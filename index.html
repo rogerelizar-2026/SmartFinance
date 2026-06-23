@@ -1650,37 +1650,57 @@ setupEventListeners() {
                 };
             }
 
-            initCharts() {
-                const colors = this.getChartColors();
-                const lineOpts = {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top', labels: { color: colors.text } } },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: colors.textSecondary }, grid: { color: colors.grid } },
-                        x: { ticks: { color: colors.textSecondary }, grid: { color: colors.grid } }
-                    }
-                };
-                this.charts.line = new Chart(document.getElementById('lineChart').getContext('2d'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [
-                        { label: 'Receitas', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.4 },
-                        { label: 'Despesas', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.4 }
-                    ] },
-                    options: lineOpts
-                });
-                this.charts.pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
-                    type: 'pie',
-                    data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: colors.text } } } }
-                });
-                this.charts.projection = new Chart(document.getElementById('projectionChart').getContext('2d'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ label: 'Projeção', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.4, fill: true }] },
-                    options: lineOpts
-                });
-                this.updateCharts();
+initCharts() {
+    // Verifica se Chart.js está disponível
+    if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js não está carregado! Os gráficos não serão exibidos.');
+        this.showToast('⚠️ Erro ao carregar gráficos. Recarregue a página.');
+        return;
+    }
+    
+    const colors = this.getChartColors();
+    const lineOpts = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top', labels: { color: colors.text } } },
+        scales: {
+            y: { beginAtZero: true, ticks: { color: colors.textSecondary }, grid: { color: colors.grid } },
+            x: { ticks: { color: colors.textSecondary }, grid: { color: colors.grid } }
+        }
+    };
+    
+    try {
+        this.charts.line = new Chart(document.getElementById('lineChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: [], datasets: [
+                { label: 'Receitas', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.4 },
+                { label: 'Despesas', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.4 }
+            ] },
+            options: lineOpts
+        });
+    } catch (e) { console.error('Erro ao criar gráfico line:', e); }
+    
+    try {
+        this.charts.pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
+            type: 'pie',
+            data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { position: 'right', labels: { color: colors.text } } } 
             }
-
+        });
+    } catch (e) { console.error('Erro ao criar gráfico pie:', e); }
+    
+    try {
+        this.charts.projection = new Chart(document.getElementById('projectionChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Projeção', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension: 0.4, fill: true }] },
+            options: lineOpts
+        });
+    } catch (e) { console.error('Erro ao criar gráfico projection:', e); }
+    
+    this.updateCharts();
+}
             updateChartsTheme() {
     const colors = this.getChartColors();
     Object.values(this.charts).forEach(chart => {
@@ -2667,18 +2687,29 @@ importBackup() {
                 }).join('');
             }
 
-            applyTheme() {
-                document.body.classList.toggle('light', !this.darkMode);
-                const btn = document.getElementById('themeBtn');
-                if (btn) {
-                    if (this.darkMode) {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
-                    } else {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-                    }
-                }
-                if (Object.keys(this.charts).length) this.updateChartsTheme();
+applyTheme() {
+    document.body.classList.toggle('light', !this.darkMode);
+    const btn = document.getElementById('themeBtn');
+    if (btn) {
+        if (this.darkMode) {
+            btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+        } else {
+            btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+        }
+    }
+    
+    // Verifica se os charts existem e são válidos antes de atualizar
+    if (Object.keys(this.charts).length > 0) {
+        const hasValidCharts = Object.values(this.charts).some(c => c && c.options);
+        if (hasValidCharts) {
+            try {
+                this.updateChartsTheme();
+            } catch (e) {
+                console.warn('⚠️ Erro ao atualizar tema dos gráficos:', e);
             }
+        }
+    }
+}
 
             applyPrivacy() {
                 document.body.classList.toggle('privacy-on', this.privacyOn);
