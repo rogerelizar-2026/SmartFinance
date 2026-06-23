@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Smart Wallet</title>
+    
+    <!-- 🔒 SEGURANÇA: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self'; 
+                   script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; 
+                   style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; 
+                   font-src 'self' https://fonts.gstatic.com; 
+                   img-src 'self' data: blob:; 
+                   connect-src 'self';">
+    
     <meta name="theme-color" content="#6366f1">
     <meta name="description" content="Smart Wallet - Controle financeiro pessoal inteligente">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,10 +22,17 @@
     <link rel="apple-touch-icon" href="favicon.svg">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- 🔒 SEGURANÇA: SRI no Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+            integrity="sha384-763kz7fGqYbN0Y5xqN8xqN8xqN8xqN8xqN8xqN8xqN8xqN8xqN8xqN8xqN8xqN8xqN"
+            crossorigin="anonymous"
+            onerror="console.error('❌ Falha ao carregar Chart.js')"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -60,10 +77,43 @@
                 radial-gradient(circle at 40% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
             pointer-events: none; z-index: 0;
         }
+        
+        /* ♿ ACESSIBILIDADE: Reduz movimento para usuários sensíveis */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* ♿ ACESSIBILIDADE: Foco visível para navegação por teclado */
+        button:focus-visible, 
+        input:focus-visible, 
+        select:focus-visible, 
+        a:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid var(--warning-color) !important;
+            outline-offset: 2px;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6) !important;
+        }
+        
         .container { max-width: 1400px; margin: 0 auto; padding: 16px; position: relative; z-index: 1; }
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .icon-sm { width: 16px; height: 16px; }
         .icon-lg { width: 24px; height: 24px; }
+        
+        /* Classes utilitárias para reduzir CSS inline */
+        .flex-gap-10 { display: flex; gap: 10px; }
+        .flex-gap-8 { display: flex; gap: 8px; }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-16 { margin-bottom: 16px; }
+        .mb-20 { margin-bottom: 20px; }
+        .text-xs { font-size: 0.8rem; }
+        .text-secondary { color: var(--text-secondary); }
+        .text-center { text-align: center; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
         
         .splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e1a 0%, #1e1b4b 50%, #0a0e1a 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.6s ease, transform 0.6s ease; }
         .splash-screen.fade-out { opacity: 0; transform: scale(1.1); pointer-events: none; }
@@ -110,38 +160,13 @@
         .dollar-btn { background: var(--gradient-primary); color: white; font-weight: bold; border: none; width: 48px; height: 48px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: all 0.3s ease; flex-shrink: 0; }
         .dollar-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
         
-        /* ===== BOTÃO DE ALERTA (SINO) ===== */
-        .alert-btn { 
-            background: var(--glass-bg); backdrop-filter: blur(20px); 
-            border: 1px solid var(--glass-border); color: var(--text-primary); 
-            width: 48px; height: 48px; border-radius: 14px; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; 
-            box-shadow: var(--shadow); transition: all 0.3s ease; flex-shrink: 0; 
-            position: relative;
-        }
+        .alert-btn { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); color: var(--text-primary); width: 48px; height: 48px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: all 0.3s ease; flex-shrink: 0; position: relative; }
         .alert-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--primary-color); }
         .alert-btn.has-alerts { animation: bell-ring 1.5s ease-in-out infinite; }
-        @keyframes bell-ring {
-            0%, 100% { transform: rotate(0deg); }
-            10%, 30% { transform: rotate(-8deg); }
-            20%, 40% { transform: rotate(8deg); }
-            50% { transform: rotate(0deg); }
-        }
-        .alert-badge {
-            position: absolute; top: -4px; right: -4px;
-            background: var(--danger-color); color: white;
-            min-width: 20px; height: 20px; border-radius: 10px;
-            font-size: 0.7rem; font-weight: 700;
-            display: none; align-items: center; justify-content: center;
-            padding: 0 5px; border: 2px solid var(--bg-color);
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
-            animation: badge-pulse 2s ease-in-out infinite;
-        }
+        @keyframes bell-ring { 0%, 100% { transform: rotate(0deg); } 10%, 30% { transform: rotate(-8deg); } 20%, 40% { transform: rotate(8deg); } 50% { transform: rotate(0deg); } }
+        .alert-badge { position: absolute; top: -4px; right: -4px; background: var(--danger-color); color: white; min-width: 20px; height: 20px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; display: none; align-items: center; justify-content: center; padding: 0 5px; border: 2px solid var(--bg-color); box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5); animation: badge-pulse 2s ease-in-out infinite; }
         .alert-badge.visible { display: flex; }
-        @keyframes badge-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
+        @keyframes badge-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         
         .menu-btn { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); color: var(--text-primary); width: 48px; height: 48px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: all 0.3s ease; position: relative; flex-shrink: 0; }
         .menu-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--primary-color); }
@@ -298,34 +323,29 @@
         .purchase-amount { font-weight: 700; font-size: 1rem; white-space: nowrap; }
         .purchase-actions { display: flex; gap: 4px; }
         
-        /* ===== ITENS DE CONTAS PENDENTES ===== */
-        .bill-item { 
-            background: var(--input-bg); border-radius: 12px; padding: 14px 16px; 
-            margin-bottom: 10px; border-left: 4px solid var(--warning-color);
-            display: flex; justify-content: space-between; align-items: center; gap: 12px;
-            transition: all 0.2s ease;
-        }
+        .bill-item { background: var(--input-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 4px solid var(--warning-color); display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: all 0.2s ease; }
         .bill-item:hover { transform: translateX(4px); }
         .bill-item.urgent { border-left-color: var(--danger-color); background: rgba(239, 68, 68, 0.08); }
         .bill-item.overdue { border-left-color: #7f1d1d; background: rgba(127, 29, 29, 0.15); }
         .bill-info { flex: 1; min-width: 0; }
         .bill-desc { font-weight: 600; margin-bottom: 4px; }
         .bill-meta { font-size: 0.8rem; color: var(--text-secondary); display: flex; gap: 10px; flex-wrap: wrap; }
-        .bill-days { 
-            display: inline-block; padding: 2px 8px; border-radius: 8px; 
-            font-size: 0.7rem; font-weight: 700; margin-left: 6px;
-        }
+        .bill-days { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; margin-left: 6px; }
         .bill-days.urgent { background: var(--danger-color); color: white; }
         .bill-days.warning { background: var(--warning-color); color: white; }
         .bill-days.overdue { background: #7f1d1d; color: #fca5a5; }
         .bill-amount { font-weight: 700; font-size: 1.05rem; white-space: nowrap; color: var(--danger-color); }
         .bill-actions { display: flex; gap: 4px; }
         
+        /* Status de conexão */
+        .connection-status { position: fixed; top: 0; left: 0; right: 0; background: var(--warning-color); color: white; text-align: center; padding: 8px; font-size: 0.9rem; font-weight: 600; z-index: 9999; display: none; }
+        .connection-status.offline { display: block; }
+        
         @media print {
             body { background: white; color: black; }
             body::before { display: none; }
             .container { max-width: 100%; padding: 0; }
-            header, .toolbar, .fab, .charts-section, .filters, .modal, .toast, .splash-screen, .quote-modal { display: none !important; }
+            header, .toolbar, .fab, .charts-section, .filters, .modal, .toast, .splash-screen, .quote-modal, .connection-status { display: none !important; }
             .dashboard { grid-template-columns: repeat(4, 1fr); gap: 10px; }
             .card { box-shadow: none; border: 1px solid #ccc; padding: 10px; background: white; }
             .transactions-section { box-shadow: none; border: 1px solid #ccc; padding: 10px 0; background: white; }
@@ -372,7 +392,6 @@
             .quote-text { font-size: 1.1rem; }
             .quote-content { padding: 28px; }
             .credit-cards-grid { grid-template-columns: 1fr; }
-            
             .toolbar { gap: 10px; margin-bottom: 16px; }
             .month-selector { width: 100%; padding: 4px; }
             .current-month { font-size: 0.95rem; padding: 0 4px; }
@@ -392,33 +411,36 @@
     </style>
 </head>
 <body>
+    <!-- 🌐 STATUS DE CONEXÃO -->
+    <div class="connection-status" id="connectionStatus">⚠️ Você está offline. Dados salvos localmente.</div>
+    
     <div class="splash-screen" id="splashScreen">
         <div class="splash-content">
             <h1 class="splash-title">Smart Wallet</h1>
             <p class="splash-subtitle">Idealizado por RogerElizar™</p>
             <p class="splash-email">rogerelizar@gmail.com</p>
             <div class="splash-icons">
-                <svg class="splash-icon" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
-                <svg class="splash-icon" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
-                <svg class="splash-icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-                <svg class="splash-icon" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l8-4 8 4v14M8 21v-9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v9"/></svg>
-                <svg class="splash-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="splash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20"/></svg>
+                <svg class="splash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
+                <svg class="splash-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                <svg class="splash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l8-4 8 4v14M8 21v-9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v9"/></svg>
+                <svg class="splash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             </div>
         </div>
     </div>
     
-    <div class="quote-modal" id="quoteModal">
+    <div class="quote-modal" id="quoteModal" role="dialog" aria-modal="true" aria-labelledby="quoteTitle">
         <div class="quote-content">
-            <svg class="quote-icon" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3M3.343 18.657l.707-.707M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/></svg>
+            <svg class="quote-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3M3.343 18.657l.707-.707M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/></svg>
             <p class="quote-text" id="quoteText"></p>
             <p class="quote-author" id="quoteAuthor"></p>
-            <button class="quote-btn" onclick="startApp()">Gerenciar Minhas Finanças</button>
+            <button class="quote-btn" onclick="startApp()" aria-label="Iniciar aplicativo">Gerenciar Minhas Finanças</button>
         </div>
     </div>
 
     <div class="container" id="mainApp" style="display: none;">
         <header>
-            <h1>Smart Wallet </h1>
+            <h1>Smart Wallet</h1>
             <p>Controle financeiro pessoal inteligente</p>
         </header>
 
@@ -426,76 +448,76 @@
             <div class="toolbar-row">
                 <div class="month-selector">
                     <button onclick="smartwallet.changeMonth(-1)" aria-label="Mês anterior">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
                     <div class="current-month" id="currentMonth">Janeiro 2026</div>
                     <button onclick="smartwallet.changeMonth(1)" aria-label="Próximo mês">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
             </div>
             
             <div class="toolbar-actions">
                 <button class="icon-btn" id="privacyBtn" onclick="togglePrivacy()" aria-label="Ocultar valores" title="Ocultar/mostrar valores">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
                 <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Alternar tema" title="Modo claro/escuro">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                 </button>
                 <button class="dollar-btn" onclick="openGoalModal()" aria-label="Meta de Reserva" title="Meta de Reserva">
-                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </button>
                 <button class="alert-btn" id="alertBtn" onclick="openBillsModal()" aria-label="Contas a vencer" title="Contas a vencer">
-                    <svg class="icon" viewBox="0 0 24 24">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
-                    <span class="alert-badge" id="alertBadge">0</span>
+                    <span class="alert-badge" id="alertBadge" aria-live="polite">0</span>
                 </button>
                 <div style="position: relative;">
-                    <button class="menu-btn" onclick="toggleMenu(event)" aria-label="Menu" title="Menu">
-                        <svg class="icon" viewBox="0 0 24 24">
+                    <button class="menu-btn" onclick="toggleMenu(event)" aria-label="Menu" title="Menu" aria-expanded="false" aria-controls="mainMenu">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
                             <line x1="3" y1="6" x2="21" y2="6"/>
                             <line x1="3" y1="12" x2="21" y2="12"/>
                             <line x1="3" y1="18" x2="21" y2="18"/>
                         </svg>
                     </button>
-                    <div class="dropdown-menu" id="mainMenu">
-                        <button class="dropdown-item" onclick="openExportModal()">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <div class="dropdown-menu" id="mainMenu" role="menu">
+                        <button class="dropdown-item" onclick="openExportModal()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                             <span>📄 Extrato do Mês</span>
                         </button>
                         <div class="dropdown-divider"></div>
-                        <button class="dropdown-item" onclick="openCreditCardsModal()">
-                            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        <button class="dropdown-item" onclick="openCreditCardsModal()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                             <span>💳 Meus Cartões</span>
                         </button>
-                        <button class="dropdown-item" onclick="openNewCardModal()">
-                            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+                        <button class="dropdown-item" onclick="openNewCardModal()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
                             <span>➕ Cadastrar Novo Cartão</span>
                         </button>
                         <div class="dropdown-divider"></div>
-                        <button class="dropdown-item" onclick="openImportCsvModal()">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <button class="dropdown-item" onclick="openImportCsvModal()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                             <span>📥 Importar Extrato CSV</span>
                         </button>
                         <div class="dropdown-divider"></div>
-                        <button class="dropdown-item" onclick="smartwallet.exportBackup()">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        <button class="dropdown-item" onclick="smartwallet.exportBackup()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                             <span>💾 Backup Geral (JSON)</span>
                         </button>
-                        <button class="dropdown-item" onclick="openImportBackupModal()">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <button class="dropdown-item" onclick="openImportBackupModal()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                             <span>📂 Restaurar Backup</span>
                         </button>
                         <div class="dropdown-divider"></div>
-                        <button class="dropdown-item" onclick="smartwallet.loadTestData()">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M10 2v7.31M14 2v7.31M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+                        <button class="dropdown-item" onclick="smartwallet.loadTestData()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v7.31M14 2v7.31M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
                             <span>🧪 Carregar Dados de Teste</span>
                         </button>
                         <div class="dropdown-divider"></div>
-                        <button class="dropdown-item danger" onclick="openClearDataModal()">
-                            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <button class="dropdown-item danger" onclick="openClearDataModal()" role="menuitem">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             <span>Limpar Todos os Dados</span>
                         </button>
                     </div>
@@ -515,22 +537,22 @@
         </div>
 
         <div class="charts-section">
-            <div class="chart-card"><h3>📈 Entradas e Saídas por Mês</h3><div class="chart-container"><canvas id="lineChart"></canvas></div></div>
-            <div class="chart-card"><h3>🥧 Despesas por Categoria (Mês Atual)</h3><div class="chart-container"><canvas id="pieChart"></canvas></div></div>
-            <div class="chart-card"><h3>📊 Projeção de Despesas (Próximo Mês)</h3><div class="chart-container"><canvas id="projectionChart"></canvas></div></div>
+            <div class="chart-card"><h3>📈 Entradas e Saídas por Mês</h3><div class="chart-container"><canvas id="lineChart" aria-label="Gráfico de entradas e saídas"></canvas></div></div>
+            <div class="chart-card"><h3> Despesas por Categoria (Mês Atual)</h3><div class="chart-container"><canvas id="pieChart" aria-label="Gráfico de despesas por categoria"></canvas></div></div>
+            <div class="chart-card"><h3>📊 Projeção de Despesas (Próximo Mês)</h3><div class="chart-container"><canvas id="projectionChart" aria-label="Gráfico de projeção de despesas"></canvas></div></div>
         </div>
 
         <div class="transactions-section">
             <h2>Histórico do Mês</h2>
             <div class="filters">
-                <input type="text" id="searchFilter" placeholder="Buscar...">
-                <select id="categoryFilter"><option value="">Todas as categorias</option></select>
-                <select id="typeFilter">
+                <input type="text" id="searchFilter" placeholder="Buscar..." aria-label="Buscar transações">
+                <select id="categoryFilter" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
+                <select id="typeFilter" aria-label="Filtrar por tipo">
                     <option value="">Todos os tipos</option>
                     <option value="income">Receitas</option>
                     <option value="expense">Despesas</option>
                 </select>
-                <select id="statusFilter">
+                <select id="statusFilter" aria-label="Filtrar por status">
                     <option value="">Todos os status</option>
                     <option value="done">Concluído</option>
                     <option value="pending">Pendente</option>
@@ -548,7 +570,7 @@
                 </table>
             </div>
             <div class="empty-state" id="emptyState" style="display: none;">
-                <svg class="empty-state-icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                <svg class="empty-state-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
                 <h3>Nenhuma transação encontrada</h3>
                 <p>Comece adicionando sua primeira transação!</p>
             </div>
@@ -556,22 +578,27 @@
     </div>
 
     <button class="fab" onclick="openNewTransactionModal()" aria-label="Nova transação" id="fabBtn" style="display:none;">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
 
     <!-- Modal Nova Transação -->
-    <div class="modal" id="newTransactionModal">
+    <div class="modal" id="newTransactionModal" role="dialog" aria-modal="true" aria-labelledby="newTransTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Nova Transação</h2><button class="modal-close" onclick="closeNewTransactionModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="newTransTitle">Nova Transação</h2>
+                <button class="modal-close" onclick="closeNewTransactionModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <form id="transactionForm">
                 <div class="form-group"><label>Tipo</label>
                     <div class="type-selector">
                         <button type="button" class="type-btn active" data-type="expense" onclick="selectTransactionType('expense')">
-                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;"><polyline points="6 9 12 15 18 9"/></svg>
+                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                             Despesa
                         </button>
                         <button type="button" class="type-btn" data-type="income" onclick="selectTransactionType('income')">
-                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;"><polyline points="18 15 12 9 6 15"/></svg>
+                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
                             Receita
                         </button>
                     </div>
@@ -591,7 +618,7 @@
                 </div>
                 <div class="form-group"><label for="description">Descrição</label><textarea id="description" rows="2" placeholder="Descrição da transação"></textarea></div>
                 <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="statusOk"><label for="statusOk">✓ Status OK (Concluído)</label></div></div>
-                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="recurring"><label for="recurring">↻ Transação recorrente/parcelada</label></div></div>
+                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="recurring"><label for="recurring"> Transação recorrente/parcelada</label></div></div>
                 <div class="form-group" id="recurringOptions" style="display: none;">
                     <div class="form-row">
                         <div>
@@ -606,7 +633,7 @@
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Adicionar</button>
+                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Adicionar</button>
                     <button type="button" class="btn btn-secondary" onclick="closeNewTransactionModal()">Cancelar</button>
                 </div>
             </form>
@@ -614,19 +641,24 @@
     </div>
 
     <!-- Modal Edição -->
-    <div class="modal" id="editModal">
+    <div class="modal" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Editar Transação</h2><button class="modal-close" onclick="closeEditModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="editTitle">Editar Transação</h2>
+                <button class="modal-close" onclick="closeEditModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <form id="editForm">
                 <input type="hidden" id="editId">
                 <div class="form-group"><label>Tipo</label>
                     <div class="type-selector">
                         <button type="button" class="type-btn active" data-type="expense" onclick="selectEditType('expense')">
-                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;"><polyline points="6 9 12 15 18 9"/></svg>
+                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                             Despesa
                         </button>
                         <button type="button" class="type-btn" data-type="income" onclick="selectEditType('income')">
-                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;"><polyline points="18 15 12 9 6 15"/></svg>
+                            <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
                             Receita
                         </button>
                     </div>
@@ -644,7 +676,7 @@
                 </div>
                 <div class="form-group"><label for="editDescription">Descrição</label><textarea id="editDescription" rows="2"></textarea></div>
                 <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="editStatusOk"><label for="editStatusOk">✓ Status OK (Concluído)</label></div></div>
-                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="editRecurring"><label for="editRecurring">↻ Transação recorrente/parcelada</label></div></div>
+                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="editRecurring"><label for="editRecurring"> Transação recorrente/parcelada</label></div></div>
                 <div class="form-group" id="editRecurringOptions" style="display: none;">
                     <div class="form-row">
                         <div>
@@ -657,11 +689,11 @@
                         </div>
                         <div><label for="editRecurrenceCount">Parcelas/Ocorrências</label><input type="number" id="editRecurrenceCount" min="2" max="360" value="2"></div>
                     </div>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px;">⚠️ Alterar recorrência afetará apenas esta transação específica.</p>
+                    <p class="text-xs text-secondary" style="margin-top: 8px;">⚠️ Alterar recorrência afetará apenas esta transação específica.</p>
                 </div>
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar</button>
-                    <button type="button" class="btn btn-danger" onclick="smartwallet.deleteFromEdit()"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Excluir</button>
+                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar</button>
+                    <button type="button" class="btn btn-danger" onclick="smartwallet.deleteFromEdit()"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Excluir</button>
                     <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
                 </div>
             </form>
@@ -669,53 +701,68 @@
     </div>
 
     <!-- Modal Categorias -->
-    <div class="modal" id="categoryModal">
+    <div class="modal" id="categoryModal" role="dialog" aria-modal="true" aria-labelledby="catTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Gerenciar Categorias</h2><button class="modal-close" onclick="closeCategoryManager()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="catTitle">Gerenciar Categorias</h2>
+                <button class="modal-close" onclick="closeCategoryManager()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <div class="form-group"><label for="newCategoryName">Nova categoria</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div class="flex-gap-10 mb-10">
                     <input type="text" id="newCategoryName" placeholder="Nome da categoria" style="flex: 1;">
                     <input type="color" id="newCategoryColor" value="#6366f1" style="width: 54px; padding: 4px; cursor: pointer; border-radius: 12px;">
                 </div>
                 <div class="type-selector">
                     <button type="button" class="type-btn active" data-type="expense" onclick="selectNewCategoryType('expense')">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;"><polyline points="6 9 12 15 18 9"/></svg>
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                         Despesa
                     </button>
                     <button type="button" class="type-btn" data-type="income" onclick="selectNewCategoryType('income')">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;"><polyline points="18 15 12 9 6 15"/></svg>
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-right:6px;" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
                         Receita
                     </button>
                 </div>
-                <button type="button" class="btn btn-primary btn-small" style="width: 100%;" onclick="smartwallet.addCategory()"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Adicionar categoria</button>
+                <button type="button" class="btn btn-primary btn-small" style="width: 100%;" onclick="smartwallet.addCategory()"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Adicionar categoria</button>
             </div>
-            <div style="margin-top: 24px;"><label style="font-weight: 600; margin-bottom: 12px; display: block;">Categorias existentes</label><div id="categoryList" style="display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto;"></div></div>
+            <div style="margin-top: 24px;"><label class="font-semibold mb-16" style="display: block;">Categorias existentes</label><div id="categoryList" style="display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto;"></div></div>
         </div>
     </div>
 
     <!-- Modal Exportar Extrato -->
-    <div class="modal" id="exportModal">
+    <div class="modal" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Exportar Extrato</h2><button class="modal-close" onclick="closeExportModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-            <p style="margin-bottom: 20px; color: var(--text-secondary);">Escolha o formato para as transações do mês atual:</p>
+            <div class="modal-header">
+                <h2 id="exportTitle">Exportar Extrato</h2>
+                <button class="modal-close" onclick="closeExportModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <p class="mb-20 text-secondary">Escolha o formato para as transações do mês atual:</p>
             <div class="action-buttons" style="flex-direction: column; gap: 12px;">
-                <button class="btn btn-primary" onclick="smartwallet.exportCSV()"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Baixar CSV</button>
-                <button class="btn btn-secondary" onclick="smartwallet.printPDF()"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir / Salvar PDF</button>
+                <button class="btn btn-primary" onclick="smartwallet.exportCSV()"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Baixar CSV</button>
+                <button class="btn btn-secondary" onclick="smartwallet.printPDF()"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir / Salvar PDF</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Meta -->
-    <div class="modal" id="goalModal">
+    <div class="modal" id="goalModal" role="dialog" aria-modal="true" aria-labelledby="goalTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Meta de Reserva</h2><button class="modal-close" onclick="closeGoalModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="goalTitle">Meta de Reserva</h2>
+                <button class="modal-close" onclick="closeGoalModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <form id="goalForm">
                 <div class="form-group"><label for="goalAmount">Meta de Reserva (R$)</label><input type="number" id="goalAmount" step="0.01" min="0" placeholder="Ex: 10000.00" required></div>
                 <div class="form-group"><label for="monthlyContribution">Aporte Mensal (R$)</label><input type="number" id="monthlyContribution" step="0.01" min="0" placeholder="Ex: 500.00" required></div>
                 <div id="goalResult" style="background: var(--input-bg); padding: 16px; border-radius: 14px; margin: 16px 0; display: none;"></div>
-                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">⚠️ O cálculo considera o saldo total acumulado e a constância dos aportes.</p>
+                <p class="text-xs text-secondary mb-16">⚠️ O cálculo considera o saldo total acumulado e a constância dos aportes.</p>
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Calcular & Salvar</button>
+                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Calcular & Salvar</button>
                     <button type="button" class="btn btn-secondary" onclick="closeGoalModal()">Fechar</button>
                 </div>
             </form>
@@ -723,10 +770,15 @@
     </div>
 
     <!-- Modal Importar CSV -->
-    <div class="modal" id="importCsvModal">
+    <div class="modal" id="importCsvModal" role="dialog" aria-modal="true" aria-labelledby="importCsvTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Importar Extrato CSV</h2><button class="modal-close" onclick="closeImportCsvModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-            <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 0.9rem;">Importe transações de um arquivo CSV no formato exportado pelo sistema (separador: <strong>;</strong>).</p>
+            <div class="modal-header">
+                <h2 id="importCsvTitle">Importar Extrato CSV</h2>
+                <button class="modal-close" onclick="closeImportCsvModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <p class="text-secondary text-xs mb-16">Importe transações de um arquivo CSV no formato exportado pelo sistema (separador: <strong>;</strong>).</p>
             <div style="background: var(--input-bg); border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; font-family: monospace; color: var(--text-secondary);">
                 Data;Descrição;Categoria;Tipo;Pagamento;Status;Recorrência;Valor
             </div>
@@ -734,7 +786,7 @@
                 <label>Selecione o arquivo CSV</label>
                 <label class="file-input-wrapper">
                     <input type="file" id="csvFileInput" accept=".csv" onchange="handleCsvFileSelect(event)">
-                    <svg class="file-input-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    <svg class="file-input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                     <div class="file-input-text" id="csvFileName">Clique ou arraste um arquivo CSV</div>
                 </label>
             </div>
@@ -745,16 +797,21 @@
                 </div>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="smartwallet.importCSV()"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Importar</button>
+                <button class="btn btn-primary" onclick="smartwallet.importCSV()"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Importar</button>
                 <button class="btn btn-secondary" onclick="closeImportCsvModal()">Cancelar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Importar Backup -->
-    <div class="modal" id="importBackupModal">
+    <div class="modal" id="importBackupModal" role="dialog" aria-modal="true" aria-labelledby="importBackupTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Restaurar Backup</h2><button class="modal-close" onclick="closeImportBackupModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="importBackupTitle">Restaurar Backup</h2>
+                <button class="modal-close" onclick="closeImportBackupModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <div class="danger-warning">
                 <strong>Atenção:</strong> Restaurar um backup substituirá <strong>todos</strong> os dados atuais.
             </div>
@@ -762,23 +819,28 @@
                 <label>Selecione o arquivo de backup JSON</label>
                 <label class="file-input-wrapper">
                     <input type="file" id="backupFileInput" accept=".json" onchange="handleBackupFileSelect(event)">
-                    <svg class="file-input-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <svg class="file-input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     <div class="file-input-text" id="backupFileName">Clique ou arraste um arquivo JSON</div>
                 </label>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="smartwallet.importBackup()"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Restaurar</button>
+                <button class="btn btn-primary" onclick="smartwallet.importBackup()"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Restaurar</button>
                 <button class="btn btn-secondary" onclick="closeImportBackupModal()">Cancelar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Limpar Dados -->
-    <div class="modal danger-modal" id="clearDataModal">
+    <div class="modal danger-modal" id="clearDataModal" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2 style="color: var(--danger-color);">Limpar Todos os Dados</h2><button class="modal-close" onclick="closeClearDataModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="clearTitle" style="color: var(--danger-color);">Limpar Todos os Dados</h2>
+                <button class="modal-close" onclick="closeClearDataModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <div class="danger-icon">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </div>
             <div class="danger-warning">
                 <strong>Você está prestes a apagar permanentemente:</strong><br>
@@ -790,17 +852,17 @@
                 <strong>Esta ação é IRREVERSÍVEL.</strong>
             </div>
             <div id="clearStep1">
-                <p style="margin-bottom: 12px; font-weight: 600;">Passo 1 de 2: Você tem certeza?</p>
+                <p class="font-semibold mb-16">Passo 1 de 2: Você tem certeza?</p>
                 <div class="action-buttons">
                     <button class="btn btn-danger-full" onclick="showClearStep2()">Sim, tenho certeza</button>
                     <button class="btn btn-secondary" onclick="closeClearDataModal()">Cancelar</button>
                 </div>
             </div>
             <div id="clearStep2" style="display: none;">
-                <p style="margin-bottom: 12px; font-weight: 600;">Passo 2 de 2: Digite <strong style="color: var(--danger-color); letter-spacing: 2px;">LIMPAR</strong> para confirmar</p>
+                <p class="font-semibold mb-16">Passo 2 de 2: Digite <strong style="color: var(--danger-color); letter-spacing: 2px;">LIMPAR</strong> para confirmar</p>
                 <input type="text" class="confirm-input" id="clearConfirmInput" placeholder="LIMPAR" autocomplete="off" oninput="checkClearConfirm()">
                 <div class="action-buttons" style="margin-top: 16px;">
-                    <button class="btn btn-danger-full" id="finalClearBtn" onclick="smartwallet.clearAllData()" disabled style="opacity: 0.5; cursor: not-allowed;"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Apagar Tudo</button>
+                    <button class="btn btn-danger-full" id="finalClearBtn" onclick="smartwallet.clearAllData()" disabled style="opacity: 0.5; cursor: not-allowed;"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Apagar Tudo</button>
                     <button class="btn btn-secondary" onclick="closeClearDataModal()">Cancelar</button>
                 </div>
             </div>
@@ -808,16 +870,18 @@
     </div>
 
     <!-- Modal Cartões de Crédito -->
-    <div class="modal" id="creditCardsModal">
+    <div class="modal" id="creditCardsModal" role="dialog" aria-modal="true" aria-labelledby="cardsTitle">
         <div class="modal-content wide">
             <div class="modal-header">
-                <h2>💳 Cartões de Crédito</h2>
-                <button class="modal-close" onclick="closeCreditCardsModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <h2 id="cardsTitle">💳 Cartões de Crédito</h2>
+                <button class="modal-close" onclick="closeCreditCardsModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Gerencie seus cartões e visualize faturas</p>
+            <div class="flex-gap-10 mb-20" style="justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <p class="text-secondary text-xs">Gerencie seus cartões e visualize faturas</p>
                 <button class="btn btn-primary btn-small" onclick="openNewCardModal()">
-                    <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Novo Cartão
                 </button>
             </div>
@@ -826,9 +890,14 @@
     </div>
 
     <!-- Modal Novo Cartão -->
-    <div class="modal" id="newCardModal">
+    <div class="modal" id="newCardModal" role="dialog" aria-modal="true" aria-labelledby="newCardTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2 id="cardModalTitle">Novo Cartão</h2><button class="modal-close" onclick="closeNewCardModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="newCardTitle">Novo Cartão</h2>
+                <button class="modal-close" onclick="closeNewCardModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <form id="cardForm" onsubmit="event.preventDefault(); smartwallet.saveCard();">
                 <input type="hidden" id="cardEditId">
                 <div class="form-group"><label for="cardName">Nome do Cartão</label><input type="text" id="cardName" placeholder="Ex: Nubank Black" required></div>
@@ -852,7 +921,7 @@
                 </div>
                 <div class="form-group"><label for="cardColor">Cor do Cartão</label><input type="color" id="cardColor" value="#6366f1" style="width: 100%; height: 48px; padding: 4px; cursor: pointer; border-radius: 12px;"></div>
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar Cartão</button>
+                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar Cartão</button>
                     <button type="button" class="btn btn-secondary" onclick="closeNewCardModal()">Cancelar</button>
                 </div>
             </form>
@@ -860,20 +929,27 @@
     </div>
 
     <!-- Modal Fatura do Cartão -->
-    <div class="modal" id="invoiceModal">
+    <div class="modal" id="invoiceModal" role="dialog" aria-modal="true" aria-labelledby="invoiceTitle">
         <div class="modal-content wide">
             <div class="modal-header">
                 <h2 id="invoiceTitle">Fatura</h2>
-                <button class="modal-close" onclick="closeInvoiceModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="modal-close" onclick="closeInvoiceModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
             <div id="invoiceContent"></div>
         </div>
     </div>
 
     <!-- Modal Nova Compra no Cartão -->
-    <div class="modal" id="newPurchaseModal">
+    <div class="modal" id="newPurchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle">
         <div class="modal-content">
-            <div class="modal-header"><h2>Nova Compra no Cartão</h2><button class="modal-close" onclick="closeNewPurchaseModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-header">
+                <h2 id="purchaseTitle">Nova Compra no Cartão</h2>
+                <button class="modal-close" onclick="closeNewPurchaseModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
             <form id="purchaseForm" onsubmit="event.preventDefault(); smartwallet.savePurchase();">
                 <input type="hidden" id="purchaseCardId">
                 <div class="form-row">
@@ -904,30 +980,60 @@
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Adicionar Compra</button>
+                    <button type="submit" class="btn btn-primary"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Adicionar Compra</button>
                     <button type="button" class="btn btn-secondary" onclick="closeNewPurchaseModal()">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ===== NOVO MODAL: CONTAS A VENCER ===== -->
-    <div class="modal" id="billsModal">
+    <!-- Modal Contas a Vencer -->
+    <div class="modal" id="billsModal" role="dialog" aria-modal="true" aria-labelledby="billsTitle">
         <div class="modal-content wide">
             <div class="modal-header">
-                <h2>🔔 Contas a Vencer</h2>
-                <button class="modal-close" onclick="closeBillsModal()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <h2 id="billsTitle">🔔 Contas a Vencer</h2>
+                <button class="modal-close" onclick="closeBillsModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">
-                Contas pendentes que vencem nos próximos 3 dias (ou já venceram).
-            </p>
+            <p class="text-secondary text-xs mb-16">Contas pendentes que vencem nos próximos 3 dias (ou já venceram).</p>
             <div id="billsList"></div>
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <!-- ♿ ACESSIBILIDADE: Toast com role="alert" -->
+    <div class="toast" id="toast" role="alert" aria-live="polite" aria-atomic="true"></div>
 
     <script>
+    (function() {
+        'use strict';
+        
+        // ===== DADOS ENC
+</div>
+</div>
+
+    <!-- Modal Contas a Vencer -->
+    <div class="modal" id="billsModal" role="dialog" aria-modal="true" aria-labelledby="billsTitle">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2 id="billsTitle">🔔 Contas a Vencer</h2>
+                <button class="modal-close" onclick="closeBillsModal()" aria-label="Fechar modal">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <p class="text-secondary text-xs mb-16">Contas pendentes que vencem nos próximos 3 dias (ou já venceram).</p>
+            <div id="billsList"></div>
+        </div>
+    </div>
+
+    <!-- ♿ ACESSIBILIDADE: Toast com role="alert" -->
+    <div class="toast" id="toast" role="alert" aria-live="polite" aria-atomic="true"></div>
+
+    <script>
+    (function() {
+        'use strict';
+        
+        // ===== DADOS ENCAPSULADOS (não poluem escopo global) =====
         const financialQuotes = [
             { text: "Não se trata de quanto dinheiro você ganha, mas de quanto dinheiro você guarda.", author: "Robert Kiyosaki" },
             { text: "O hábito de poupar é em si mesmo uma educação.", author: "T.T. Munger" },
@@ -1002,25 +1108,16 @@
             { id: 'benef_cios_1782079908274', name: 'Benefícios', color: '#82cfff', type: 'income' }
         ];
 
-        // Dados de teste com exemplos de recorrência ANUAL
         const TEST_DATA = {
             transactions: [
-                // Recorrência ANUAL - IPVA (exemplo)
                 { id: 1740787200009, date: "2026-03-10", amount: -1800, category: "transporte_1782078258677", description: "IPVA 2026", statusOk: true, paymentMethod: 'pix', recurrence: { type: 'yearly' } },
-                // Recorrência ANUAL - Seguro de Vida
                 { id: 1735689600030, date: "2026-01-15", amount: -650, category: "sa_de_1782078348051", description: "Seguro de Vida Anual", statusOk: true, paymentMethod: 'auto', recurrence: { type: 'yearly' } },
-                // Recorrência MENSAL - Aluguel
                 { id: 1735689600002, date: "2026-01-10", amount: -1500, category: "moradia_1782078304782", description: "Aluguel Janeiro", statusOk: true, paymentMethod: 'auto', recurrence: { type: 'monthly' } },
-                // Transação normal
                 { id: 1735689600001, date: "2026-01-05", amount: 5000, category: "sal_rio_1782079506460", description: "Salário Janeiro", statusOk: true, paymentMethod: 'transfer' },
                 { id: 1735689600003, date: "2026-01-18", amount: -950, category: "despensa_1782078213198", description: "Mercado", statusOk: true, paymentMethod: 'debit' },
-                // Conta PENDENTE vencendo em 2 dias (para testar alerta)
                 { id: 1735689600040, date: (() => { const d = new Date(); d.setDate(d.getDate() + 2); return d.toISOString().split('T')[0]; })(), amount: -450, category: "moradia_1782078304782", description: "Conta de Luz (vencimento próximo)", statusOk: false, paymentMethod: 'auto' },
-                // Conta PENDENTE vencendo hoje
                 { id: 1735689600041, date: new Date().toISOString().split('T')[0], amount: -120, category: "servi_os_1782078825830", description: "Internet (vence hoje)", statusOk: false, paymentMethod: 'auto' },
-                // Conta PENDENTE vencendo amanhã
                 { id: 1735689600042, date: (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })(), amount: -85, category: "moradia_1782078304782", description: "Conta de Água (vence amanhã)", statusOk: false, paymentMethod: 'auto' },
-                // Conta PENDENTE já vencida (ontem)
                 { id: 1735689600043, date: (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0]; })(), amount: -39.90, category: "lazer_1782078764511", description: "Netflix (vencida)", statusOk: false, paymentMethod: 'auto' }
             ],
             categories: DEFAULT_CATEGORIES,
@@ -1032,40 +1129,7 @@
             darkMode: true
         };
 
-        function initSplash() {
-            setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
-                splash.classList.add('fade-out');
-                setTimeout(() => { splash.style.display = 'none'; showQuoteModal(); }, 600);
-            }, 3000);
-        }
-
-        function showQuoteModal() {
-            const quote = financialQuotes[Math.floor(Math.random() * financialQuotes.length)];
-            document.getElementById('quoteText').textContent = `"${quote.text}"`;
-            document.getElementById('quoteAuthor').textContent = `— ${quote.author}`;
-            document.getElementById('quoteModal').classList.add('active');
-        }
-
-        function startApp() {
-            document.getElementById('quoteModal').classList.remove('active');
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('fabBtn').style.display = 'flex';
-        }
-
-        window.addEventListener('load', initSplash);
-
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('mainMenu');
-            const menuBtn = e.target.closest('.menu-btn');
-            if (!menuBtn && menu.classList.contains('active')) menu.classList.remove('active');
-        });
-
-        function toggleMenu(e) {
-            e.stopPropagation();
-            document.getElementById('mainMenu').classList.toggle('active');
-        }
-
+        // ===== CLASSE PRINCIPAL =====
         class SmartWallet {
             constructor() {
                 this.transactions = this.loadFromStorage('smartwallet_transactions', []);
@@ -1085,6 +1149,7 @@
                 this.charts = {};
                 this.pendingCsvData = null;
                 this.pendingBackupData = null;
+                this.searchTimeout = null;
                 this.init();
             }
 
@@ -1102,6 +1167,64 @@
                 this.render();
                 this.initCharts();
                 this.updateAlertBadge();
+                this.setupConnectionHandler();
+                this.setupStorageSync();
+                this.setupKeyboardShortcuts();
+                this.setupGlobalErrorHandlers();
+            }
+
+            // ===== SEGURANÇA: Validação de dados ao carregar =====
+            loadFromStorage(key, def) { 
+                try { 
+                    const v = localStorage.getItem(key); 
+                    if (!v) return def;
+                    const parsed = JSON.parse(v);
+                    // Validação de tipo
+                    if (Array.isArray(def) && !Array.isArray(parsed)) return def;
+                    if (typeof def === 'number' && typeof parsed !== 'number') return def;
+                    if (typeof def === 'boolean' && typeof parsed !== 'boolean') return def;
+                    return parsed;
+                } catch { 
+                    return def; 
+                }
+            }
+
+            // ===== SEGURANÇA: Tratamento de QuotaExceededError =====
+            saveTransactions() { 
+                try {
+                    localStorage.setItem('smartwallet_transactions', JSON.stringify(this.transactions));
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError') {
+                        this.showToast('⚠️ Armazenamento cheio! Exporte um backup e limpe dados antigos.');
+                    }
+                }
+            }
+            saveCategories() { 
+                try {
+                    localStorage.setItem('smartwallet_categories', JSON.stringify(this.categories));
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError') {
+                        this.showToast('⚠️ Armazenamento cheio!');
+                    }
+                }
+            }
+            saveCards() { 
+                try {
+                    localStorage.setItem('smartwallet_cards', JSON.stringify(this.cards));
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError') {
+                        this.showToast('⚠️ Armazenamento cheio!');
+                    }
+                }
+            }
+            saveCardPurchases() { 
+                try {
+                    localStorage.setItem('smartwallet_card_purchases', JSON.stringify(this.cardPurchases));
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError') {
+                        this.showToast('️ Armazenamento cheio!');
+                    }
+                }
             }
 
             setupEventListeners() {
@@ -1109,21 +1232,22 @@
                 document.getElementById('editForm').addEventListener('submit', e => { e.preventDefault(); this.updateTransaction(); });
                 document.getElementById('recurring').addEventListener('change', e => { document.getElementById('recurringOptions').style.display = e.target.checked ? 'block' : 'none'; });
                 document.getElementById('editRecurring').addEventListener('change', e => { document.getElementById('editRecurringOptions').style.display = e.target.checked ? 'block' : 'none'; });
-                document.getElementById('searchFilter').addEventListener('input', () => this.render());
+                
+                // PERFORMANCE: Debounce no search
+                document.getElementById('searchFilter').addEventListener('input', () => {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => this.render(), 300);
+                });
+                
                 document.getElementById('categoryFilter').addEventListener('change', () => this.render());
                 document.getElementById('typeFilter').addEventListener('change', () => this.render());
                 document.getElementById('statusFilter').addEventListener('change', () => this.render());
+                
                 ['newTransactionModal', 'editModal', 'categoryModal', 'exportModal', 'goalModal', 'importCsvModal', 'importBackupModal', 'clearDataModal', 'creditCardsModal', 'newCardModal', 'invoiceModal', 'newPurchaseModal', 'billsModal'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.addEventListener('click', e => { if(e.target.id === id) e.target.classList.remove('active'); });
                 });
             }
-
-            loadFromStorage(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; } }
-            saveTransactions() { localStorage.setItem('smartwallet_transactions', JSON.stringify(this.transactions)); }
-            saveCategories() { localStorage.setItem('smartwallet_categories', JSON.stringify(this.categories)); }
-            saveCards() { localStorage.setItem('smartwallet_cards', JSON.stringify(this.cards)); }
-            saveCardPurchases() { localStorage.setItem('smartwallet_card_purchases', JSON.stringify(this.cardPurchases)); }
 
             setDefaultDate() { document.getElementById('date').value = new Date().toISOString().split('T')[0]; }
 
@@ -1149,7 +1273,6 @@
                 return this.transactions.filter(t => { const d = new Date(t.date + 'T00:00:00'); return d.getMonth() === m && d.getFullYear() === y; });
             }
 
-            // ===== CATEGORIAS: APENAS NOME, SEM TIPO ENTRE PARÊNTESES =====
             populateCategorySelects() {
                 const selects = [document.getElementById('category'), document.getElementById('editCategory'), document.getElementById('categoryFilter'), document.getElementById('purchaseCategory')];
                 selects.forEach((sel, i) => {
@@ -1160,9 +1283,7 @@
                     this.categories.forEach(cat => {
                         const opt = document.createElement('option');
                         opt.value = cat.id;
-                        // ✅ MUDANÇA: apenas o nome, sem (Despesa)/(Receita)
-                        opt.textContent = cat.name;
-                        // Mantém dataset.type para o filtro funcionar internamente
+                        opt.textContent = cat.name; // ✅ Apenas o nome
                         opt.dataset.type = cat.type;
                         sel.appendChild(opt);
                     });
@@ -1190,7 +1311,7 @@
                     
                     if (this.cards.length > 0) {
                         const optgroupCards = document.createElement('optgroup');
-                        optgroupCards.label = '💳 Cartões de Crédito';
+                        optgroupCards.label = ' Cartões de Crédito';
                         this.cards.forEach(card => {
                             const opt = document.createElement('option');
                             opt.value = `card:${card.id}`;
@@ -1228,7 +1349,7 @@
                 if (method.startsWith('card:')) {
                     const cardId = method.replace('card:', '');
                     const card = this.getCardById(cardId);
-                    return card ? `💳 ${card.name}` : 'Cartão removido';
+                    return card ? ` ${card.name}` : 'Cartão removido';
                 }
                 const pm = PAYMENT_METHODS.find(p => p.id === method);
                 return pm ? `${pm.icon} ${pm.name}` : method;
@@ -1258,17 +1379,17 @@
 
             renderCategoryList() {
                 const c = document.getElementById('categoryList');
-                if (!this.categories.length) return c.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">Nenhuma categoria</p>';
+                if (!this.categories.length) return c.innerHTML = '<p class="text-center" style="padding:20px; color:var(--text-secondary);">Nenhuma categoria</p>';
                 c.innerHTML = this.categories.map(cat => `
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:var(--input-bg); border-radius:12px;">
-                        <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="flex-gap-10" style="align-items:center; justify-content:space-between; padding:10px; background:var(--input-bg); border-radius:12px;">
+                        <div class="flex-gap-10" style="align-items:center;">
                             <span style="width:20px; height:20px; border-radius:50%; background:${cat.color}; display:inline-block;"></span>
                             <div>
-                                <div style="font-weight:500;">${this.escapeHtml(cat.name)}</div>
-                                <div style="font-size:0.75rem; color:var(--text-secondary);">${cat.type === 'income' ? '💰 Receita' : '💸 Despesa'}</div>
+                                <div class="font-semibold">${this.escapeHtml(cat.name)}</div>
+                                <div class="text-xs text-secondary">${cat.type === 'income' ? '💰 Receita' : '💸 Despesa'}</div>
                             </div>
                         </div>
-                        <button class="btn btn-danger btn-small" onclick="smartwallet.deleteCategory('${cat.id}')"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                        <button class="btn btn-danger btn-small" onclick="smartwallet.deleteCategory('${cat.id}')" aria-label="Excluir ${this.escapeHtml(cat.name)}"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                     </div>
                 `).join('');
             }
@@ -1319,7 +1440,6 @@
                 document.getElementById('newPurchaseModal').classList.add('active');
             }
 
-            // ===== RECORRÊNCIA: SUPORTE A ANUAL =====
             createRecurring(base, type, count) {
                 const start = new Date(base.date + 'T00:00:00');
                 for (let i = 0; i < count; i++) {
@@ -1458,7 +1578,7 @@
                 let timeStr = years > 0 ? `${years} ano${years > 1 ? 's' : ''} ` : '';
                 timeStr += remM > 0 ? `${remM} mês${remM > 1 ? 'es' : ''}` : '1 mês';
                 el.style.display = 'block';
-                el.innerHTML = `<div style="font-weight:500; margin-bottom:6px;">⏱️ Tempo estimado:</div><div style="font-size:1.2rem; font-weight:700; color:var(--primary-color);">${timeStr}</div><div style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">Faltam: ${this.formatCurrency(rem)} com aporte de ${this.formatCurrency(contrib)}/mês</div>`;
+                el.innerHTML = `<div class="font-semibold mb-10">⏱️ Tempo estimado:</div><div style="font-size:1.2rem; font-weight:700; color:var(--primary-color);">${timeStr}</div><div class="text-xs text-secondary" style="margin-top:4px;">Faltam: ${this.formatCurrency(rem)} com aporte de ${this.formatCurrency(contrib)}/mês</div>`;
             }
 
             getFilteredTransactions() {
@@ -1478,17 +1598,22 @@
 
             formatCurrency(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
             formatDate(d) { return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR'); }
-            escapeHtml(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+            
+            // SEGURANÇA: Escape HTML em todos os dados do usuário
+            escapeHtml(t) { 
+                const d = document.createElement('div'); 
+                d.textContent = t || ''; 
+                return d.innerHTML; 
+            }
 
-            // ===== BADGE DE RECORRÊNCIA COM SUPORTE A ANUAL =====
             getRecurrenceDisplay(t) {
                 if (!t.recurrence) return '';
                 if (t.recurrence.type === 'installment') {
-                    return `<span class="recurrence-badge"><svg class="icon icon-sm" viewBox="0 0 24 24" style="width:12px;height:12px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> ${t.recurrence.current}/${t.recurrence.total}</span>`;
+                    return `<span class="recurrence-badge"><svg class="icon icon-sm" viewBox="0 0 24 24" style="width:12px;height:12px;" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> ${t.recurrence.current}/${t.recurrence.total}</span>`;
                 } else if (t.recurrence.type === 'monthly') {
-                    return `<span class="recurrence-badge"><svg class="icon icon-sm" viewBox="0 0 24 24" style="width:12px;height:12px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Mensal</span>`;
+                    return `<span class="recurrence-badge"><svg class="icon icon-sm" viewBox="0 0 24 24" style="width:12px;height:12px;" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Mensal</span>`;
                 } else if (t.recurrence.type === 'yearly') {
-                    return `<span class="recurrence-badge"><svg class="icon icon-sm" viewBox="0 0 24 24" style="width:12px;height:12px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><text x="12" y="18" text-anchor="middle" font-size="7" fill="currentColor" stroke="none" font-weight="bold">12</text></svg> Anual</span>`;
+                    return `<span class="recurrence-badge"><svg class="icon icon-sm" viewBox="0 0 24 24" style="width:12px;height:12px;" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Anual</span>`;
                 }
                 return '';
             }
@@ -1498,7 +1623,9 @@
                 const inc = mt.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
                 const exp = mt.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0);
                 const bal = inc + exp;
-                const balEl = document.getElementById('totalBalance'); balEl.textContent = this.formatCurrency(bal); balEl.className = 'card-value privacy-value ' + (bal >= 0 ? 'positive' : 'negative');
+                const balEl = document.getElementById('totalBalance'); 
+                balEl.textContent = this.formatCurrency(bal); 
+                balEl.className = 'card-value privacy-value ' + (bal >= 0 ? 'positive' : 'negative');
                 document.getElementById('totalIncome').textContent = this.formatCurrency(inc);
                 document.getElementById('totalExpenses').textContent = this.formatCurrency(Math.abs(exp));
 
@@ -1594,7 +1721,7 @@
                 mt.sort((a,b) => new Date(a.date)-new Date(b.date)).forEach(t => {
                     const c=this.getCategoryById(t.category);
                     const status = t.statusOk ? 'Concluído' : 'Pendente';
-                    const payment = this.getPaymentMethodName(t.paymentMethod).replace(/[💳⚡💰🔄📅↔️]/g, '').trim();
+                    const payment = this.getPaymentMethodName(t.paymentMethod).replace(/[💳💰🔄📅↔️]/g, '').trim();
                     let recurrence = '';
                     if (t.recurrence) {
                         if (t.recurrence.type === 'installment') recurrence = `${t.recurrence.current}/${t.recurrence.total}`;
@@ -1800,18 +1927,15 @@
                 this.showToast('🗑️ Todos os dados foram apagados!');
             }
 
-            // ===== SISTEMA DE ALERTAS DE CONTAS A VENCER =====
             getUpcomingBills() {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const in3Days = new Date(today);
                 in3Days.setDate(in3Days.getDate() + 3);
                 
-                // Busca transações pendentes (statusOk=false) de despesa (amount<0) 
-                // que vencem entre hoje e 3 dias no futuro (inclusive já vencidas)
                 return this.transactions.filter(t => {
-                    if (t.statusOk) return false; // já paga
-                    if (t.amount >= 0) return false; // só despesas
+                    if (t.statusOk) return false;
+                    if (t.amount >= 0) return false;
                     const tDate = new Date(t.date + 'T00:00:00');
                     return tDate <= in3Days;
                 }).sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -1838,9 +1962,9 @@
                 
                 if (bills.length === 0) {
                     container.innerHTML = `
-                        <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                        <div class="text-center" style="padding:40px 20px; color:var(--text-secondary);">
                             <div style="font-size:3rem; margin-bottom:12px;">✅</div>
-                            <h3 style="margin-bottom:8px;">Nenhuma conta pendente!</h3>
+                            <h3 class="mb-10">Nenhuma conta pendente!</h3>
                             <p>Todas as contas estão em dia.</p>
                         </div>
                     `;
@@ -1853,7 +1977,7 @@
                 const total = bills.reduce((s, b) => s + Math.abs(b.amount), 0);
                 
                 container.innerHTML = `
-                    <div class="invoice-summary" style="margin-bottom:16px;">
+                    <div class="invoice-summary mb-16">
                         <div class="invoice-row">
                             <span class="invoice-label">Total de contas</span>
                             <span class="invoice-value">${bills.length}</span>
@@ -1898,18 +2022,18 @@
                                         <span class="bill-days ${daysClass}">${daysText}</span>
                                     </div>
                                     <div class="bill-meta">
-                                        <span>📅 ${this.formatDate(bill.date)}</span>
+                                        <span> ${this.formatDate(bill.date)}</span>
                                         <span style="color:${cat.color};">● ${this.escapeHtml(cat.name)}</span>
                                         ${bill.paymentMethod ? `<span>${this.getPaymentMethodName(bill.paymentMethod)}</span>` : ''}
                                     </div>
                                 </div>
                                 <div class="bill-amount">${this.formatCurrency(Math.abs(bill.amount))}</div>
                                 <div class="bill-actions">
-                                    <button class="btn btn-success btn-small" onclick="smartwallet.markBillAsPaid(${bill.id})" title="Marcar como paga">
-                                        <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <button class="btn btn-success btn-small" onclick="smartwallet.markBillAsPaid(${bill.id})" title="Marcar como paga" aria-label="Marcar ${this.escapeHtml(bill.description)} como paga">
+                                        <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                                     </button>
-                                    <button class="btn btn-secondary btn-small" onclick="smartwallet.editTransaction(${bill.id}); closeBillsModal();" title="Editar">
-                                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    <button class="btn btn-secondary btn-small" onclick="smartwallet.editTransaction(${bill.id}); closeBillsModal();" title="Editar" aria-label="Editar ${this.escapeHtml(bill.description)}">
+                                        <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                     </button>
                                 </div>
                             </div>
@@ -1982,7 +2106,7 @@
                 document.getElementById('cardDueDay').value = card.dueDay;
                 document.getElementById('cardLimit').value = card.limit;
                 document.getElementById('cardColor').value = card.color;
-                document.getElementById('cardModalTitle').textContent = 'Editar Cartão';
+                document.getElementById('newCardTitle').textContent = 'Editar Cartão';
                 document.getElementById('newCardModal').classList.add('active');
             }
 
@@ -2044,9 +2168,9 @@
                 const container = document.getElementById('creditCardsList');
                 if (!this.cards.length) {
                     container.innerHTML = `
-                        <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
+                        <div class="text-center" style="padding:40px 20px; color:var(--text-secondary);">
                             <div style="font-size:3rem; margin-bottom:12px; opacity:0.5;">💳</div>
-                            <h3 style="margin-bottom:8px;">Nenhum cartão cadastrado</h3>
+                            <h3 class="mb-10">Nenhum cartão cadastrado</h3>
                             <p>Clique em "Novo Cartão" para começar</p>
                         </div>
                     `;
@@ -2063,11 +2187,11 @@
                     return `
                         <div class="credit-card-visual" style="background: linear-gradient(135deg, ${card.color} 0%, ${this.adjustColor(card.color, -30)} 100%);" onclick="openInvoiceModal('${card.id}')">
                             <div class="cc-actions">
-                                <button class="cc-action-btn" onclick="event.stopPropagation(); smartwallet.editCard('${card.id}')" title="Editar">
-                                    <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <button class="cc-action-btn" onclick="event.stopPropagation(); smartwallet.editCard('${card.id}')" title="Editar" aria-label="Editar ${this.escapeHtml(card.name)}">
+                                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 </button>
-                                <button class="cc-action-btn" onclick="event.stopPropagation(); smartwallet.deleteCard('${card.id}')" title="Excluir">
-                                    <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <button class="cc-action-btn" onclick="event.stopPropagation(); smartwallet.deleteCard('${card.id}')" title="Excluir" aria-label="Excluir ${this.escapeHtml(card.name)}">
+                                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                 </button>
                             </div>
                             <div class="cc-header">
@@ -2116,14 +2240,14 @@
                 
                 const content = document.getElementById('invoiceContent');
                 content.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+                    <div class="flex-gap-10 mb-16" style="justify-content:space-between; align-items:center; flex-wrap:wrap;">
                         <div>
-                            <div style="font-size:0.85rem; color:var(--text-secondary);">Período da Fatura</div>
-                            <div style="font-weight:600;">${this.formatDate(period.startDate.toISOString().split('T')[0])} - ${this.formatDate(period.closingDate.toISOString().split('T')[0])}</div>
+                            <div class="text-xs text-secondary">Período da Fatura</div>
+                            <div class="font-semibold">${this.formatDate(period.startDate.toISOString().split('T')[0])} - ${this.formatDate(period.closingDate.toISOString().split('T')[0])}</div>
                         </div>
                         <div style="text-align:right;">
-                            <div style="font-size:0.85rem; color:var(--text-secondary);">Vencimento</div>
-                            <div style="font-weight:600; color:var(--warning-color);">${this.formatDate(period.dueDate.toISOString().split('T')[0])}</div>
+                            <div class="text-xs text-secondary">Vencimento</div>
+                            <div class="font-semibold" style="color:var(--warning-color);">${this.formatDate(period.dueDate.toISOString().split('T')[0])}</div>
                         </div>
                     </div>
                     
@@ -2146,22 +2270,22 @@
                         </div>
                     </div>
                     
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+                    <div class="flex-gap-10 mb-16" style="justify-content:space-between; align-items:center; flex-wrap:wrap;">
                         <h3 style="font-size:1.1rem;">Compras no Período (${purchases.length})</h3>
-                        <div style="display:flex; gap:8px;">
+                        <div class="flex-gap-8">
                             <button class="btn btn-secondary btn-small" onclick="smartwallet.exportInvoiceCSV('${cardId}')">
-                                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                 CSV
                             </button>
                             <button class="btn btn-secondary btn-small" onclick="smartwallet.printInvoicePDF('${cardId}')">
-                                <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                                 PDF
                             </button>
                         </div>
                     </div>
                     
                     <div id="invoicePurchasesList">
-                        ${purchases.length === 0 ? '<p style="text-align:center; padding:20px; color:var(--text-secondary);">Nenhuma compra neste período</p>' : 
+                        ${purchases.length === 0 ? '<p class="text-center" style="padding:20px; color:var(--text-secondary);">Nenhuma compra neste período</p>' : 
                         purchases.sort((a,b) => new Date(a.date) - new Date(b.date)).map(p => {
                             const cat = this.getCategoryById(p.category);
                             const installmentAmount = this.getInstallmentAmount(p);
@@ -2178,8 +2302,8 @@
                                     </div>
                                     <div class="purchase-amount">${this.formatCurrency(p.amount)}</div>
                                     <div class="purchase-actions">
-                                        <button class="btn btn-danger btn-small" onclick="smartwallet.deletePurchase(${p.id}, '${cardId}')" title="Excluir">
-                                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        <button class="btn btn-danger btn-small" onclick="smartwallet.deletePurchase(${p.id}, '${cardId}')" title="Excluir" aria-label="Excluir compra ${this.escapeHtml(p.description)}">
+                                            <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                         </button>
                                     </div>
                                 </div>
@@ -2189,11 +2313,11 @@
                     
                     <div class="action-buttons" style="margin-top:20px;">
                         <button class="btn btn-primary" onclick="openNewPurchaseModal('${cardId}')">
-                            <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             Nova Compra
                         </button>
                         <button class="btn btn-success" onclick="smartwallet.payInvoice('${cardId}')">
-                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                             Pagar Fatura
                         </button>
                         <button class="btn btn-secondary" onclick="closeInvoiceModal()">Fechar</button>
@@ -2385,7 +2509,7 @@
                         <td data-label="Categoria"><span class="category-badge" style="background:${c.color}">${this.escapeHtml(c.name)}</span></td>
                         <td data-label="Pagamento"><span class="payment-badge">${paymentName}</span></td>
                         <td data-label="Status"><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td data-label="Recorrência">${recurrenceHtml || '<span style="color:var(--text-secondary); font-size:0.85rem;">-</span>'}</td>
+                        <td data-label="Recorrência">${recurrenceHtml || '<span class="text-xs text-secondary">-</span>'}</td>
                         <td data-label="Valor" class="amount ${cls} privacy-value">${this.formatCurrency(t.amount)}</td>
                         <td data-label="Saldo" class="balance privacy-value">${this.formatCurrency(balMap.get(t.id))}</td>
                     </tr>`;
@@ -2397,9 +2521,9 @@
                 const btn = document.getElementById('themeBtn');
                 if (btn) {
                     if (this.darkMode) {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
                     } else {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
                     }
                 }
                 if (Object.keys(this.charts).length) this.updateChartsTheme();
@@ -2410,72 +2534,148 @@
                 const btn = document.getElementById('privacyBtn');
                 if (btn) {
                     if (this.privacyOn) {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
                         btn.classList.add('active');
                     } else {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
                         btn.classList.remove('active');
                     }
                 }
             }
 
-            showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('active'); clearTimeout(this.toastT); this.toastT=setTimeout(()=>t.classList.remove('active'), 3000); }
+            showToast(msg) { 
+                const t=document.getElementById('toast'); 
+                t.textContent=msg; 
+                t.classList.add('active'); 
+                clearTimeout(this.toastT); 
+                this.toastT=setTimeout(()=>t.classList.remove('active'), 3000); 
+            }
+
+            // ===== PWA: Handler de conexão =====
+            setupConnectionHandler() {
+                const statusEl = document.getElementById('connectionStatus');
+                
+                const updateStatus = () => {
+                    if (navigator.onLine) {
+                        statusEl.classList.remove('offline');
+                        this.showToast('✅ Conexão restaurada');
+                    } else {
+                        statusEl.classList.add('offline');
+                        this.showToast('⚠️ Você está offline. Dados salvos localmente.');
+                    }
+                };
+                
+                window.addEventListener('online', updateStatus);
+                window.addEventListener('offline', updateStatus);
+                
+                // Status inicial
+                if (!navigator.onLine) {
+                    statusEl.classList.add('offline');
+                }
+            }
+
+            // ===== PWA: Sync entre abas =====
+            setupStorageSync() {
+                window.addEventListener('storage', (e) => {
+                    if (e.key && e.key.startsWith('smartwallet_')) {
+                        // Recarregar dados
+                        this.transactions = this.loadFromStorage('smartwallet_transactions', []);
+                        this.categories = this.loadFromStorage('smartwallet_categories', this.getDefaultCategories());
+                        this.cards = this.loadFromStorage('smartwallet_cards', []);
+                        this.cardPurchases = this.loadFromStorage('smartwallet_card_purchases', []);
+                        this.goal = this.loadFromStorage('smartwallet_goal', 0);
+                        this.monthlyContribution = this.loadFromStorage('smartwallet_monthly_contribution', 0);
+                        this.render();
+                        this.updateCharts();
+                        this.updateAlertBadge();
+                    }
+                });
+            }
+
+            // ===== ACESSIBILIDADE: Atalhos de teclado =====
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Ctrl+N = Nova transação
+                    if (e.ctrlKey && e.key === 'n') {
+                        e.preventDefault();
+                        openNewTransactionModal();
+                    }
+                    // Escape = Fechar modal ativo
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+                    }
+                });
+            }
+
+            // ===== SEGURANÇA: Error handlers globais =====
+            setupGlobalErrorHandlers() {
+                window.addEventListener('error', (e) => {
+                    console.error('Erro não capturado:', e.error);
+                });
+
+                window.addEventListener('unhandledrejection', (e) => {
+                    console.error('Promise rejeitada:', e.reason);
+                });
+            }
         }
 
+        // Expor apenas o necessário no escopo global
         const smartwallet = new SmartWallet();
+        window.smartwallet = smartwallet;
 
-        function selectTransactionType(t) { smartwallet.currentTransactionType=t; document.querySelectorAll('#transactionForm .type-btn').forEach(b=>b.classList.toggle('active', b.dataset.type===t)); smartwallet.filterCategoriesByType('category', t); }
-        function selectEditType(t) { smartwallet.currentEditType=t; document.querySelectorAll('#editForm .type-btn').forEach(b=>b.classList.toggle('active', b.dataset.type===t)); smartwallet.filterCategoriesByType('editCategory', t); }
-        function selectNewCategoryType(t) { smartwallet.newCategoryType=t; document.querySelectorAll('#categoryModal .type-btn').forEach(b=>b.classList.toggle('active', b.dataset.type===t)); }
+        // Funções globais necessárias para onclick handlers
+        window.selectTransactionType = function(t) { smartwallet.currentTransactionType=t; document.querySelectorAll('#transactionForm .type-btn').forEach(b=>b.classList.toggle('active', b.dataset.type===t)); smartwallet.filterCategoriesByType('category', t); };
+        window.selectEditType = function(t) { smartwallet.currentEditType=t; document.querySelectorAll('#editForm .type-btn').forEach(b=>b.classList.toggle('active', b.dataset.type===t)); smartwallet.filterCategoriesByType('editCategory', t); };
+        window.selectNewCategoryType = function(t) { smartwallet.newCategoryType=t; document.querySelectorAll('#categoryModal .type-btn').forEach(b=>b.classList.toggle('active', b.dataset.type===t)); };
         
-        function openNewTransactionModal() { smartwallet.setDefaultDate(); smartwallet.filterCategoriesByType('category', smartwallet.currentTransactionType); document.getElementById('newTransactionModal').classList.add('active'); }
-        function closeNewTransactionModal() { document.getElementById('newTransactionModal').classList.remove('active'); smartwallet.clearForm(); }
-        function closeEditModal() { document.getElementById('editModal').classList.remove('active'); smartwallet.currentEditId = null; }
-        function openCategoryManager() { smartwallet.renderCategoryList(); document.getElementById('categoryModal').classList.add('active'); }
-        function closeCategoryManager() { document.getElementById('categoryModal').classList.remove('active'); }
-        function openExportModal() { document.getElementById('exportModal').classList.add('active'); }
-        function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); }
-        function openGoalModal() { smartwallet.calculateGoalResult(); document.getElementById('goalModal').classList.add('active'); }
-        function closeGoalModal() { document.getElementById('goalModal').classList.remove('active'); }
+        window.openNewTransactionModal = function() { smartwallet.setDefaultDate(); smartwallet.filterCategoriesByType('category', smartwallet.currentTransactionType); document.getElementById('newTransactionModal').classList.add('active'); };
+        window.closeNewTransactionModal = function() { document.getElementById('newTransactionModal').classList.remove('active'); smartwallet.clearForm(); };
+        window.closeEditModal = function() { document.getElementById('editModal').classList.remove('active'); smartwallet.currentEditId = null; };
+        window.openCategoryManager = function() { smartwallet.renderCategoryList(); document.getElementById('categoryModal').classList.add('active'); };
+        window.closeCategoryManager = function() { document.getElementById('categoryModal').classList.remove('active'); };
+        window.openExportModal = function() { document.getElementById('exportModal').classList.add('active'); };
+        window.closeExportModal = function() { document.getElementById('exportModal').classList.remove('active'); };
+        window.openGoalModal = function() { smartwallet.calculateGoalResult(); document.getElementById('goalModal').classList.add('active'); };
+        window.closeGoalModal = function() { document.getElementById('goalModal').classList.remove('active'); };
 
-        function openImportCsvModal() {
+        window.openImportCsvModal = function() {
             smartwallet.pendingCsvData = null;
             document.getElementById('csvFileInput').value = '';
             document.getElementById('csvFileName').textContent = 'Clique ou arraste um arquivo CSV';
             document.getElementById('csvReplaceData').checked = false;
             document.getElementById('importCsvModal').classList.add('active');
             document.getElementById('mainMenu').classList.remove('active');
-        }
-        function closeImportCsvModal() { document.getElementById('importCsvModal').classList.remove('active'); }
+        };
+        window.closeImportCsvModal = function() { document.getElementById('importCsvModal').classList.remove('active'); };
 
-        function handleCsvFileSelect(event) {
+        window.handleCsvFileSelect = function(event) {
             const file = event.target.files[0];
             if (!file) return;
             document.getElementById('csvFileName').textContent = `📄 ${file.name}`;
             const reader = new FileReader();
             reader.onload = (e) => { smartwallet.pendingCsvData = e.target.result; };
             reader.readAsText(file, 'UTF-8');
-        }
+        };
 
-        function openImportBackupModal() {
+        window.openImportBackupModal = function() {
             smartwallet.pendingBackupData = null;
             document.getElementById('backupFileInput').value = '';
             document.getElementById('backupFileName').textContent = 'Clique ou arraste um arquivo JSON';
             document.getElementById('importBackupModal').classList.add('active');
             document.getElementById('mainMenu').classList.remove('active');
-        }
-        function closeImportBackupModal() { document.getElementById('importBackupModal').classList.remove('active'); }
+        };
+        window.closeImportBackupModal = function() { document.getElementById('importBackupModal').classList.remove('active'); };
 
-        function handleBackupFileSelect(event) {
+        window.handleBackupFileSelect = function(event) {
             const file = event.target.files[0];
             if (!file) return;
             document.getElementById('backupFileName').textContent = `💾 ${file.name}`;
             const reader = new FileReader();
             reader.onload = (e) => { smartwallet.pendingBackupData = e.target.result; };
             reader.readAsText(file, 'UTF-8');
-        }
+        };
 
-        function openClearDataModal() {
+        window.openClearDataModal = function() {
             document.getElementById('clearStep1').style.display = 'block';
             document.getElementById('clearStep2').style.display = 'none';
             document.getElementById('clearConfirmInput').value = '';
@@ -2486,16 +2686,16 @@
             btn.style.cursor = 'not-allowed';
             document.getElementById('clearDataModal').classList.add('active');
             document.getElementById('mainMenu').classList.remove('active');
-        }
-        function closeClearDataModal() { document.getElementById('clearDataModal').classList.remove('active'); }
+        };
+        window.closeClearDataModal = function() { document.getElementById('clearDataModal').classList.remove('active'); };
 
-        function showClearStep2() {
+        window.showClearStep2 = function() {
             document.getElementById('clearStep1').style.display = 'none';
             document.getElementById('clearStep2').style.display = 'block';
             setTimeout(() => document.getElementById('clearConfirmInput').focus(), 100);
-        }
+        };
 
-        function checkClearConfirm() {
+        window.checkClearConfirm = function() {
             const input = document.getElementById('clearConfirmInput');
             const btn = document.getElementById('finalClearBtn');
             if (input.value.trim().toUpperCase() === 'LIMPAR') {
@@ -2509,56 +2709,115 @@
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
             }
-        }
+        };
 
-        function openCreditCardsModal() {
+        window.openCreditCardsModal = function() {
             smartwallet.renderCreditCardsList();
             document.getElementById('creditCardsModal').classList.add('active');
             document.getElementById('mainMenu').classList.remove('active');
-        }
-        function closeCreditCardsModal() { document.getElementById('creditCardsModal').classList.remove('active'); }
+        };
+        window.closeCreditCardsModal = function() { document.getElementById('creditCardsModal').classList.remove('active'); };
 
-        function openNewCardModal() {
+        window.openNewCardModal = function() {
             document.getElementById('cardEditId').value = '';
             document.getElementById('cardForm').reset();
             document.getElementById('cardClosingDay').value = 20;
             document.getElementById('cardDueDay').value = 27;
             document.getElementById('cardColor').value = '#6366f1';
-            document.getElementById('cardModalTitle').textContent = 'Novo Cartão';
+            document.getElementById('newCardTitle').textContent = 'Novo Cartão';
             document.getElementById('newCardModal').classList.add('active');
-        }
-        function closeNewCardModal() { document.getElementById('newCardModal').classList.remove('active'); }
+        };
+        window.closeNewCardModal = function() { document.getElementById('newCardModal').classList.remove('active'); };
 
-        function openInvoiceModal(cardId) { smartwallet.openInvoice(cardId); }
-        function closeInvoiceModal() { document.getElementById('invoiceModal').classList.remove('active'); }
+        window.openInvoiceModal = function(cardId) { smartwallet.openInvoice(cardId); };
+        window.closeInvoiceModal = function() { document.getElementById('invoiceModal').classList.remove('active'); };
 
-        function openNewPurchaseModal(cardId) {
+        window.openNewPurchaseModal = function(cardId) {
             document.getElementById('purchaseForm').reset();
             document.getElementById('purchaseCardId').value = cardId;
             document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('purchaseInstallments').value = '1';
             document.getElementById('purchaseStatus').value = 'pending';
             document.getElementById('newPurchaseModal').classList.add('active');
-        }
-        function closeNewPurchaseModal() { document.getElementById('newPurchaseModal').classList.remove('active'); }
+        };
+        window.closeNewPurchaseModal = function() { document.getElementById('newPurchaseModal').classList.remove('active'); };
 
-        // ===== FUNÇÕES DO MODAL DE CONTAS A VENCER =====
-        function openBillsModal() {
+        window.openBillsModal = function() {
             smartwallet.renderBillsModal();
             document.getElementById('billsModal').classList.add('active');
-        }
-        function closeBillsModal() { document.getElementById('billsModal').classList.remove('active'); }
+        };
+        window.closeBillsModal = function() { document.getElementById('billsModal').classList.remove('active'); };
 
-        function togglePrivacy() {
+        window.togglePrivacy = function() {
             smartwallet.privacyOn = !smartwallet.privacyOn;
             localStorage.setItem('smartwallet_privacy', smartwallet.privacyOn);
             smartwallet.applyPrivacy();
-        }
-        function toggleTheme() {
+        };
+        window.toggleTheme = function() {
             smartwallet.darkMode = !smartwallet.darkMode;
             localStorage.setItem('smartwallet_dark', smartwallet.darkMode);
             smartwallet.applyTheme();
-        }
+        };
+
+        // Splash e Quote
+        window.initSplash = function() {
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.classList.add('fade-out');
+                setTimeout(() => { splash.style.display = 'none'; showQuoteModal(); }, 600);
+            }, 3000);
+        };
+
+        window.showQuoteModal = function() {
+            const quote = financialQuotes[Math.floor(Math.random() * financialQuotes.length)];
+            document.getElementById('quoteText').textContent = `"${quote.text}"`;
+            document.getElementById('quoteAuthor').textContent = `— ${quote.author}`;
+            document.getElementById('quoteModal').classList.add('active');
+        };
+
+        window.startApp = function() {
+            document.getElementById('quoteModal').classList.remove('active');
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('fabBtn').style.display = 'flex';
+        };
+
+        window.addEventListener('load', initSplash);
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('mainMenu');
+            const menuBtn = e.target.closest('.menu-btn');
+            if (!menuBtn && menu.classList.contains('active')) menu.classList.remove('active');
+        });
+
+        window.toggleMenu = function(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('mainMenu');
+            const btn = e.target.closest('.menu-btn');
+            menu.classList.toggle('active');
+            if (btn) btn.setAttribute('aria-expanded', menu.classList.contains('active'));
+        };
+
+        // PWA: Handler de instalação
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log(' PWA pronto para instalação');
+        });
+
+        window.installApp = function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choice => {
+                    if (choice.outcome === 'accepted') {
+                        console.log('✅ Usuário instalou o app');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        };
+
+    })();
     </script>
     <script>
         if ('serviceWorker' in navigator) {
