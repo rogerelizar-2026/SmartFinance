@@ -1846,98 +1846,133 @@
         smartwallet.applyTheme();
     };
 
-// ===== CONTROLE DO DISCLAIMER =====
+// ===== CONTROLE DA SEQUÊNCIA: SPLASH → DISCLAIMER → BOAS-VINDAS → APP =====
 let disclaimerTimerInterval;
-let disclaimerCountdown = 15;
+let DISCLAIMER_COUNTDOWN = 12; // 12 segundos
 
 function initDisclaimer() {
-    const timerEl = document.getElementById('countdown');
-    const btnEl = document.getElementById('acceptDisclaimerBtn');
     const timerDisplay = document.getElementById('disclaimerTimer');
+    const btnEl = document.getElementById('acceptDisclaimerBtn');
+    const disclaimerModal = document.getElementById('disclaimerModal');
+    
+    if (!timerDisplay || !btnEl || !disclaimerModal) return;
+    
+    // Mostra o disclaimer como overlay
+    disclaimerModal.classList.add('active');
     
     // Reset
-    disclaimerCountdown = 15;
+    let countdown = DISCLAIMER_COUNTDOWN;
     btnEl.classList.remove('enabled');
     btnEl.disabled = true;
     
-    if (timerDisplay) {
-        timerDisplay.innerHTML = `⏱️ Por favor, leia atentamente. O botão será habilitado em <span id="countdown">15</span> segundos`;
-    }
+    timerDisplay.innerHTML = `⏱️ Aguarde <span id="countdown">${countdown}</span> segundos para continuar`;
     
-    // Limpa timer anterior se existir
-    if (disclaimerTimerInterval) {
-        clearInterval(disclaimerTimerInterval);
-    }
+    if (disclaimerTimerInterval) clearInterval(disclaimerTimerInterval);
     
-    // Inicia contador
+    // Inicia contagem regressiva
     disclaimerTimerInterval = setInterval(() => {
-        disclaimerCountdown--;
+        countdown--;
         const countdownSpan = document.getElementById('countdown');
-        if (countdownSpan) {
-            countdownSpan.textContent = disclaimerCountdown;
-        }
+        if (countdownSpan) countdownSpan.textContent = countdown;
         
-        if (disclaimerCountdown <= 0) {
+        if (countdown <= 0) {
             clearInterval(disclaimerTimerInterval);
             btnEl.classList.add('enabled');
             btnEl.disabled = false;
-            if (timerDisplay) {
-                timerDisplay.innerHTML = '✅ Você já pode aceitar os termos';
-            }
+            timerDisplay.innerHTML = '✅ Você já pode aceitar os termos';
         }
     }, 1000);
 }
 
 window.acceptDisclaimer = function() {
     const btnEl = document.getElementById('acceptDisclaimerBtn');
-    if (!btnEl.classList.contains('enabled')) {
-        return; // Botão ainda não habilitado
-    }
+    const disclaimerModal = document.getElementById('disclaimerModal');
     
-    // Salva que o usuário aceitou
+    if (!btnEl || !btnEl.classList.contains('enabled')) return;
+    if (!disclaimerModal) return;
+    
+    // Salva aceite
     localStorage.setItem('smartwallet_disclaimer_accepted', 'true');
     
-    // Esconde disclaimer
-    document.getElementById('disclaimerModal').style.display = 'none';
+    // Animação de desintegração
+    disclaimerModal.classList.add('disintegrating');
     
-    // Mostra splash screen
-    document.getElementById('splashScreen').style.display = 'flex';
-    
-    // Aguarda e mostra quote
+    // Remove o modal após animação
     setTimeout(() => {
-        const splash = document.getElementById('splashScreen');
-        splash.classList.add('fade-out');
+        disclaimerModal.classList.remove('active', 'disintegrating');
+        disclaimerModal.style.display = 'none';
+        
+        // Splash fica visível por 3 segundos como boas-vindas
         setTimeout(() => {
-            splash.style.display = 'none';
-            showQuoteModal();
-        }, 600);
-    }, 3000);
+            transitionToApp();
+        }, 3000);
+    }, 600); // Duração da animação de desintegração
 };
 
-// ===== INICIALIZAÇÃO =====
+function transitionToApp() {
+    const splashScreen = document.getElementById('splashScreen');
+    
+    if (splashScreen) {
+        // Fade out da splash
+        splashScreen.classList.add('fade-out');
+        
+        setTimeout(() => {
+            splashScreen.style.display = 'none';
+            
+            // Mostra quote modal ou vai direto pro app
+            showQuoteModal();
+        }, 800);
+    } else {
+        showQuoteModal();
+    }
+}
+
+function showQuoteModal() {
+    const quote = financialQuotes[Math.floor(Math.random() * financialQuotes.length)];
+    const quoteText = document.getElementById('quoteText');
+    const quoteAuthor = document.getElementById('quoteAuthor');
+    const quoteModal = document.getElementById('quoteModal');
+    
+    if (quoteText) quoteText.textContent = `"${quote.text}"`;
+    if (quoteAuthor) quoteAuthor.textContent = `— ${quote.author}`;
+    if (quoteModal) quoteModal.classList.add('active');
+}
+
+window.startApp = function() {
+    const quoteModal = document.getElementById('quoteModal');
+    const mainApp = document.getElementById('mainApp');
+    const fabBtn = document.getElementById('fabBtn');
+    
+    if (quoteModal) quoteModal.classList.remove('active');
+    if (mainApp) mainApp.style.display = 'block';
+    if (fabBtn) fabBtn.style.display = 'flex';
+};
+
+// ===== INICIALIZAÇÃO PRINCIPAL =====
 window.addEventListener('load', () => {
     updatePrintDate();
     
-    // Verifica se já aceitou o disclaimer
     const disclaimerAccepted = localStorage.getItem('smartwallet_disclaimer_accepted') === 'true';
+    const splashScreen = document.getElementById('splashScreen');
     
-    // Mostra splash screen primeiro
+    // Garante que splash está visível
+    if (splashScreen) {
+        splashScreen.style.display = 'flex';
+        splashScreen.classList.remove('fade-out');
+    }
+    
+    // Aguarda 1 segundo para a splash carregar, depois mostra disclaimer
     setTimeout(() => {
-        const splash = document.getElementById('splashScreen');
-        splash.classList.add('fade-out');
-        setTimeout(() => {
-            splash.style.display = 'none';
-            
-            if (!disclaimerAccepted) {
-                // Primeiro acesso: mostra disclaimer
-                document.getElementById('disclaimerModal').style.display = 'flex';
-                initDisclaimer();
-            } else {
-                // Já aceitou: vai direto para quote
-                showQuoteModal();
-            }
-        }, 600);
-    }, 3000);
+        if (!disclaimerAccepted) {
+            // Primeiro acesso: mostra disclaimer overlay
+            initDisclaimer();
+        } else {
+            // Já aceitou: splash fica 3 segundos e vai pro app
+            setTimeout(() => {
+                transitionToApp();
+            }, 3000);
+        }
+    }, 1000);
 });
 
     document.addEventListener('click', (e) => {
