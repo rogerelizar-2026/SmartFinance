@@ -2072,26 +2072,30 @@ window.printManual = function() {
         }, 1000);
     }
 
-    window.acceptDisclaimer = function() {
-        const btnEl = document.getElementById('acceptDisclaimerBtn');
-        const disclaimerModal = document.getElementById('disclaimerModal');
+window.acceptDisclaimer = function() {
+    const btnEl = document.getElementById('acceptDisclaimerBtn');
+    const disclaimerModal = document.getElementById('disclaimerModal');
+    
+    if (!btnEl || !btnEl.classList.contains('enabled')) return;
+    if (!disclaimerModal) return;
+    
+    // Salva aceite
+    localStorage.setItem('smartwallet_disclaimer_accepted', 'true');
+    
+    // Animação de desintegração
+    disclaimerModal.classList.add('disintegrating');
+    
+    // Remove após animação
+    setTimeout(() => {
+        disclaimerModal.classList.remove('active', 'disintegrating');
+        disclaimerModal.style.display = 'none';
         
-        if (!btnEl || !btnEl.classList.contains('enabled')) return;
-        if (!disclaimerModal) return;
-        
-        localStorage.setItem('smartwallet_disclaimer_accepted', 'true');
-        
-        disclaimerModal.classList.add('disintegrating');
-        
+        // Splash fica visível por 3 segundos
         setTimeout(() => {
-            disclaimerModal.classList.remove('active', 'disintegrating');
-            disclaimerModal.style.display = 'none';
-            
-            setTimeout(() => {
-                transitionToApp();
-            }, 3000);
-        }, 600);
-    };
+            transitionToApp();
+        }, 3000);
+    }, 600);
+};
 
     function transitionToApp() {
         const splashScreen = document.getElementById('splashScreen');
