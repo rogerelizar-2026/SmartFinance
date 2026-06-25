@@ -852,8 +852,8 @@
                         x: { beginAtZero: true, ticks: { color: colors.textSecondary }, grid: { color: colors.grid } },
                         y: { ticks: { color: colors.textSecondary }, grid: { color: colors.grid } }
                     },
-                    barPercentage: 0.5,
-                    categoryPercentage: 0.6
+                    barPercentage: 0.12,
+                    categoryPercentage: 0.15
                 }
             });
         } catch (e) { console.error('Erro pie:', e); }
