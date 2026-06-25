@@ -1,7 +1,7 @@
 {
   "name": "Smart Wallet",
   "short_name": "SmartWallet",
-  "description": "Controle financeiro pessoal inteligente - Idealizado por RogerElizar™",
+  "description": "Controle financeiro pessoal inteligente - Idealizado por RogerElizar®",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -19,6 +19,12 @@
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -27,7 +33,24 @@
       "short_name": "Nova",
       "description": "Adicionar nova transação financeira",
       "url": "./?action=new",
-      "icons": [{ "src": "favicon.svg", "sizes": "any" }]
+      "icons": [
+        {
+          "src": "favicon.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Cartões de Crédito",
+      "short_name": "Cartões",
+      "description": "Gerenciar cartões e faturas",
+      "url": "./?action=cards",
+      "icons": [
+        {
+          "src": "favicon.svg",
+          "sizes": "any"
+        }
+      ]
     }
   ]
 }
