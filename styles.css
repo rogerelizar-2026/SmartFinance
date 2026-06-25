@@ -479,7 +479,8 @@ header {
     margin-bottom: 20px;
     box-shadow: var(--shadow);
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* MUDANÇA: era overflow: hidden */
+    z-index: 1;
 }
 
 header::before {
@@ -513,7 +514,10 @@ header p {
     margin-top: 4px;
 }
 
-.info-wrapper { position: relative; }
+.info-wrapper {
+    position: relative;
+    z-index: 1000; /* AUMENTADO: era 100 */
+}
 
 .info-btn {
     background: var(--glass-bg);
@@ -547,12 +551,15 @@ header p {
     padding: 8px;
     min-width: 280px;
     box-shadow: var(--shadow-lg);
-    z-index: 100;
+    z-index: 10000; /* AUMENTADO: era 100 */
     display: none;
     animation: slideDown 0.2s ease;
+    overflow: visible; /* GARANTIR visibilidade */
 }
 
-.info-dropdown.active { display: block; }
+.info-dropdown.active {
+    display: block;
+}
 
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-10px); }
