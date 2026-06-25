@@ -13,7 +13,7 @@
             { text: "Riqueza verdadeira não é ter muito, é depender de pouco. O dinheiro é ponte para seus valores, não o destino final.", author: "Sabedoria Financeira" },
             { text: "Riqueza é a capacidade de viver completamente a vida.", author: "Henry David Thoreau" },
             { text: "Um orçamento está dizendo a seu dinheiro para onde ir, em vez de se perguntar para onde ele foi.", author: "Dave Ramsey" },
-            { text: "Amar dinheiro demais é a raiz de todos os problemas. Muita gente se afastou da fé por causa disso e se encheu de angústia.", author: "1 Timóteo 6:10 (Linguagem Atual)" },
+            { text: "Amar dinheiro é a raiz de todos os problemas. Muita gente se afastou da fé por causa disso e se encheu de angústia.", author: "1 Timóteo 6:10 (Linguagem Atual)" },
             { text: "É melhor ter pouco e temer a Deus do que ter um tesouro enorme e viver preocupado.", author: "Provérbios 15:16 (Linguagem Atual)" },
             { text: "Quem deve fica escravo de quem empresta. O rico manda no pobre.", author: "Provérbios 22:7 (Linguagem Atual)" },
             { text: "O dinheiro não muda pessoas; apenas revela quem elas realmente são.", author: "Provérbio Financeiro Moderno" },
@@ -543,39 +543,58 @@
         return method;
     };
 
-    SmartWallet.prototype.addTransaction = function() {
-        var date = document.getElementById('date').value;
-        var amount = parseFloat(document.getElementById('amount').value);
-        var category = document.getElementById('category').value;
-        var description = document.getElementById('description').value;
-        var statusOk = document.getElementById('statusOk').checked;
-        var paymentMethod = document.getElementById('paymentMethod').value;
-        var accountId = document.getElementById('transactionAccount').value;
+SmartWallet.prototype.addTransaction = function() {
+    var date = document.getElementById('date').value;
+    var amount = parseFloat(document.getElementById('amount').value);
+    var category = document.getElementById('category').value;
+    var description = document.getElementById('description').value;
+    var statusOk = document.getElementById('statusOk').checked;
+    var paymentMethod = document.getElementById('paymentMethod').value;
+    var accountId = document.getElementById('transactionAccount').value;
 
-        if (!category) { this.showToast('Selecione uma categoria'); return; }
-        if (!paymentMethod) { this.showToast('Selecione a forma de pagamento'); return; }
+    if (!category) { this.showToast('Selecione uma categoria'); return; }
+    if (!paymentMethod) { this.showToast('Selecione a forma de pagamento'); return; }
 
-        var transaction = {
-            id: Date.now(),
-            date: date,
-            amount: this.currentTransactionType === 'expense' ? -Math.abs(amount) : Math.abs(amount),
-            category: category,
-            description: description,
-            statusOk: statusOk,
-            paymentMethod: paymentMethod,
-            accountId: accountId
-        };
-
-        this.transactions.push(transaction);
-        this.saveTransactions();
-        this.render();
-        this.updateCharts();
-        this.updateAlertBadge();
-        this.showToast('Transação adicionada!');
-        closeNewTransactionModal();
-        this.clearForm();
+    var transaction = {
+        id: Date.now(),
+        date: date,
+        amount: this.currentTransactionType === 'expense' ? -Math.abs(amount) : Math.abs(amount),
+        category: category,
+        description: description,
+        statusOk: statusOk,
+        paymentMethod: paymentMethod,
+        accountId: accountId
     };
 
+    // NOVO: Se for cartão de crédito, registrar também como compra de cartão
+    if (paymentMethod.indexOf('card:') === 0 && this.currentTransactionType === 'expense') {
+        var cardId = paymentMethod.replace('card:', '');
+        var card = this.getCardById(cardId);
+        
+        if (card) {
+            this.cardPurchases.push({
+                id: Date.now() + 1,
+                cardId: cardId,
+                date: date,
+                amount: Math.abs(amount),
+                description: description,
+                category: category,
+                installments: 1,
+                status: statusOk
+            });
+            this.saveCardPurchases();
+        }
+    }
+
+    this.transactions.push(transaction);
+    this.saveTransactions();
+    this.render();
+    this.updateCharts();
+    this.updateAlertBadge();
+    this.showToast('Transação adicionada!');
+    closeNewTransactionModal();
+    this.clearForm();
+};
     SmartWallet.prototype.clearForm = function() {
         var form = document.getElementById('transactionForm');
         if (form) form.reset();
@@ -1179,80 +1198,11 @@
         }
         html += '</div>';
         html += '<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">';
-        html += '<button class="btn btn-primary" onclick="openNewPurchaseModal(\'' + cardId + '\')">➕ Nova Compra</button>';
         html += '<button class="btn btn-success" onclick="smartwallet.payInvoice(\'' + cardId + '\')">💰 Pagar Fatura</button>';
         html += '<button class="btn btn-secondary" onclick="closeInvoiceModal()">Fechar</button></div>';
 
         document.getElementById('invoiceContent').innerHTML = html;
         document.getElementById('invoiceModal').classList.add('active');
-    };
-
-    SmartWallet.prototype.savePurchase = function() {
-        var cardId = document.getElementById('purchaseCardId').value;
-        var date = document.getElementById('purchaseDate').value;
-        var amount = parseFloat(document.getElementById('purchaseAmount').value);
-        var description = document.getElementById('purchaseDescription').value.trim();
-        var category = document.getElementById('purchaseCategory').value;
-        var installments = parseInt(document.getElementById('purchaseInstallments').value);
-        var status = document.getElementById('purchaseStatus').value;
-
-        if (!cardId || !date || !amount || !description || !category) {
-            this.showToast('Preencha todos os campos');
-            return;
-        }
-
-        this.cardPurchases.push({
-            id: Date.now(),
-            cardId: cardId,
-            date: date,
-            amount: amount,
-            description: description,
-            category: category,
-            installments: installments,
-            status: status === 'done'
-        });
-
-        var card = this.getCardById(cardId);
-        var installmentAmount = installments > 1 ? amount / installments : amount;
-        this.transactions.push({
-            id: Date.now() + 1,
-            date: date,
-            amount: -installmentAmount,
-            category: category,
-            description: description + (card ? ' (' + card.name + ')' : ''),
-            statusOk: status === 'done',
-            paymentMethod: 'card:' + cardId,
-            accountId: ''
-        });
-
-        this.saveCardPurchases();
-        this.saveTransactions();
-        this.renderCreditCardsList();
-        this.render();
-        this.updateCharts();
-        closeNewPurchaseModal();
-        this.openInvoice(cardId);
-        this.showToast('Compra registrada!');
-    };
-
-    SmartWallet.prototype.deletePurchase = function(id, cardId) {
-        if (!confirm('Excluir esta compra?')) return;
-        var purchase = null;
-        for (var i = 0; i < this.cardPurchases.length; i++) {
-            if (this.cardPurchases[i].id === id) { purchase = this.cardPurchases[i]; break; }
-        }
-        this.cardPurchases = this.cardPurchases.filter(function(p) { return p.id !== id; });
-        if (purchase) {
-            this.transactions = this.transactions.filter(function(t) {
-                return !(t.description && t.description.indexOf(purchase.description) !== -1 && t.paymentMethod === 'card:' + cardId);
-            });
-            this.saveTransactions();
-        }
-        this.saveCardPurchases();
-        this.render();
-        this.updateCharts();
-        this.openInvoice(cardId);
-        this.showToast('Compra excluída!');
     };
 
     SmartWallet.prototype.payInvoice = function(cardId) {
@@ -2244,20 +2194,6 @@ summaryEl.innerHTML = '<div class="investment-summary"><h3>📊 Resumo</h3><div 
 
     window.closeInvoiceModal = function() {
         document.getElementById('invoiceModal').classList.remove('active');
-    };
-
-    window.openNewPurchaseModal = function(cardId) {
-        document.getElementById('purchaseForm').reset();
-        document.getElementById('purchaseCardId').value = cardId;
-        document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('purchaseInstallments').value = '1';
-        document.getElementById('purchaseStatus').value = 'pending';
-        smartwallet.populateCategorySelects();
-        document.getElementById('newPurchaseModal').classList.add('active');
-    };
-
-    window.closeNewPurchaseModal = function() {
-        document.getElementById('newPurchaseModal').classList.remove('active');
     };
 
     window.openBillsModal = function() {
