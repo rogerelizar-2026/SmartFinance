@@ -1097,6 +1097,21 @@ body.privacy-on .privacy-value {
     pointer-events: none;
 }
 
+/* Valores de investimentos no modo privacidade */
+body.privacy-on .investment-value-amount,
+body.privacy-on .investment-summary-value {
+    filter: blur(8px);
+    user-select: none;
+    pointer-events: none;
+    transition: filter 0.3s ease;
+}
+
+/* Labels permanecem visíveis */
+body.privacy-on .investment-value-label,
+body.privacy-on .investment-summary-label {
+    filter: none;
+}
+
 body.privacy-on .goal-bar-fill { filter: blur(4px); }
 body.privacy-on canvas { filter: blur(6px); }
 
