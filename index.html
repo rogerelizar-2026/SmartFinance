@@ -219,7 +219,7 @@
         <div><label for="recurrenceCount">Parcelas</label><input type="number" id="recurrenceCount" min="2" max="360" value="2"></div>
     </div>
 </div>
-<div class="action-buttons">
+<div class="action-buttons">    
                     <button type="submit" class="btn btn-primary">➕ Adicionar</button>
                     <button type="button" class="btn btn-secondary" onclick="closeNewTransactionModal()">Cancelar</button>
                 </div>
@@ -245,7 +245,14 @@
                 <div class="form-group"><label for="editTransactionAccount">🏦 Conta</label><select id="editTransactionAccount" required><option value="">Selecione a conta...</option></select></div>
                 <div class="form-group"><label for="editDescription">Descrição</label><textarea id="editDescription" rows="2"></textarea></div>
                 <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="editStatusOk"><label for="editStatusOk">✓ Status OK</label></div></div>
-                <div class="action-buttons">
+                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="editRecurring"><label for="editRecurring"> Recorrente/Parcelada</label></div></div>
+                <div class="form-group" id="editRecurringOptions" style="display:none;">
+                <div class="form-row">
+                <div><label for="editRecurrenceType">Tipo</label><select id="editRecurrenceType"><option value="monthly">Mensal</option><option value="yearly">Anual</option><option value="installment">Parcelado</option></select></div>
+                <div><label for="editRecurrenceCount">Parcelas</label><input type="number" id="editRecurrenceCount" min="2" max="360" value="2"></div>
+         </div>
+     </div>
+<div class="action-buttons">                <div class="action-buttons">
                     <button type="submit" class="btn btn-primary">💾 Salvar</button>
                     <button type="button" class="btn btn-danger" onclick="smartwallet.deleteFromEdit()">🗑️ Excluir</button>
                     <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
