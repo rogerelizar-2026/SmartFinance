@@ -29,7 +29,7 @@ Smart Wallet é uma aplicação web progressiva (PWA) de controle financeiro pes
 SmartWallet/
 ├── index.html # Estrutura HTML completa (~600 linhas)
 ├── styles.css # Estilos e animações (~2000 linhas)
-├── app.js # Lógica JavaScript (~2500 linhas)
+├── app.js # Lógica JavaScript (~2500 linhas)]
 ── manifest.json # Configuração PWA
 ├── sw.js # Service Worker
 ├── favicon.svg # Ícone do app
