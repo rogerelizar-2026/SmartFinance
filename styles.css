@@ -469,7 +469,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6);
 }
 
-/* ===== HEADER ===== */
+/* ===== HEADER - CORRIGIDO PARA NÃO CORTAR DROPDOWN ===== */
 header {
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
@@ -479,7 +479,7 @@ header {
     margin-bottom: 20px;
     box-shadow: var(--shadow);
     position: relative;
-    overflow: visible; /* MUDANÇA: era overflow: hidden */
+    overflow: visible;
     z-index: 1;
 }
 
@@ -514,9 +514,10 @@ header p {
     margin-top: 4px;
 }
 
+/* ===== INFO MENU - CORRIGIDO COM Z-INDEX ALTO ===== */
 .info-wrapper {
     position: relative;
-    z-index: 1000; /* AUMENTADO: era 100 */
+    z-index: 1000;
 }
 
 .info-btn {
@@ -551,15 +552,13 @@ header p {
     padding: 8px;
     min-width: 280px;
     box-shadow: var(--shadow-lg);
-    z-index: 10000; /* AUMENTADO: era 100 */
+    z-index: 10000;
     display: none;
     animation: slideDown 0.2s ease;
-    overflow: visible; /* GARANTIR visibilidade */
+    overflow: visible;
 }
 
-.info-dropdown.active {
-    display: block;
-}
+.info-dropdown.active { display: block; }
 
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-10px); }
@@ -774,17 +773,14 @@ header p {
     padding: 8px;
     min-width: 280px;
     box-shadow: var(--shadow-lg);
-    z-index: 10000; /* AUMENTADO */
+    z-index: 10000;
     display: none;
     animation: slideDown 0.2s ease;
     max-height: 70vh;
     overflow-y: auto;
-    overflow: visible;
 }
 
-.dropdown-menu.active {
-    display: block;
-}
+.dropdown-menu.active { display: block; }
 
 .dropdown-item {
     display: flex;
@@ -1091,13 +1087,17 @@ tbody tr.transaction-row:hover {
     font-weight: 600;
 }
 
+/* ===== PRIVACY MODE ===== */
 body.privacy-on .privacy-value {
     filter: blur(8px);
     user-select: none;
     pointer-events: none;
 }
 
-/* Valores de investimentos no modo privacidade */
+body.privacy-on .goal-bar-fill { filter: blur(4px); }
+body.privacy-on canvas { filter: blur(6px); }
+
+/* ✅ Valores de investimentos no modo privacidade */
 body.privacy-on .investment-value-amount,
 body.privacy-on .investment-summary-value {
     filter: blur(8px);
@@ -1111,9 +1111,6 @@ body.privacy-on .investment-value-label,
 body.privacy-on .investment-summary-label {
     filter: none;
 }
-
-body.privacy-on .goal-bar-fill { filter: blur(4px); }
-body.privacy-on canvas { filter: blur(6px); }
 
 /* ===== FAB ===== */
 .fab {
@@ -1685,7 +1682,7 @@ body.privacy-on canvas { filter: blur(6px); }
     font-weight: 700;
 }
 
-/* ===== MODAL DO MANUAL ===== */
+/* ===== MODAL DO MANUAL - CORRIGIDO COM SCROLL ===== */
 #manualModal .modal-content {
     max-width: 900px;
     width: 100%;
@@ -1871,55 +1868,6 @@ body.privacy-on canvas { filter: blur(6px); }
     margin: 12px 0;
     word-break: break-all;
 }
-
-/* ===== RECURRENCE MODAL ===== */
-.recurrence-confirm-modal .modal-content {
-    max-width: 500px;
-    border: 2px solid var(--primary-color);
-}
-
-.recurrence-info {
-    background: var(--input-bg);
-    border-radius: 12px;
-    padding: 16px;
-    margin: 16px 0;
-    border-left: 4px solid var(--primary-color);
-}
-
-.recurrence-info-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.recurrence-info-item:last-child { border-bottom: none; }
-.recurrence-info-label { color: var(--text-secondary); font-size: 0.9rem; }
-.recurrence-info-value { font-weight: 600; }
-
-.recurrence-options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.recurrence-option {
-    background: var(--input-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.recurrence-option:hover {
-    border-color: var(--primary-color);
-    background: rgba(99,102,241,0.1);
-}
-
-.recurrence-option-title { font-weight: 600; margin-bottom: 4px; }
-.recurrence-option-desc { font-size: 0.85rem; color: var(--text-secondary); }
 
 /* ===== ACCOUNTS ===== */
 .accounts-grid {
