@@ -1,21 +1,24 @@
 // js/handlers.js
-// Fase 2: Handlers via event delegation (substitui onclick inline)
+// Fase 3: Handlers com Lazy Loading + Validação Forte
 
 import './delegation.js';
+import { lazyLoader } from './lazy-loader.js';
+import { validators, ValidationError } from './validators.js';
+import { storageManager } from './storage-manager.js';
 
-console.log('[Handlers] Registrando handlers de ação...');
+console.log('[Handlers] Fase 3 - Registrando handlers...');
 
 // ===== TOGGLES =====
 window.addEventListener('action:toggle-theme', () => {
     const isLight = document.body.classList.contains('light');
     document.body.classList.toggle('light', !isLight);
-    localStorage.setItem('smartwallet_dark', isLight);
+    storageManager.setPreferences({ darkMode: isLight });
     if (window.smartwallet) window.smartwallet.applyTheme();
 });
 
 window.addEventListener('action:toggle-privacy', () => {
     const isPrivate = document.body.classList.toggle('privacy-on');
-    localStorage.setItem('smartwallet_privacy', isPrivate);
+    storageManager.setPreferences({ privacyMode: isPrivate });
     if (window.smartwallet) window.smartwallet.applyPrivacy();
 });
 
@@ -23,7 +26,6 @@ window.addEventListener('action:toggle-menu', (e) => {
     const menuId = e.detail?.params?.menu || 'mainMenu';
     const menu = document.getElementById(menuId);
     const infoMenu = document.getElementById('infoMenu');
-    
     if (menu) menu.classList.toggle('active');
     if (infoMenu) infoMenu.classList.remove('active');
 });
@@ -32,7 +34,6 @@ window.addEventListener('action:toggle-info-menu', (e) => {
     e.detail?.originalEvent?.stopPropagation();
     const infoMenu = document.getElementById('infoMenu');
     const mainMenu = document.getElementById('mainMenu');
-    
     if (infoMenu) infoMenu.classList.toggle('active');
     if (mainMenu) mainMenu.classList.remove('active');
 });
@@ -119,6 +120,9 @@ Object.entries(modalMap).forEach(([action, modalId]) => {
                 modal.classList.remove('active');
             } else {
                 modal.classList.add('active');
+                
+                // Lazy load: dispara evento para carregar conteúdo
+                window.dispatchEvent(new CustomEvent(`modal:opened:${modalId}`));
             }
         }
     });
@@ -149,62 +153,76 @@ window.addEventListener('form:update-investment', () => {
     if (window.smartwallet) window.smartwallet.updateInvestmentValue();
 });
 
-// ===== FILE HANDLERS =====
-window.addEventListener('action:select-csv-file', (e) => {
+// ===== FILE HANDLERS COM VALIDAÇÃO =====
+window.addEventListener('action:select-csv-file', async (e) => {
     const input = e.detail?.target;
     if (!input || !input.files[0]) return;
     
     const file = input.files[0];
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-        alert('⚠️ Selecione um arquivo .csv');
-        input.value = '';
-        return;
-    }
     
-    document.getElementById('csvFileName').textContent = 
-        `📄 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
-    
-    const reader = new FileReader();
-    reader.onload = (ev) => { window._pendingCsvData = ev.target.result; };
-    reader.readAsText(file, 'UTF-8');
-});
-
-window.addEventListener('action:select-backup-file', (e) => {
-    const input = e.detail?.target;
-    if (!input || !input.files[0]) return;
-    
-    const file = input.files[0];
-    if (!file.name.toLowerCase().endsWith('.json')) {
-        alert('⚠️ Selecione um arquivo .json');
-        input.value = '';
-        return;
-    }
-    
-    if (file.size > 10 * 1024 * 1024) {
-        alert('️ Arquivo muito grande (máx 10MB)');
-        input.value = '';
-        return;
-    }
-    
-    document.getElementById('backupFileName').textContent = 
-        `💾 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
-    
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        try {
-            JSON.parse(ev.target.result);
-            window._pendingBackupData = ev.target.result;
-            if (window.smartwallet) window.smartwallet.showToast('✅ Arquivo carregado!');
-        } catch (err) {
-            alert('❌ JSON inválido: ' + err.message);
-            input.value = '';
-            window._pendingBackupData = null;
+    try {
+        validators.validateFileExtension(file, ['csv']);
+        validators.validateFileSize(file, 10);
+        
+        document.getElementById('csvFileName').textContent = 
+            `📄 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => { window._pendingCsvData = ev.target.result; };
+        reader.readAsText(file, 'UTF-8');
+    } catch (err) {
+        if (err instanceof ValidationError) {
+            alert('❌ ' + err.message);
+        } else {
+            alert('❌ Erro ao processar arquivo');
         }
-    };
-    reader.readAsText(file, 'UTF-8');
+        input.value = '';
+    }
 });
 
-// ===== IMPORT/EXPORT ACTIONS =====
+window.addEventListener('action:select-backup-file', async (e) => {
+    const input = e.detail?.target;
+    if (!input || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    try {
+        validators.validateFileExtension(file, ['json']);
+        validators.validateFileSize(file, 10);
+        
+        document.getElementById('backupFileName').textContent = 
+            `💾 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                validators.validateBackupSchema(data);
+                window._pendingBackupData = ev.target.result;
+                if (window.smartwallet) window.smartwallet.showToast('✅ Arquivo válido!');
+            } catch (err) {
+                if (err instanceof ValidationError) {
+                    const details = err.details?.errors 
+                        ? '\n\n' + err.details.errors.slice(0, 5).join('\n')
+                        : '';
+                    alert('❌ ' + err.message + details);
+                } else {
+                    alert('❌ JSON inválido: ' + err.message);
+                }
+                input.value = '';
+                window._pendingBackupData = null;
+            }
+        };
+        reader.readAsText(file, 'UTF-8');
+    } catch (err) {
+        if (err instanceof ValidationError) {
+            alert(' ' + err.message);
+        }
+        input.value = '';
+    }
+});
+
+// ===== IMPORT/EXPORT =====
 window.addEventListener('action:import-csv', () => {
     if (window.smartwallet) window.smartwallet.importCSV();
 });
@@ -416,6 +434,35 @@ window.addEventListener('action:start-app', () => {
     if (fab) fab.style.display = 'flex';
 });
 
+// ===== PERSISTÊNCIA DE FILTROS =====
+let filterDebounceTimer;
+document.addEventListener('change', (e) => {
+    const filterIds = ['typeFilter', 'categoryFilter', 'statusFilter', 'accountFilter'];
+    if (filterIds.includes(e.target.id)) {
+        clearTimeout(filterDebounceTimer);
+        filterDebounceTimer = setTimeout(() => {
+            const filters = {
+                type: document.getElementById('typeFilter')?.value || '',
+                category: document.getElementById('categoryFilter')?.value || '',
+                status: document.getElementById('statusFilter')?.value || '',
+                account: document.getElementById('accountFilter')?.value || ''
+            };
+            storageManager.setFilters(filters);
+        }, 500);
+    }
+});
+
+document.addEventListener('input', (e) => {
+    if (e.target.id === 'searchFilter') {
+        clearTimeout(filterDebounceTimer);
+        filterDebounceTimer = setTimeout(() => {
+            const filters = storageManager.getFilters();
+            filters.search = e.target.value;
+            storageManager.setFilters(filters);
+        }, 500);
+    }
+});
+
 // ===== FECHA MODAIS AO CLICAR FORA =====
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal')) {
@@ -423,4 +470,4 @@ document.addEventListener('click', (e) => {
     }
 });
 
-console.log('[Handlers] ✅ Todos os handlers de ação registrados');
+console.log('[Handlers] ✅ Fase 3 completa - Handlers registrados');
