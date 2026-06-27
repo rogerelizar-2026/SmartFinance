@@ -5,6 +5,7 @@
 import './handlers.js';
 import { storageManager } from './storage-manager.js';
 import { lazyLoader } from './lazy-loader.js';
+import { a11yManager } from './a11y.js';  
 
 console.log('🚀 Smart Wallet v3.0.0 iniciando...');
 
