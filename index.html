@@ -161,44 +161,44 @@
                     <div class="dropdown-menu" id="mainMenu" role="menu" aria-label="Menu principal">
                         <button class="dropdown-item" role="menuitem" onclick="openExportModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            <span>📄 Extrato do Mês</span>
+                            <span> Extrato do Mês</span>
                         </button>
                         <div class="dropdown-divider" role="separator"></div>
                         <button class="dropdown-item" role="menuitem" onclick="openManualModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                            <span>📘 Manual do Usuário</span>
+                            <span> Manual do Usuário</span>
                         </button>
                         <div class="dropdown-divider" role="separator"></div>
                         <button class="dropdown-item" role="menuitem" onclick="openAccountsModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                            <span>🏦 Minhas Contas</span>
+                            <span> Minhas Contas</span>
                         </button>
                         <button class="dropdown-item" role="menuitem" onclick="openCreditCardsModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                            <span>💳 Meus Cartões</span>
+                            <span> Meus Cartões</span>
                         </button>
                         <button class="dropdown-item" role="menuitem" onclick="openNewCardModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-                            <span>➕ Novo Cartão</span>
+                            <span> Novo Cartão</span>
                         </button>
                         <div class="dropdown-divider" role="separator"></div>
                         <button class="dropdown-item" role="menuitem" onclick="openImportCsvModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            <span>📥 Importar CSV</span>
+                            <span> Importar CSV</span>
                         </button>
                         <div class="dropdown-divider" role="separator"></div>
                         <button class="dropdown-item" role="menuitem" onclick="smartwallet.exportBackup()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                            <span>💾 Backup (JSON)</span>
+                            <span> Backup (JSON)</span>
                         </button>
                         <button class="dropdown-item" role="menuitem" onclick="openImportBackupModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                            <span>📂 Restaurar Backup</span>
+                            <span> Restaurar Backup</span>
                         </button>
                         <div class="dropdown-divider" role="separator"></div>
                         <button class="dropdown-item danger" role="menuitem" onclick="openClearDataModal()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                            <span>🗑️ Limpar Dados</span>
+                            <span> Limpar Dados</span>
                         </button>
                     </div>
                 </div>
@@ -226,15 +226,15 @@
 
         <div class="charts-section" role="region" aria-label="Gráficos financeiros">
             <div class="chart-card">
-                <h3>📈 Entradas e Saídas por Mês</h3>
+                <h3> Entradas e Saídas por Mês</h3>
                 <div class="chart-container"><canvas id="lineChart" aria-label="Gráfico de linhas de receitas e despesas"></canvas></div>
             </div>
             <div class="chart-card">
-                <h3>💳 Cartões de Crédito (6 meses)</h3>
+                <h3> Cartões de Crédito (6 meses)</h3>
                 <div class="chart-container"><canvas id="cardsChart" aria-label="Gráfico de evolução dos cartões de crédito"></canvas></div>
             </div>
             <div class="chart-card">
-                <h3>🥧 Despesas por Categoria</h3>
+                <h3> Despesas por Categoria</h3>
                 <div class="chart-container"><canvas id="pieChart" aria-label="Gráfico de despesas por categoria"></canvas></div>
             </div>
         </div>
@@ -287,7 +287,7 @@
 
         <div class="charts-section" id="investmentsChartSection" role="region" aria-label="Gráfico de investimentos">
             <div class="chart-card" style="grid-column: 1 / -1;">
-                <h3>📊 Acompanhamento de Aplicações</h3>
+                <h3> Acompanhamento de Aplicações</h3>
                 <div class="chart-container" style="height: 400px;"><canvas id="investChart" aria-label="Gráfico de evolução dos investimentos"></canvas></div>
                 <div id="investSummary" style="margin-top: 20px;" aria-live="polite"></div>
             </div>
