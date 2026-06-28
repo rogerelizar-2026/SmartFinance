@@ -283,27 +283,51 @@ getCardTransactionsForPeriod(cardId, startDate, closingDate) {
         return tDate >= start && tDate <= end;
     });
 }
-        populateCategorySelects() {
-            const self = this;
-            ['category', 'editCategory', 'categoryFilter'].forEach((id, i) => {
-                const sel = document.getElementById(id);
-                if (!sel) return;
-                const val = sel.value;
-                sel.innerHTML = i === 2 ? '<option value="">Todas as categorias</option>' : '<option value="">Selecione...</option>';
-                self.categories.forEach(cat => {
-                    const opt = document.createElement('option');
-                    opt.value = cat.id;
-                    opt.textContent = cat.name;
-                    opt.dataset.type = cat.type;
-                    sel.appendChild(opt);
-                });
-                sel.value = val;
-            });
-            this.filterCategoriesByType('category', this.currentTransactionType);
-            const typeFilter = document.getElementById('typeFilter');
-            if (typeFilter) this.filterCategoriesByType('categoryFilter', typeFilter.value);
+populateCategorySelects() {
+    const self = this;
+    
+    // Popula 3 selects: category, editCategory, categoryFilter
+    ['category', 'editCategory', 'categoryFilter'].forEach((id, i) => {
+        const sel = document.getElementById(id);
+        if (!sel) {
+            console.warn('Select não encontrado:', id);
+            return;
         }
-
+        
+        const val = sel.value;
+        
+        // Define o texto inicial
+        if (i === 2) {
+            // categoryFilter (filtro do histórico)
+            sel.innerHTML = '<option value="">Todas as categorias</option>';
+        } else {
+            // category e editCategory (modais)
+            sel.innerHTML = '<option value="">Selecione uma categoria...</option>';
+        }
+        
+        // Adiciona TODAS as categorias
+        console.log(`Populando ${id} com ${self.categories.length} categorias`);
+        self.categories.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat.id;
+            opt.textContent = cat.name;
+            opt.dataset.type = cat.type; // 'expense' ou 'income'
+            sel.appendChild(opt);
+        });
+        
+        // Restaura valor selecionado
+        sel.value = val;
+    });
+    
+    // Filtra por tipo (despesa/receita)
+    this.filterCategoriesByType('category', this.currentTransactionType);
+    const typeFilter = document.getElementById('typeFilter');
+    if (typeFilter) {
+        this.filterCategoriesByType('categoryFilter', typeFilter.value);
+    }
+    
+    console.log('✅ Categorias populadas:', this.categories.length);
+}
         populatePaymentMethodSelects() {
             const self = this;
             ['paymentMethod', 'editPaymentMethod'].forEach(id => {
