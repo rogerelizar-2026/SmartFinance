@@ -217,8 +217,6 @@
                 }
         } catch(e){}
     }
-            } catch(e){}
-        }
 
         setDefaultDate() {
             const el = document.getElementById('date');
