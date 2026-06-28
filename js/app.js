@@ -255,14 +255,22 @@
             });
         }
 
-        getCardTransactionsForPeriod(cardId, startDate, closingDate) {
-            return this.transactions.filter(t => {
-                if (t.paymentMethod !== 'card:' + cardId || t.amount >= 0) return false;
-                const tDate = new Date(t.date + 'T00:00:00');
-                return tDate >= startDate && tDate <= closingDate;
-            });
-        }
-
+getCardTransactionsForPeriod(cardId, startDate, closingDate) {
+    // Normaliza as datas para comparar apenas o dia (sem horas)
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    
+    const end = new Date(closingDate);
+    end.setHours(23, 59, 59, 999);
+    
+    return this.transactions.filter(t => {
+        if (t.paymentMethod !== 'card:' + cardId) return false;
+        if (t.amount >= 0) return false; // Apenas despesas
+        
+        const tDate = new Date(t.date + 'T12:00:00'); // Meio-dia para evitar timezone
+        return tDate >= start && tDate <= end;
+    });
+}
         populateCategorySelects() {
             const self = this;
             ['category', 'editCategory', 'categoryFilter'].forEach((id, i) => {
