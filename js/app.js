@@ -276,7 +276,7 @@
  
     // ===== CLASSE PRINCIPAL =====
     class SmartWallet {
-constructor() {
+    constructor() {
     // ✅ CORREÇÃO: Inicializar currentMonth PRIMEIRO, antes de tudo
     this.currentMonth = new Date();
     this.currentMonth.setDate(1);
@@ -304,6 +304,7 @@ constructor() {
     // Carrega dados e inicializa
     this.loadData();
     this.init();
+}
 }
         loadData() {
             try {
