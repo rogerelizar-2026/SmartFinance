@@ -1306,6 +1306,7 @@ window.openNewInvestmentModal = function() {
     window.closeUpdateInvestmentModal = function() { document.getElementById('updateInvestmentModal').classList.remove('active'); };
     window.openManualModal = function() { document.getElementById('manualContent').innerHTML = manualHTML; document.getElementById('manualModal').classList.add('active'); document.getElementById('mainMenu').classList.remove('active'); };
     window.closeManualModal = function() { document.getElementById('manualModal').classList.remove('active'); };
+    window.printManual = function() { smartwallet.printManual(); };
     window.openTermsModal = function() { document.getElementById('disclaimerModal').classList.add('active'); initDisclaimer(); document.getElementById('mainMenu').classList.remove('active'); };
     window.openThanksModal = function() { document.getElementById('thanksModal').classList.add('active'); document.getElementById('mainMenu').classList.remove('active'); };
     window.closeThanksModal = function() { document.getElementById('thanksModal').classList.remove('active'); };
