@@ -1202,7 +1202,7 @@ renderAccountsList() {
     this.showToast(id ? 'Aplicação atualizada!' : 'Aplicação cadastrada!'); 
 }
 
-    window.smartwallet = new SmartWallet();
+    // window.smartwallet = new SmartWallet();
     window.selectTransactionType = function(t) { smartwallet.currentTransactionType = t; document.querySelectorAll('#transactionForm .type-btn').forEach(btn => { const isActive = btn.getAttribute('data-type') === t; btn.classList.toggle('active', isActive); btn.setAttribute('aria-checked', isActive); }); smartwallet.filterCategoriesByType('category', t); };
     window.selectEditType = function(t) { smartwallet.currentEditType = t; document.querySelectorAll('#editForm .type-btn').forEach(btn => { const isActive = btn.getAttribute('data-type') === t; btn.classList.toggle('active', isActive); btn.setAttribute('aria-checked', isActive); }); smartwallet.filterCategoriesByType('editCategory', t); };
 
