@@ -130,11 +130,11 @@
         <div class="toolbar">
             <div class="toolbar-row">
                 <div class="month-selector" role="navigation" aria-label="Navegação de meses">
-                    <button onclick="smartwallet.changeMonth(-1)" aria-label="Mês anterior">
+                    <button onclick="mywallet.changeMonth(-1)" aria-label="Mês anterior">
                         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
                     <div class="current-month" id="currentMonth" aria-live="polite">Janeiro 2026</div>
-                    <button onclick="smartwallet.changeMonth(1)" aria-label="Próximo mês">
+                    <button onclick="mywallet.changeMonth(1)" aria-label="Próximo mês">
                         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
@@ -182,7 +182,7 @@
                             <span>Importar CSV</span>
                         </button>
                         <div class="dropdown-divider" role="separator"></div>
-                        <button class="dropdown-item" role="menuitem" onclick="smartwallet.exportBackup()">
+                        <button class="dropdown-item" role="menuitem" onclick="mywallet.exportBackup()">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                             <span>Backup (JSON)</span>
                         </button>
@@ -302,7 +302,7 @@
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <form id="transactionForm" onsubmit="event.preventDefault(); smartwallet.addTransaction();">
+            <form id="transactionForm" onsubmit="event.preventDefault(); mywallet.addTransaction();">
                 <div class="form-group">
                     <label>Tipo</label>
                     <div class="type-selector" role="radiogroup" aria-label="Tipo de transação">
@@ -381,7 +381,7 @@
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <form id="editForm" onsubmit="event.preventDefault(); smartwallet.updateTransaction();">
+            <form id="editForm" onsubmit="event.preventDefault(); mywallet.updateTransaction();">
                 <input type="hidden" id="editId">
                 <div class="form-group">
                     <label>Tipo</label>
@@ -446,7 +446,7 @@
                 </div>
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-primary">💾 Salvar</button>
-                    <button type="button" class="btn btn-danger" onclick="smartwallet.deleteFromEdit()">🗑️ Excluir</button>
+                    <button type="button" class="btn btn-danger" onclick="mywallet.deleteFromEdit()">🗑️ Excluir</button>
                     <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
                 </div>
             </form>
@@ -463,8 +463,8 @@
                 </button>
             </div>
             <div class="action-buttons" style="flex-direction:column;gap:12px;">
-                <button class="btn btn-primary" onclick="smartwallet.exportCSV()">📥 Baixar CSV</button>
-                <button class="btn btn-secondary" onclick="smartwallet.printExtratoPDF()">️ Imprimir / PDF</button>
+                <button class="btn btn-primary" onclick="mywallet.exportCSV()">📥 Baixar CSV</button>
+                <button class="btn btn-secondary" onclick="mywallet.printExtratoPDF()">️ Imprimir / PDF</button>
             </div>
         </div>
     </div>
@@ -519,7 +519,7 @@
                 </div>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="smartwallet.importCSV()">📥 Importar</button>
+                <button class="btn btn-primary" onclick="mywallet.importCSV()">📥 Importar</button>
                 <button class="btn btn-secondary" onclick="closeImportCsvModal()">Cancelar</button>
             </div>
         </div>
@@ -543,7 +543,7 @@
                 </label>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="smartwallet.importBackup()">📂 Restaurar</button>
+                <button class="btn btn-primary" onclick="mywallet.importBackup()">📂 Restaurar</button>
                 <button class="btn btn-secondary" onclick="closeImportBackupModal()">Cancelar</button>
             </div>
         </div>
@@ -573,7 +573,7 @@
                 <p class="font-semibold mb-16">Digite <strong style="color:var(--danger-color);">LIMPAR</strong> para confirmar</p>
                 <input type="text" class="confirm-input" id="clearConfirmInput" placeholder="LIMPAR" oninput="checkClearConfirm()" aria-label="Digite LIMPAR para confirmar">
                 <div class="action-buttons" style="margin-top:16px;">
-                    <button class="btn btn-danger-full" id="finalClearBtn" onclick="smartwallet.clearAllData()" disabled style="opacity:0.5;">🗑️ Apagar Tudo</button>
+                    <button class="btn btn-danger-full" id="finalClearBtn" onclick="mywallet.clearAllData()" disabled style="opacity:0.5;">🗑️ Apagar Tudo</button>
                     <button class="btn btn-secondary" onclick="closeClearDataModal()">Cancelar</button>
                 </div>
             </div>
@@ -606,7 +606,7 @@
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <form id="accountForm" onsubmit="event.preventDefault(); smartwallet.saveAccount();">
+            <form id="accountForm" onsubmit="event.preventDefault(); mywallet.saveAccount();">
                 <input type="hidden" id="accountEditId">
                 <div class="form-group">
                     <label for="accountName">Nome da Conta</label>
@@ -676,7 +676,7 @@
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <form id="cardForm" onsubmit="event.preventDefault(); smartwallet.saveCard();">
+            <form id="cardForm" onsubmit="event.preventDefault(); mywallet.saveCard();">
                 <input type="hidden" id="cardEditId">
                 <div class="form-group">
                     <label for="cardName">Nome</label>
@@ -776,7 +776,7 @@
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <form id="investmentForm" onsubmit="event.preventDefault(); smartwallet.saveInvestment();">
+            <form id="investmentForm" onsubmit="event.preventDefault(); mywallet.saveInvestment();">
                 <input type="hidden" id="investmentEditId">
                 <div class="form-group">
                     <label for="investmentName">Nome da Aplicação</label>
@@ -841,7 +841,7 @@
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <form id="updateInvestmentForm" onsubmit="event.preventDefault(); smartwallet.updateInvestmentValue();">
+            <form id="updateInvestmentForm" onsubmit="event.preventDefault(); mywallet.updateInvestmentValue();">
                 <input type="hidden" id="updateInvestmentId">
                 <div class="form-group">
                     <label>Aplicação</label>
@@ -889,8 +889,8 @@
                 </button>
             </div>
             <div class="thanks-icon" aria-hidden="true">☕</div>
-            <h3 class="thanks-title">Obrigado por Usar o Smart Wallet!</h3>
-            <p style="font-size:1.1rem;line-height:1.8;margin-bottom:30px;text-align:center;">Se o Smart Wallet tem sido útil, que tal me pagar um cafezinho?</p>
+            <h3 class="thanks-title">Obrigado por Usar o My Wallet!</h3>
+            <p style="font-size:1.1rem;line-height:1.8;margin-bottom:30px;text-align:center;">Se o My Wallet tem sido útil, que tal me pagar um cafezinho?</p>
             <div class="pix-section">
                 <div style="font-size:1.3rem;font-weight:700;color:var(--success-color);margin-bottom:12px;">💚 Doação via PIX</div>
                 <p style="margin-bottom:12px;">Qualquer valor é bem-vindo!</p>
@@ -899,7 +899,7 @@
             </div>
             <div style="margin-top:30px;padding-top:20px;border-top:1px solid var(--border-color);text-align:center;">
                 <h3 style="margin-bottom:12px;">💬 Feedback</h3>
-                <a href="mailto:rogerelizar@gmail.com?subject=Feedback%20Smart%20Wallet" class="btn btn-primary">✉️ Enviar Feedback</a>
+                <a href="mailto:rogerelizar@gmail.com?subject=Feedback%20My%20Wallet" class="btn btn-primary">✉️ Enviar Feedback</a>
             </div>
         </div>
     </div>
