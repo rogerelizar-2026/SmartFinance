@@ -768,59 +768,73 @@
         </div>
     </div>
 
-    <!-- MODAL NOVA APLICAÇÃO -->
-    <div class="modal" id="newInvestmentModal" role="dialog" aria-modal="true" aria-labelledby="newInvestmentTitle" aria-hidden="true">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="newInvestmentTitle">Nova Aplicação</h2>
-                <button class="modal-close" onclick="closeNewInvestmentModal()" aria-label="Fechar modal">
-                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <form id="investmentForm" onsubmit="event.preventDefault(); smartwallet.saveInvestment();">
-                <input type="hidden" id="investmentEditId">
-                <div class="form-group">
-                    <label for="investmentName">Nome da Aplicação</label>
-                    <input type="text" id="investmentName" required placeholder="Ex: CDB Banco XYZ">
-                </div>
-                <div class="form-group">
-                    <label for="investmentType">Tipo</label>
-                    <select id="investmentType" required>
-                        <option value="cdb">CDB</option>
-                        <option value="tesouro">Tesouro Direto</option>
-                        <option value="lci">LCI/LCA</option>
-                        <option value="fundo">Fundo de Investimento</option>
-                        <option value="acao">Ações</option>
-                        <option value="fiis">FIIs</option>
-                        <option value="poupanca">Poupança</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="investmentInitial">Valor Inicial (R$)</label>
-                        <input type="number" id="investmentInitial" step="0.01" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="investmentCurrent">Valor Atual (R$)</label>
-                        <input type="number" id="investmentCurrent" step="0.01" min="0" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="investmentDate">Data da Aplicação</label>
-                    <input type="date" id="investmentDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="investmentRate">Taxa de Rendimento (% ao ano)</label>
-                    <input type="number" id="investmentRate" step="0.01" min="0" placeholder="Ex: 10.5">
-                </div>
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeNewInvestmentModal()">Cancelar</button>
-                </div>
-            </form>
+<!-- MODAL NOVA APLICAÇÃO -->
+<div class="modal" id="newInvestmentModal" role="dialog" aria-modal="true" aria-labelledby="newInvestmentTitle" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="newInvestmentTitle">Nova Aplicação</h2>
+            <button class="modal-close" onclick="closeNewInvestmentModal()" aria-label="Fechar modal">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
         </div>
+        <form id="investmentForm" onsubmit="event.preventDefault(); smartwallet.saveInvestment();">
+            <input type="hidden" id="investmentEditId">
+            <div class="form-group">
+                <label for="investmentName">Nome da Aplicação</label>
+                <input type="text" id="investmentName" required placeholder="Ex: CDB Banco XYZ">
+            </div>
+            <div class="form-group">
+                <label for="investmentType">Tipo</label>
+                <select id="investmentType" required>
+                    <option value="cdb">CDB</option>
+                    <option value="tesouro">Tesouro Direto</option>
+                    <option value="lci">LCI/LCA</option>
+                    <option value="fundo">Fundo de Investimento</option>
+                    <option value="acao">Ações</option>
+                    <option value="fiis">FIIs</option>
+                    <option value="poupanca">Poupança</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+            
+            <!--  NOVO CAMPO: Conta de Investimento Vinculada -->
+            <div class="form-group">
+                <label for="investmentAccount">🏦 Conta de Investimento Vinculada</label>
+                <select id="investmentAccount">
+                    <option value="">-- Sem vínculo (criar nova automaticamente) --</option>
+                </select>
+                <div class="checkbox-group" style="margin-top:8px;">
+                    <input type="checkbox" id="createLinkedAccount" checked>
+                    <label for="createLinkedAccount">Criar conta investment automaticamente</label>
+                </div>
+            </div>
+            <!-- FIM NOVO CAMPO -->
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="investmentInitial">Valor Inicial (R$)</label>
+                    <input type="number" id="investmentInitial" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="investmentCurrent">Valor Atual (R$)</label>
+                    <input type="number" id="investmentCurrent" step="0.01" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="investmentDate">Data da Aplicação</label>
+                <input type="date" id="investmentDate" required>
+            </div>
+            <div class="form-group">
+                <label for="investmentRate">Taxa de Rendimento (% ao ano)</label>
+                <input type="number" id="investmentRate" step="0.01" min="0" placeholder="Ex: 10.5">
+            </div>
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeNewInvestmentModal()">Cancelar</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- MODAL ATUALIZAR VALOR -->
     <div class="modal" id="updateInvestmentModal" role="dialog" aria-modal="true" aria-labelledby="updateInvestmentTitle" aria-hidden="true">
