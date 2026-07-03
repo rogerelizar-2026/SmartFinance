@@ -1079,8 +1079,13 @@ const manualHTML = '<div class="manual-cover">' +
         clearDashboardHighlight() { document.querySelectorAll('.card.clickable').forEach(c => c.classList.remove('active-filter')); }
         setDefaultDate() { const el = document.getElementById('date'); if (el) el.value = new Date().toISOString().split('T')[0]; }
         changeMonth(delta) { this.currentMonth.setMonth(this.currentMonth.getMonth() + delta); this.updateMonthDisplay(); this.clearCache(); this.clearDashboardHighlight(); this.render(); this.updateCharts(); }
-        updateMonthDisplay() { const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; const el = document.getElementById('currentMonth'); if (el) el.textContent = months[this.currentMonth.getMonth()] + ' ' + this.currentMonth.getFullYear(); }
-        formatMonthYear(date) { if (!date || !(date instanceof Date)) date = this.currentMonth; return String(date.getMonth() + 1).padStart(2, '0') + '-' + date.getFullYear(); }
+        updateMonthDisplay() {
+    const months = this.t('months');
+    const el = document.getElementById('currentMonth');
+    if (el) {
+        el.textContent = months[this.currentMonth.getMonth()] + ' ' + this.currentMonth.getFullYear();
+    }
+}        formatMonthYear(date) { if (!date || !(date instanceof Date)) date = this.currentMonth; return String(date.getMonth() + 1).padStart(2, '0') + '-' + date.getFullYear(); }
         generateTimestamp() { const now = new Date(); const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const day = String(now.getDate()).padStart(2, '0'); const hours = String(now.getHours()).padStart(2, '0'); const minutes = String(now.getMinutes()).padStart(2, '0'); const seconds = String(now.getSeconds()).padStart(2, '0'); return 'SmartWallet-' + year + month + day + hours + minutes + seconds; }
         getMonthTransactions(date) {
             if (!date) date = this.currentMonth;
@@ -1828,19 +1833,19 @@ navigateInvoice(direction) {
     window.openNewInvestmentModal = function() { document.getElementById('investmentEditId').value = ''; document.getElementById('investmentForm').reset(); document.getElementById('investmentDate').value = new Date().toISOString().split('T')[0]; document.getElementById('newInvestmentTitle').textContent = 'Nova Aplicação'; const accountSelect = document.getElementById('investmentAccount'); accountSelect.innerHTML = '<option value="">-- Sem vínculo (criar nova automaticamente) --</option>'; smartwallet.accounts.filter(a => a.type === 'investment').forEach(acc => { const opt = document.createElement('option'); opt.value = acc.id; opt.textContent = acc.name + ' - ' + smartwallet.formatCurrency(acc.balance); accountSelect.appendChild(opt); }); document.getElementById('newInvestmentModal').classList.add('active'); };
     window.closeNewInvestmentModal = function() { document.getElementById('newInvestmentModal').classList.remove('active'); };
     window.closeUpdateInvestmentModal = function() { document.getElementById('updateInvestmentModal').classList.remove('active'); };
-window.openManualModal = function() { document.getElementById('manualContent').innerHTML = manualHTML; document.getElementById('manualModal').classList.add('active'); document.getElementById('infoMenu').classList.remove('active'); };
-window.closeWhatsNewModal = function() {
-    document.getElementById('whatsNewModal').classList.remove('active');
+	window.openManualModal = function() { document.getElementById('manualContent').innerHTML = manualHTML; document.getElementById('manualModal').classList.add('active'); document.getElementById('infoMenu').classList.remove('active'); };
+	window.closeWhatsNewModal = function() {
+    	document.getElementById('whatsNewModal').classList.remove('active');
 };
 
-window.printManualFromWhatsNew = function() {
+	window.printManualFromWhatsNew = function() {
     closeWhatsNewModal();
     setTimeout(() => {
         smartwallet.printManual();
     }, 300);
 };
 
-window.openManualFromWhatsNew = function() {
+	window.openManualFromWhatsNew = function() {
     closeWhatsNewModal();
     setTimeout(() => {
         openManualModal();
@@ -1927,7 +1932,7 @@ window.openManualFromWhatsNew = function() {
     window.startApp = function() { const quote = document.getElementById('quoteModal'); const main = document.getElementById('mainApp'); const fab = document.getElementById('fabBtn'); if (quote) { quote.classList.remove('active'); quote.style.display = 'none'; } if (main) main.style.display = 'block'; if (fab) fab.style.display = 'flex'; };
     function updatePrintDate() { const dateEl = document.getElementById('printDate'); if (dateEl) dateEl.textContent = 'Gerado em: ' + new Date().toLocaleString('pt-BR'); }
     window.addEventListener('load', () => { updatePrintDate(); const accepted = localStorage.getItem('smartwallet_disclaimer_accepted') === 'true'; const splash = document.getElementById('splashScreen'); const disclaimer = document.getElementById('disclaimerModal'); if (splash) { splash.style.display = 'flex'; splash.classList.remove('fade-out'); } setTimeout(() => { if (!accepted && disclaimer) { disclaimer.classList.add('active'); disclaimer.style.display = 'flex'; initDisclaimer(); } else { setTimeout(() => { if (splash) { splash.classList.add('fade-out'); setTimeout(() => { splash.style.display = 'none'; showQuoteModal(); }, 800); } }, 3000); } }, 3500); });
-
+	
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('mainMenu');
         const info = document.getElementById('infoMenu');
@@ -1937,6 +1942,29 @@ window.openManualFromWhatsNew = function() {
         const fab = document.getElementById('fabBtn');
         if (fabWrapper && !fabWrapper.contains(e.target) && fab.classList.contains('active')) toggleFab();
     });
+	window.toggleLanguage = function() {
+    const currentLang = smartwallet.getLanguage();
+    const newLang = currentLang === 'pt-BR' ? 'en-US' : 'pt-BR';
+    smartwallet.setLanguage(newLang);
+    
+    // Atualizar texto do botão
+    const langText = document.getElementById('languageText');
+    if (langText) {
+        langText.textContent = newLang === 'pt-BR' ? 'Idioma: Português' : 'Language: English';
+    }
+    
+    // Fechar menu
+    document.getElementById('mainMenu').classList.remove('active');
+};
+	// Aplicar idioma salvo
+this.applyLanguage();
+
+// Atualizar texto do botão de idioma
+const langText = document.getElementById('languageText');
+if (langText) {
+    const lang = this.getLanguage();
+    langText.textContent = lang === 'pt-BR' ? 'Idioma: Português' : 'Language: English';
+}
     document.addEventListener('keydown', (e) => { if (e.target.classList.contains('clickable') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.target.click(); } });
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then(reg => console.log('[SmartWallet] SW registrado:', reg.scope)).catch(err => console.log('[SmartWallet] SW falhou:', err)); }); }
 
