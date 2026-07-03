@@ -287,18 +287,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     font-weight: 500;
 }
 
-.header-nav-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-}
-
-.header-actions-group {
+/* Container dos 6 botões */
+.header-all-actions {
     display: flex;
     gap: 8px;
     align-items: center;
-    flex-shrink: 0;
+    flex-wrap: wrap;
 }
 
 .header-btn {
@@ -386,16 +380,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     white-space: nowrap;
 }
 
-.dollar-btn {
-    background: var(--gradient-primary) !important;
-    color: white !important;
-    border: none !important;
-}
-
-.dollar-btn:hover {
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
-}
-
 .alert-btn.has-alerts {
     animation: bell-ring 1.5s ease-in-out infinite;
 }
@@ -480,57 +464,46 @@ body.light .info-dropdown, body.light .dropdown-menu {
     .header-title { font-size: 1.25rem; }
     .header-subtitle { font-size: 0.72rem; }
 
+    /* Linha 1: Marca à esquerda, 6 botões à direita */
+    .header-brand {
+        order: 1;
+        flex: 1;
+    }
+
+    .header-all-actions {
+        order: 2;
+        justify-content: flex-end;
+        gap: 6px;
+    }
+
     .header-btn {
-        width: 36px; height: 36px;
+        width: 36px;
+        height: 36px;
         border-radius: 10px;
     }
 
     .header-btn .icon {
-        width: 17px; height: 17px;
+        width: 17px;
+        height: 17px;
     }
 
-    /* Linha 1: Marca + Sistema */
-    .header-brand { order: 1; }
-    .system-group { 
-        order: 2; 
-        align-self: flex-end; 
-        margin-top: -44px;
-        gap: 6px;
-    }
-
-    /* Linha 2: Nav + Financeiro (mesma linha) */
-    .header-nav-group { 
-        order: 3; 
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
+    /* Linha 2: Seletor de mês */
+    .header-month-nav {
+        order: 3;
+        width: 100%;
     }
 
     .month-selector {
-        flex: 1;
-        min-width: 0;
-        padding: 3px;
+        width: 100%;
     }
 
     .month-selector button {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
     }
 
     .current-month {
-        font-size: 0.85rem;
-        padding: 0 4px;
-    }
-
-    .financial-group {
-        gap: 6px;
-        flex-shrink: 0;
-    }
-
-    /* Linha 3: Preferências */
-    .preferences-group { 
-        order: 4;
-        gap: 6px;
+        font-size: 0.88rem;
     }
 }
 
@@ -542,58 +515,50 @@ body.light .info-dropdown, body.light .dropdown-menu {
         flex-direction: row;
         align-items: center;
         padding: 12px 24px;
-        gap: 16px;
+        gap: 20px;
         flex-wrap: nowrap;
     }
 
-    /* Título + Mês juntos à esquerda */
     .header-brand { 
         order: 1; 
         flex: 0 0 auto;
-        min-width: 180px;
+        min-width: 200px;
     }
 
-    .header-nav-group { 
+    .header-month-nav { 
         order: 2; 
         flex: 0 0 auto;
         max-width: 280px;
-        gap: 12px;
     }
 
-    /* Agrupar botões */
-    .preferences-group { 
+    .header-all-actions {
         order: 3;
-        gap: 6px;
-    }
-
-    .system-group { 
-        order: 4;
-        gap: 6px;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 8px;
     }
 
     .header-btn {
-        width: 40px; height: 40px;
+        width: 40px;
+        height: 40px;
     }
 
     .header-btn .icon {
-        width: 20px; height: 20px;
+        width: 20px;
+        height: 20px;
     }
 
-    /* Separador visual entre grupos */
-    .preferences-group::before {
+    /* Separadores visuais entre grupos */
+    .header-all-actions .dropdown-wrapper:nth-child(5)::before,
+    .header-all-actions .header-btn:nth-child(4)::before {
         content: '';
+        position: absolute;
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
         width: 1px;
         height: 24px;
         background: var(--border-color);
-        margin-right: 4px;
-    }
-
-    .system-group::before {
-        content: '';
-        width: 1px;
-        height: 24px;
-        background: var(--border-color);
-        margin-right: 4px;
     }
 }
 
