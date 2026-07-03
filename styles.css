@@ -253,7 +253,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     z-index: 10;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
 }
 
 .app-header::before {
@@ -263,13 +263,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     height: 3px;
     background: var(--gradient-primary);
     border-radius: 20px 20px 0 0;
-}
-
-/* --- Linha 1: Topo --- */
-.header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
 }
 
 .header-brand {
@@ -294,11 +287,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     font-weight: 500;
 }
 
-/* --- Botões Gerais --- */
+/* Navegação + Financeiro agrupados */
+.header-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Botões gerais */
 .header-actions-group {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .header-btn {
@@ -321,7 +323,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .header-btn:hover {
     transform: translateY(-2px);
     border-color: var(--primary-color);
-    background: var(--glass-bg);
 }
 
 .header-btn:active {
@@ -338,20 +339,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     fill: none;
 }
 
-/* --- Wrappers para Dropdowns --- */
+/* Wrappers para Dropdowns */
 .dropdown-wrapper {
     position: relative;
     z-index: 1000;
 }
 
-/* --- Linha 2: Meio --- */
-.header-middle {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
+/* Month selector */
 .month-selector {
     background: var(--input-bg);
     border: 1px solid var(--glass-border);
@@ -379,7 +373,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 .month-selector button:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .current-month {
@@ -391,15 +384,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     color: var(--text-primary);
 }
 
-/* Botões Específicos */
+/* Botões especiais */
 .dollar-btn {
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
+    background: var(--gradient-primary) !important;
+    color: white !important;
+    border: none !important;
 }
 
 .dollar-btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
 
@@ -433,7 +425,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 .alert-badge.visible { display: flex; }
 
-/* --- Dropdowns (Menu e Info) --- */
+/* Dropdowns */
 .info-dropdown, .dropdown-menu {
     position: absolute;
     top: calc(100% + 10px);
@@ -476,88 +468,61 @@ body.light .info-dropdown, body.light .dropdown-menu {
 .dropdown-item.danger:hover { background: rgba(239, 68, 68, 0.15); }
 .dropdown-divider { height: 1px; background: var(--border-color); margin: 6px 0; }
 
-/* --- Linha 3: Fundo --- */
-.header-bottom {
-    display: flex;
-    justify-content: flex-start;
-}
+/* ============================
+   RESPONSIVO
+   ============================ */
 
-/* ==========================================
-   RESPONSIVIDADE
-   ========================================== */
-
-/* MOBILE (Até 640px) */
+/* MOBILE (≤ 640px): 3 linhas empilhadas */
 @media (max-width: 640px) {
     .app-header {
         padding: 16px;
         gap: 14px;
     }
-    
+
     .header-title { font-size: 1.3rem; }
     .header-subtitle { font-size: 0.75rem; }
-    
+
     .header-btn {
         width: 38px; height: 38px;
         border-radius: 10px;
     }
-    
-    .header-middle {
-        flex-direction: column;
-        align-items: stretch;
+
+    .header-btn .icon {
+        width: 18px; height: 18px;
     }
-    
-    .financial-group {
-        justify-content: flex-end;
-    }
+
+    /* Linha 1: Marca + Sistema */
+    .header-brand { order: 1; }
+    .system-group { order: 2; align-self: flex-end; margin-top: -48px; }
+
+    /* Linha 2: Nav + Financeiro */
+    .header-nav-group { order: 3; flex-direction: column; align-items: stretch; }
+    .financial-group { justify-content: flex-end; }
+
+    /* Linha 3: Preferências */
+    .preferences-group { order: 4; }
 }
 
-/* ===== RESPONSIVO DESKTOP ===== */
+/* DESKTOP (> 640px): 1 linha horizontal */
 @media (min-width: 641px) {
     .app-header {
         flex-direction: row;
         align-items: center;
-        justify-content: space-between;
         padding: 12px 24px;
         gap: 20px;
-        flex-wrap: wrap;
     }
-    
-    /* Ordem no desktop: Título → Mês → Financeiro → Preferências → Sistema */
-    .header-top {
-        order: 1;
-        margin-bottom: 0;
-        flex: 0 0 auto;
-    }
-    
-    .header-middle {
-        order: 2;
-        margin-bottom: 0;
-        flex: 1;
-        max-width: 380px;
-    }
-    
-    .header-bottom {
-        order: 3;
-        flex: 0 0 auto;
-    }
-    
-    .system-group {
-        order: 4; /* Vai para o final no desktop */
-        flex: 0 0 auto;
-    }
-    
-    .header-actions-group {
-        gap: 10px;
-    }
-    
+
+    .header-brand { order: 1; flex: 0 0 auto; min-width: 200px; }
+    .header-nav-group { order: 2; flex: 1; max-width: 400px; width: auto; }
+    .preferences-group { order: 3; }
+    .system-group { order: 4; }
+
     .header-btn {
-        width: 44px;
-        height: 44px;
+        width: 44px; height: 44px;
     }
-    
+
     .header-btn .icon {
-        width: 22px;
-        height: 22px;
+        width: 22px; height: 22px;
     }
 }
 
