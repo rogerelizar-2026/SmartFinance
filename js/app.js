@@ -2147,9 +2147,14 @@
         }
 
         // ===== NOVO v4.4.0: MODO DEMONSTRAÇÃO =====
-        toggleDemoMode() {
+        async toggleDemoMode() {
             if (this.demoMode) {
-                if (confirm(this.t('confirmDemoClear'))) {
+                const confirmed = await showConfirm(
+                    '⚠️ Encerrar Demonstração?',
+                    this.t('confirmDemoClear')
+                );
+                
+                if (confirmed) {
                     this.clearAllData(true);
                     this.demoMode = false;
                     localStorage.setItem('smartwallet_demo', 'false');
@@ -2157,12 +2162,16 @@
                     this.showToast(this.t('demoCleared'));
                 }
             } else {
-                if (confirm(this.t('confirmDemoLoad'))) {
+                const confirmed = await showConfirm(
+                    '🎯 Carregar Demonstração?',
+                    this.t('confirmDemoLoad')
+                );
+                
+                if (confirmed) {
                     this.loadDemoData();
                 }
             }
         }
-
         loadDemoData() {
             // Contas
             this.accounts = [
@@ -3705,7 +3714,7 @@
         }
     }
 
-	    // ===== NOVO v4.5.0: MODAL DE CONFIRMAÇÃO =====
+    // ===== NOVO v4.5.0: MODAL DE CONFIRMAÇÃO =====
     
     /**
      * Substitui confirm() nativo por modal customizado
@@ -3752,6 +3761,9 @@
             setTimeout(() => newNoBtn.focus(), 100);
         });
     }
+
+    // Expor globalmente para uso em outros contextos
+    window.showConfirm = showConfirm;
 
     // Expor globalmente para uso em outros contextos
     window.showConfirm = showConfirm;
