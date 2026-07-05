@@ -2256,6 +2256,51 @@ body.modal-open .fab-wrapper {
     }
 }
 
+/* ===== MODAL DE CONFIRMAÇÃO (NOVO v4.5.0) ===== */
+#confirmModal .modal-content {
+    text-align: center;
+}
+
+#confirmModal .modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+#confirmModal .modal-header h2 {
+    font-size: 1.5rem;
+    color: var(--warning-color);
+}
+
+#confirmModal #confirmMessage {
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+#confirmModal .action-buttons {
+    justify-content: center;
+    gap: 16px;
+}
+
+#confirmModal .btn {
+    min-width: 120px;
+}
+
+/* Animação de entrada */
+#confirmModal.active .modal-content {
+    animation: confirmSlideIn 0.3s ease;
+}
+
+@keyframes confirmSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* ===== PRINT STYLES ===== */
 .print-header, .print-footer { display: none; }
 
