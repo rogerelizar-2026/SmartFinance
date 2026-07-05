@@ -730,15 +730,26 @@
         }
 
         // ===== NOVO v4.4.0: BADGE DEMO =====
+        // ===== NOVO v4.4.0: BADGE DEMO (ATUALIZADO v4.5.0) =====
         applyDemoBadge() {
             const badge = document.getElementById('demoBadge');
-            const btn = document.getElementById('demoBtn');
+            const infoDemoBtn = document.getElementById('infoDemoBtn');
+            const infoDemoText = document.getElementById('infoDemoText');
+            
+            // Atualiza badge no header
             if (badge) {
                 badge.style.display = this.demoMode ? 'inline-block' : 'none';
             }
-            if (btn) {
-                btn.classList.toggle('active', this.demoMode);
-                btn.title = this.demoMode ? 'Encerrar Demonstração' : 'Carregar Demonstração';
+            
+            // NOVO v4.5.0: Atualiza botão no menu Info
+            if (infoDemoBtn && infoDemoText) {
+                if (this.demoMode) {
+                    infoDemoText.textContent = '🔴 Encerrar Demonstração';
+                    infoDemoBtn.classList.add('demo-active');
+                } else {
+                    infoDemoText.textContent = '🎯 Modo Demonstração';
+                    infoDemoBtn.classList.remove('demo-active');
+                }
             }
         }
 
@@ -3785,6 +3796,12 @@
         smartwallet.filterCategoriesByType('category', t);
     };
 
+    // ===== NOVO v4.5.0: BOTÃO DEMO NO MENU INFO =====
+    window.toggleDemoMode = function() {
+        smartwallet.toggleDemoMode();
+        closeAllDropdowns();
+    };
+	
     window.selectEditType = function(t) {
         smartwallet.currentEditType = t;
         document.querySelectorAll('#editForm .type-btn').forEach(btn => {
