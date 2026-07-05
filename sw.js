@@ -1,5 +1,5 @@
-// Smart Wallet Service Worker v4.1.0
-const CACHE_NAME = 'smartwallet-v4.1.0';
+// Smart Wallet Service Worker v4.1.5
+const CACHE_NAME = 'smartwallet-v4.1.t';
 const OFFLINE_URL = '/index.html';
 
 const STATIC_ASSETS = [
