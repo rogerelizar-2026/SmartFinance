@@ -6,7 +6,7 @@
     --danger-color: #ef4444;
     --warning-color: #f59e0b;
     --info-color: #3b82f6;
-    --bg-color: #0a0e1a;
+    --bg-color: #0a0e1a;e
     --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
     --glass-bg: rgba(15, 23, 42, 0.7);
@@ -2415,4 +2415,30 @@ textarea:focus-visible {
     width: 16px;
     height: 16px;
     border-radius: 4px;
+}
+
+/* ===== BOTÃO DEMO NO MENU INFO (NOVO v4.5.0) ===== */
+.info-item.demo-active {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
+    border-left: 3px solid var(--danger-color);
+    padding-left: 11px;
+}
+
+.info-item.demo-active span {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.info-item.demo-active:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(245, 158, 11, 0.25) 100%);
+}
+
+.info-item#infoDemoBtn {
+    margin-top: 6px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+}
+
+.info-item#infoDemoBtn .icon {
+    color: var(--warning-color);
 }
