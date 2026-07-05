@@ -928,7 +928,9 @@ td {
     border-bottom: 1px solid var(--border-color);
 }
 
-.modal-header h2 { font-size: 1.3rem; color: var(--text-primary); }
+.modal-header h2 {
+    color: var(--primary-color);
+}
 
 .modal-close {
     background: var(--input-bg);
