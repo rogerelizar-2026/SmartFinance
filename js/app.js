@@ -831,10 +831,6 @@
             const menuBtn = document.getElementById('menuBtn');
             if (menuBtn) menuBtn.addEventListener('click', (e) => toggleMenu(e));
 
-            // NOVO v4.4.0: Botão Demo
-            const demoBtn = document.getElementById('demoBtn');
-            if (demoBtn) demoBtn.addEventListener('click', () => self.toggleDemoMode());
-
             // FAB
             const fabBtn = document.getElementById('fabBtn');
             if (fabBtn) fabBtn.addEventListener('click', () => toggleFab());
