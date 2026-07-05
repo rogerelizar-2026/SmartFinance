@@ -2442,3 +2442,23 @@ textarea:focus-visible {
 .info-item#infoDemoBtn .icon {
     color: var(--warning-color);
 }
+/* ===== CORREÇÃO: GARANTIR TEMA ESCURO ===== */
+body:not(.light) {
+    --text-primary: #e2e8f0 !important;
+    --text-secondary: #94a3b8 !important;
+    --bg-color: #0a0e1a !important;
+    --glass-bg: rgba(15, 23, 42, 0.7) !important;
+    --input-bg: rgba(30, 41, 59, 0.5) !important;
+}
+
+body:not(.light) .modal-content,
+body:not(.light) .info-dropdown,
+body:not(.light) .dropdown-menu,
+body:not(.light) .card,
+body:not(.light) .chart-card,
+body:not(.light) .transactions-section,
+body:not(.light) .form-group input,
+body:not(.light) .form-group select,
+body:not(.light) .form-group textarea {
+    color: var(--text-primary) !important;
+}
