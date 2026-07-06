@@ -3413,7 +3413,7 @@
             } catch (e) {
                 this.showToast('❌ Erro: ' + e.message);
             }
-
+		}
         // ===== SISTEMA DE ATUALIZAÇÃO =====
         checkVersionUpdate() {
             const CURRENT_VERSION = '4.4.0';
