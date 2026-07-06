@@ -86,6 +86,268 @@
         return 'fallback_' + Math.abs(hash).toString(16).padStart(8, '0');
     }
 
+    // ===== NOVO v4.5.0: CRIPTOGRAFIA AES-256-GCM =====
+    
+    /**
+     * Deriva chave AES-256 a partir de senha usando PBKDF2
+     * 100.000 iterações (padrão OWASP recomendado)
+     */
+    async function deriveKey(password, salt) {
+        const encoder = new TextEncoder();
+        const passwordBuffer = encoder.encode(password);
+        
+        // Importa senha como chave base
+        const baseKey = await window.crypto.subtle.importKey(
+            'raw',
+            passwordBuffer,
+            { name: 'PBKDF2' },
+            false,
+            ['deriveBits', 'deriveKey']
+        );
+        
+        // Deriva chave AES-256
+        return await window.crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: salt,
+                iterations: 100000,
+                hash: 'SHA-256'
+            },
+            baseKey,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt']
+        );
+    }
+
+    /**
+     * Criptografa dados com AES-256-GCM
+     * Retorna objeto com: salt, iv, ciphertext (todos em base64)
+     */
+    async function encryptData(plaintext, password) {
+        const encoder = new TextEncoder();
+        const dataBuffer = encoder.encode(plaintext);
+        
+        // Gera salt e IV aleatórios
+        const salt = window.crypto.getRandomValues(new Uint8Array(16));
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        
+        // Deriva chave
+        const key = await deriveKey(password, salt);
+        
+        // Criptografa
+        const ciphertext = await window.crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            dataBuffer
+        );
+        
+        // Converte para base64 para armazenamento JSON
+        return {
+            version: 1,
+            algorithm: 'AES-GCM-256',
+            kdf: 'PBKDF2-SHA256',
+            iterations: 100000,
+            salt: bufferToBase64(salt),
+            iv: bufferToBase64(iv),
+            ciphertext: bufferToBase64(new Uint8Array(ciphertext))
+        };
+    }
+
+    /**
+     * Descriptografa dados com AES-256-GCM
+     * Lança erro se senha incorreta ou dados corrompidos
+     */
+    async function decryptData(encryptedObj, password) {
+        if (!encryptedObj || encryptedObj.version !== 1) {
+            throw new Error('Formato de criptografia inválido');
+        }
+        
+        const salt = base64ToBuffer(encryptedObj.salt);
+        const iv = base64ToBuffer(encryptedObj.iv);
+        const ciphertext = base64ToBuffer(encryptedObj.ciphertext);
+        
+        // Deriva chave
+        const key = await deriveKey(password, salt);
+        
+        try {
+            const decrypted = await window.crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: iv },
+                key,
+                ciphertext
+            );
+            
+            const decoder = new TextDecoder();
+            return decoder.decode(decrypted);
+        } catch (e) {
+            throw new Error('Senha incorreta ou dados corrompidos');
+        }
+    }
+
+    /**
+     * Converte ArrayBuffer/Uint8Array para base64
+     */
+    function bufferToBase64(buffer) {
+        const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+
+    /**
+     * Converte base64 para Uint8Array
+     */
+    function base64ToBuffer(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    /**
+     * Verifica se Web Crypto API está disponível
+     */
+    function isCryptoSupported() {
+        return !!(window.crypto && window.crypto.subtle && window.crypto.getRandomValues);
+    }
+
+    /**
+     * Modal de senha - Retorna Promise<string|null>
+     * mode: 'encrypt' (com confirmação) ou 'decrypt' (sem confirmação)
+     */
+    function showPasswordModal(mode = 'encrypt', message = '') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('passwordModal');
+            const titleEl = document.getElementById('passwordModalTitle');
+            const messageEl = document.getElementById('passwordMessage');
+            const passwordInput = document.getElementById('passwordInput');
+            const confirmInput = document.getElementById('confirmPasswordInput');
+            const confirmBtn = document.getElementById('passwordConfirmBtn');
+            const strengthEl = document.getElementById('passwordStrength');
+            
+            if (!modal || !isCryptoSupported()) {
+                resolve(null);
+                return;
+            }
+            
+            // Configura modo
+            if (mode === 'decrypt') {
+                modal.classList.add('decrypt-mode');
+                titleEl.textContent = '🔓 Backup Criptografado';
+                messageEl.textContent = message || 'Digite a senha para descriptografar o backup:';
+                confirmBtn.textContent = 'Descriptografar';
+            } else {
+                modal.classList.remove('decrypt-mode');
+                titleEl.textContent = '🔒 Criptografar Backup';
+                messageEl.textContent = message || 'Crie uma senha forte para proteger seu backup:';
+                confirmBtn.textContent = 'Criptografar';
+            }
+            
+            // Limpa campos
+            passwordInput.value = '';
+            confirmInput.value = '';
+            strengthEl.innerHTML = '';
+            
+            // Clona botões para remover listeners antigos
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            // Medidor de força da senha
+            passwordInput.addEventListener('input', () => {
+                updatePasswordStrength(passwordInput.value, strengthEl);
+            });
+            
+            // Enter submete
+            const handleEnter = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    newConfirmBtn.click();
+                }
+            };
+            passwordInput.addEventListener('keydown', handleEnter);
+            confirmInput.addEventListener('keydown', handleEnter);
+            
+            // Listener do botão
+            newConfirmBtn.addEventListener('click', () => {
+                const password = passwordInput.value;
+                
+                if (!password || password.length < 4) {
+                    showToast('❌ Senha muito curta (mínimo 4 caracteres)');
+                    passwordInput.focus();
+                    return;
+                }
+                
+                if (mode === 'encrypt') {
+                    if (password !== confirmInput.value) {
+                        showToast('❌ Senhas não conferem');
+                        confirmInput.focus();
+                        return;
+                    }
+                }
+                
+                closeModal('passwordModal');
+                resolve(password);
+            });
+            
+            // Listener do botão cancelar
+            const cancelBtn = modal.querySelector('[data-close-modal="passwordModal"]');
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+            newCancelBtn.addEventListener('click', () => {
+                closeModal('passwordModal');
+                resolve(null);
+            });
+            
+            // Abre o modal
+            openModal('passwordModal');
+            setTimeout(() => passwordInput.focus(), 100);
+        });
+    }
+
+    /**
+     * Atualiza medidor visual de força da senha
+     */
+    function updatePasswordStrength(password, container) {
+        if (!password) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        
+        let strength, label, cssClass;
+        if (score <= 2) {
+            strength = 'weak';
+            label = 'Fraca';
+            cssClass = 'weak';
+        } else if (score <= 3) {
+            strength = 'medium';
+            label = 'Média';
+            cssClass = 'medium';
+        } else {
+            strength = 'strong';
+            label = 'Forte';
+            cssClass = 'strong';
+        }
+        
+        container.innerHTML = `
+            <div class="password-strength-bar ${cssClass}"></div>
+            <div class="password-strength-text ${cssClass}">Força: ${label}</div>
+        `;
+    }
+
+    // Expor globalmente
+    window.showPasswordModal = showPasswordModal;
+	
     async function verifyIntegrity(data, expectedChecksum) {
         if (!expectedChecksum) return { valid: true, warning: 'Sem checksum' };
         const actual = await computeChecksum(data);
@@ -2837,7 +3099,90 @@
 
         exportBackup() {
             if (this.isSaving) return;
+            
+            // Pergunta ao usuário se quer criptografar
+            showConfirm(
+                '💾 Tipo de Backup',
+                'Deseja proteger seu backup com senha?<br><br>' +
+                '<strong>✅ Sim (Recomendado):</strong> Backup criptografado com AES-256. Você precisará da senha para restaurar.<br><br>' +
+                '<strong>❌ Não:</strong> Backup em texto puro. Mais fácil de restaurar, mas qualquer pessoa com acesso ao arquivo poderá ver seus dados.'
+            ).then(wantEncryption => {
+                if (wantEncryption === null || wantEncryption === undefined) return;
+                
+                if (wantEncryption) {
+                    this.exportBackupEncrypted();
+                } else {
+                    this.exportBackupPlain();
+                }
+            });
+        }
+
+        async exportBackupEncrypted() {
+            if (!isCryptoSupported()) {
+                this.showToast('❌ Seu navegador não suporta criptografia');
+                return;
+            }
+            
+            const password = await showPasswordModal('encrypt');
+            if (!password) return; // Usuário cancelou
+            
+            if (this.isSaving) return;
             this.isSaving = true;
+            
+            try {
+                // Monta objeto de backup
+                const backup = {
+                    version: '4.5.0',
+                    dataVersion: DATA_VERSION,
+                    exportDate: new Date().toISOString(),
+                    appName: 'Smart Wallet',
+                    language: this.getLanguage(),
+                    currency: this.getCurrency(),
+                    transactions: this.transactions,
+                    categories: this.categories,
+                    accounts: this.accounts,
+                    cards: this.cards,
+                    investments: this.investments,
+                    darkMode: this.darkMode,
+                    privacyOn: this.privacyOn,
+                    settings: this.settings
+                };
+                
+                // Criptografa
+                const plaintext = JSON.stringify(backup);
+                const encrypted = await encryptData(plaintext, password);
+                
+                // Monta arquivo final com header mágico
+                const finalBackup = {
+                    magic: 'SWENCRYPTED',  // Header para detecção automática
+                    version: 1,
+                    created: new Date().toISOString(),
+                    encrypted: encrypted
+                };
+                
+                const jsonString = JSON.stringify(finalBackup, null, 2);
+                const blob = new Blob(['\ufeff' + jsonString], { type: 'application/json;charset=utf-8' });
+                const fileName = this.generateTimestamp() + '_backup_encrypted.json';
+                
+                saveFileWithPicker(blob, fileName, 'application/json').then(result => {
+                    if (result === 'saved' || result === 'downloaded') {
+                        localStorage.setItem('smartwallet_last_backup', Date.now().toString());
+                        this.showToast('🔒 Backup criptografado com sucesso!');
+                        this.updateSettingsUI();
+                    }
+                }).catch(e => this.showToast('❌ ' + e.message))
+                .finally(() => { this.isSaving = false; });
+                
+            } catch (e) {
+                this.isSaving = false;
+                this.showToast('❌ Erro ao criptografar: ' + e.message);
+            }
+        }
+
+        exportBackupPlain() {
+            if (this.isSaving) return;
+            this.isSaving = true;
+            
             try {
                 const backup = {
                     version: '4.5.0',
@@ -2856,7 +3201,6 @@
                     settings: this.settings
                 };
                 
-                // NOVO v4.5.0: Calcular checksum ANTES de stringificar
                 computeChecksum(backup).then(checksum => {
                     backup.checksum = checksum;
                     const jsonString = JSON.stringify(backup, null, 2);
@@ -2866,14 +3210,14 @@
                     saveFileWithPicker(blob, fileName, 'application/json').then(result => {
                         if (result === 'saved' || result === 'downloaded') {
                             localStorage.setItem('smartwallet_last_backup', Date.now().toString());
-                            this.showToast('✅ ' + this.t('backupExported'));
+                            this.showToast('✅ Backup exportado!');
                             this.updateSettingsUI();
                         }
                     }).catch(e => this.showToast('❌ ' + e.message))
                     .finally(() => { this.isSaving = false; });
                 }).catch(e => {
                     this.isSaving = false;
-                    this.showToast('❌ Erro ao gerar backup: ' + e.message);
+                    this.showToast('❌ Erro: ' + e.message);
                 });
             } catch (e) {
                 this.isSaving = false;
