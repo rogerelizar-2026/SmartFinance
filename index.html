@@ -134,10 +134,6 @@
                             <button class="info-item" data-action="openManualModal"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Manual do Usuário</span></button>
                             <button class="info-item" data-action="openTermsModal"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Termos de Uso</span></button>
                             <button class="info-item" data-action="openThanksModal"><svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Apoie o Projeto</span></button>
-                            <button class="info-item" data-action="toggleDemoMode" id="infoDemoBtn">
-                                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                                <span id="infoDemoText">Modo Demonstração</span>
-                            </button>
                         </div>
                     </div>
                     <div class="dropdown-wrapper">
@@ -149,7 +145,7 @@
                             <div class="dropdown-divider"></div>
                             <button class="dropdown-item" data-action="openAccountsModal"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span>Minhas Contas</span></button>
                             <button class="dropdown-item" data-action="openCreditCardsModal"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span>Meus Cartões</span></button>
-                            <button class="dropdown-item" data-action="openInvestmentsModal"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg><span>Aplicações</span></button>
+                            <button class="dropdown-item" data-action="openInvestmentsModal"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg><span>Acompanhamento de Aplicações</span></button>
                             <div class="dropdown-divider"></div>
                             <button class="dropdown-item" data-action="openCategoryBudgetModal"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg><span>Orçamento por Categoria</span></button>
                             <div class="dropdown-divider"></div>
@@ -161,7 +157,6 @@
                             <button class="dropdown-item" data-action="toggleLanguage"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span id="languageText">Idioma: Português</span></button>
                             <button class="dropdown-item" data-action="toggleCurrency" id="currencyMenuItem" style="display:none;"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span id="currencyText">Currency: $</span></button>
                             <button class="dropdown-item" data-action="openSettingsModal"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Configurações</span></button>
-                            <button class="dropdown-item" data-action="enableNotifications"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg><span id="notificationsText">Ativar Notificações</span></button>
                             <div class="dropdown-divider"></div>
                             <button class="dropdown-item danger" data-action="openClearDataModal"><svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Limpar Dados</span></button>
                         </div>
@@ -231,13 +226,13 @@
                 <svg class="empty-state-icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
                 <h3>Nenhuma transação encontrada</h3>
                 <p>Comece adicionando sua primeira transação!</p>
-                <button class="btn btn-primary" id="loadDemoFromEmptyBtn" style="margin-top:16px;">Carregar Demonstração</button>
+                <button class="btn btn-primary" id="loadDemoFromEmptyBtn" style="margin-top:16px;">🎯 Carregar Demonstração</button>
             </div>
         </div>
 
         <div class="charts-section" id="investmentsChartSection">
             <div class="chart-card" style="grid-column: 1 / -1;">
-                <h3>📊 Aplicações</h3>
+                <h3>📊 Acompanhamento de Aplicações</h3>
                 <div class="chart-container" style="height: 400px;"><canvas id="investChart"></canvas></div>
                 <div id="investSummary" style="margin-top: 20px;"></div>
             </div>
@@ -423,20 +418,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação Customizado (NOVO v4.5.0) -->
-    <div class="modal" id="confirmModal" role="dialog" aria-modal="true" tabindex="-1">
-        <div class="modal-content" tabindex="0" style="max-width: 450px;">
-            <div class="modal-header">
-                <h2 id="confirmTitle">⚠️ Confirmação</h2>
-            </div>
-            <div id="confirmMessage" style="padding: 20px 0; line-height: 1.6;"></div>
-            <div class="action-buttons">
-                <button class="btn btn-primary" id="confirmYesBtn">Confirmar</button>
-                <button class="btn btn-secondary" id="confirmNoBtn">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Modal Limpar -->
     <div class="modal danger-modal" id="clearDataModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -663,7 +644,7 @@
         </div>
     </div>
 
-    <!-- Modal Configurações (NOVO v4.4.0) -->
+    <!-- Modal Configurações -->
     <div class="modal" id="settingsModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
             <div class="modal-header"><h2>⚙️ Configurações</h2><button class="modal-close" data-close-modal="settingsModal"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
@@ -708,26 +689,6 @@
                         <div class="settings-description" id="lastBackupDate">Nunca realizado</div>
                     </div>
                     <button class="btn btn-secondary btn-small" id="doBackupNowBtn">Fazer Agora</button>
-                </div>
-            </div>
-            <div class="settings-section">
-                <h3>🔔 Notificações</h3>
-                <div class="settings-item">
-                    <div class="settings-info">
-                        <div class="settings-label">Notificações de contas a vencer</div>
-                        <div class="settings-description">Receba alertas de contas vencendo em 3 dias</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notifyBills" disabled>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <div class="settings-info">
-                        <div class="settings-label">Status atual</div>
-                        <div class="settings-description" id="notificationsStatus">Não ativado</div>
-                    </div>
-                    <button class="btn btn-primary btn-small" id="requestNotificationsBtn">Ativar</button>
                 </div>
             </div>
             <div class="settings-section">
