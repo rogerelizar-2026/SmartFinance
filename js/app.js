@@ -2989,8 +2989,8 @@
                 this.updateAlertBadge(); this.renderBillsModal();
                 this.showToast('✅ Conta paga!');
             }
-        }}
-
+        }
+	
 	        // ===== INVESTIMENTOS =====
         updateInvestmentChart() {
             const section = document.getElementById('investmentsChartSection');
