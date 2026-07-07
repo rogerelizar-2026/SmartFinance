@@ -854,6 +854,11 @@ td {
     animation: fadeIn 0.3s ease;
 }
 
+/* CORREÇÃO v4.4.2: Modal ativo fica em primeiro plano */
+.modal-front {
+    z-index: 10000 !important;
+}
+
 .modal.active { display: flex; }
 
 .modal-backdrop {
