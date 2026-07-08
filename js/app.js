@@ -2723,3 +2723,655 @@
                 printWindow.print(); 
             }, 300);
         }
+                // ===== EXPORTAÇÕES =====
+        exportCSV() {
+            const mt = this.getMonthTransactions();
+            if (!mt.length) { this.showToast('❌ ' + this.t('noTransactions')); return; }
+            const self = this;
+            let csv = '\ufeff' + this.t('monthlyStatement') + '\n';
+            csv += this.t('period') + ': ' + this.formatMonthYear(this.currentMonth) + '\n\n';
+            csv += this.t('date') + ';' + this.t('description') + ';' + this.t('category') + ';' + this.t('type') + ';' + this.t('payment') + ';' + this.t('status') + ';' + this.t('value') + '\n';
+            mt.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(t => {
+                const c = self.getCategoryById(t.category);
+                const status = t.statusOk ? this.t('completed') : this.t('pending');
+                const payment = self.getPaymentMethodName(t.paymentMethod);
+                const type = t.amount > 0 ? this.t('income_singular') : this.t('expense_singular');
+                csv += t.date + ';"' + (t.description || '').replace(/"/g,'""') + '";"' + c.name + '";' + type + ';"' + payment + '";' + status + ';' + Math.abs(t.amount).toFixed(2) + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const fileName = this.generateTimestamp() + '_extrato_' + this.formatMonthYear(this.currentMonth) + '.csv';
+            saveFileWithPicker(blob, fileName, 'text/csv').then(result => {
+                if (result === 'saved' || result === 'downloaded') this.showToast('✅ ' + this.t('backupExported'));
+            }).catch(e => this.showToast('❌ ' + e.message));
+            closeModal('exportModal');
+        }
+
+        printExtratoPDF() {
+            const filtered = this.getFilteredTransactions();
+            if (!filtered.length) { this.showToast('❌ ' + this.t('noTransactions')); return; }
+            const months = this.getMonths();
+            const period = months[this.currentMonth.getMonth()] + ' ' + this.currentMonth.getFullYear();
+            let totalReceitas = 0, totalDespesas = 0;
+            const sorted = filtered.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+            sorted.forEach(t => { if (t.amount > 0) totalReceitas += t.amount; else totalDespesas += Math.abs(t.amount); });
+            const saldo = totalReceitas - totalDespesas;
+            const rowsHtml = sorted.map(t => {
+                const cat = this.getCategoryById(t.category);
+                const acc = this.getAccountById(t.accountId);
+                return '<tr><td>' + this.formatDate(t.date) + '</td><td>' + this.escapeHtml(t.description || '-') + '</td><td style="font-size:8pt;">' + this.escapeHtml(cat.name) + '</td><td>' + (acc ? this.escapeHtml(acc.name) : '-') + '</td><td>' + this.getPaymentMethodName(t.paymentMethod).replace(/^[^\s]+\s/, '') + '</td><td style="color:' + (t.statusOk ? '#10b981' : '#f59e0b') + ';font-weight:600;">' + (t.statusOk ? this.t('completed') : this.t('pending')) + '</td><td style="color:' + (t.amount >= 0 ? '#10b981' : '#ef4444') + ';font-weight:600;text-align:right;">' + this.formatCurrency(t.amount) + '</td></tr>';
+            }).join('');
+            const fileName = this.generateTimestamp() + '_extrato_' + period.replace(/ /g,'_') + '.pdf';
+            const html = '<!DOCTYPE html><html lang="' + this.getLanguage() + '"><head><meta charset="UTF-8"><title>' + fileName + '</title><style>@page{size:A4;margin:2cm;}body{font-family:Arial,sans-serif;color:#1e293b;padding:20px;max-width:900px;margin:0 auto;}.header{text-align:center;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:30px;}.header h1{color:#6366f1;font-size:28pt;margin:0 0 8px 0;}table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:9pt;}th{background:#6366f1;color:white;padding:10px 8px;text-align:left;font-weight:600;}td{padding:8px;border-bottom:1px solid #e5e7eb;}tr:nth-child(even){background:#f8fafc;}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px;}.summary-box{background:#f8fafc;border-radius:8px;padding:16px;text-align:center;border:2px solid #e5e7eb;}.summary-box .label{font-size:9pt;color:#64748b;text-transform:uppercase;margin-bottom:6px;}.summary-box .value{font-size:16pt;font-weight:bold;}.summary-box.receitas .value{color:#10b981;}.summary-box.despesas .value{color:#ef4444;}.summary-box.saldo .value{color:#6366f1;}.footer{margin-top:40px;padding-top:20px;border-top:2px solid #6366f1;text-align:center;font-size:9pt;color:#64748b;}.no-print{text-align:center;margin-top:24px;}@media print{body{padding:0;}.no-print{display:none;}}</style></head><body><div class="header"><h1>Smart Wallet</h1><p style="color:#64748b;">' + this.t('appSubtitle') + '</p><p style="color:#6366f1;font-size:14pt;font-weight:bold;margin:12px 0 0 0;">' + this.t('monthlyStatement') + ': ' + period + '</p></div><table><thead><tr><th>' + this.t('date') + '</th><th>' + this.t('description') + '</th><th>' + this.t('category') + '</th><th>' + this.t('account') + '</th><th>' + this.t('payment') + '</th><th>' + this.t('status') + '</th><th style="text-align:right;">' + this.t('value') + '</th></tr></thead><tbody>' + rowsHtml + '</tbody></table><div class="summary"><div class="summary-box receitas"><div class="label">' + this.t('income_plural') + '</div><div class="value">' + this.formatCurrency(totalReceitas) + '</div></div><div class="summary-box despesas"><div class="label">' + this.t('expense_plural') + '</div><div class="value">' + this.formatCurrency(totalDespesas) + '</div></div><div class="summary-box saldo"><div class="label">' + this.t('unifiedBalance') + '</div><div class="value">' + this.formatCurrency(saldo) + '</div></div></div><div class="footer"><p>Smart Wallet - ' + this.t('appSubtitle') + '</p><p style="font-weight:600;color:#6366f1;margin-top:6px;">Idealizado por RogerElizar™ | rogerelizar@gmail.com</p></div><div class="no-print"><button onclick="window.print()" style="background:#6366f1;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:11pt;cursor:pointer;">🖨️ ' + this.t('printPDF') + '</button></div></body></html>';
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) { this.showToast('⚠️ ' + this.t('allowPopups')); return; }
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.document.title = fileName;
+            setTimeout(() => { printWindow.focus(); printWindow.print(); }, 300);
+        }
+
+        exportBackup() {
+            if (this.isSaving) return;
+            this.isSaving = true;
+            try {
+                const backup = {
+                    version: '4.4.3', exportDate: new Date().toISOString(), appName: 'Smart Wallet', 
+                    language: this.getLanguage(), currency: this.getCurrency(), transactions: this.transactions,
+                    categories: this.categories, accounts: this.accounts, cards: this.cards,
+                    darkMode: this.darkMode, privacyOn: this.privacyOn, settings: this.settings
+                };
+                const jsonString = JSON.stringify(backup, null, 2);
+                const blob = new Blob(['\ufeff' + jsonString], { type: 'application/json;charset=utf-8' });
+                const fileName = this.generateTimestamp() + '_backup.json';
+                saveFileWithPicker(blob, fileName, 'application/json').then(result => {
+                    if (result === 'saved' || result === 'downloaded') {
+                        localStorage.setItem('smartwallet_last_backup', Date.now().toString());
+                        this.showToast('✅ ' + this.t('backupExported'));
+                        this.updateSettingsUI();
+                    }
+                }).catch(e => this.showToast('❌ ' + e.message)).finally(() => { this.isSaving = false; });
+            } catch (e) { this.isSaving = false; this.showToast('❌ Erro: ' + e.message); }
+        }
+
+        importBackup() {
+            if (!window._pendingBackupData) { this.showToast('⚠️ Selecione um arquivo'); return; }
+            try {
+                let cleanData = window._pendingBackupData;
+                if (cleanData.charCodeAt(0) === 0xFEFF) cleanData = cleanData.substring(1);
+                cleanData = cleanData.trim();
+                if (!cleanData) { this.showToast('⚠️ Arquivo vazio!'); return; }
+                const data = JSON.parse(cleanData);
+                if (!data || typeof data !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
+                if (!confirm('⚠️ Substituir TODOS os dados?')) return;
+                this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
+                this.categories = Array.isArray(data.categories) ? data.categories : this.categories;
+                this.accounts = Array.isArray(data.accounts) ? data.accounts : [];
+                this.cards = Array.isArray(data.cards) ? data.cards : [];
+                if (typeof data.darkMode === 'boolean') this.darkMode = data.darkMode;
+                if (typeof data.privacyOn === 'boolean') this.privacyOn = data.privacyOn;
+                if (data.settings) this.settings = { ...this.settings, ...data.settings };
+                if (typeof data.language === 'string') localStorage.setItem('smartwallet_language', data.language);
+                if (typeof data.currency === 'string') localStorage.setItem('smartwallet_currency', data.currency);
+                this.pageSize = this.settings.pageSize || 20;
+                this.clearCache(); this.saveTransactions(); this.saveCategories(); this.saveAccounts(); this.saveCards(); this.saveSettings();
+                localStorage.setItem('smartwallet_dark', this.darkMode); localStorage.setItem('smartwallet_privacy', this.privacyOn);
+                this.populateCategorySelects(); this.populatePaymentMethodSelects(); this.populateAccountSelects(); 
+                this.applyTheme(); this.applyPrivacy(); this.applyLanguage(); this.applyCurrency();
+                this.currentPage = 1; this.render(); this.updateCharts(); this.updateAlertBadge(); this.checkNegativeBalance();
+                closeModal('importBackupModal'); this.showToast('✅ Backup restaurado!'); window._pendingBackupData = null;
+            } catch (e) { this.showToast('⚠️ Erro: ' + e.message); }
+        }
+
+        importCSV() {
+            if (!window._pendingCsvData) { this.showToast('Selecione um arquivo CSV'); return; }
+            const replace = document.getElementById('csvReplaceData').checked;
+            const lines = window._pendingCsvData.split(/\r?\n/).filter(l => l.trim());
+            if (lines.length < 2) { this.showToast('CSV vazio ou inválido'); return; }
+            const header = lines[0].toLowerCase();
+            if (header.indexOf('data') === -1 || header.indexOf('valor') === -1) { this.showToast('Formato CSV inválido'); return; }
+            const transactionsToAdd = []; let skipped = 0;
+            for (let i = 1; i < lines.length; i++) {
+                const cols = this.parseCSVLine(lines[i]);
+                if (cols.length < 6) { skipped++; continue; }
+                const [date, desc, catName, tipo, payment, status, valor] = cols;
+                if (!date || !valor) { skipped++; continue; }
+                const category = this.findCategoryByName(catName);
+                const amount = parseFloat(valor.replace(',', '.'));
+                if (isNaN(amount)) { skipped++; continue; }
+                const signedAmount = tipo.toLowerCase().indexOf('despesa') !== -1 ? -Math.abs(amount) : Math.abs(amount);
+                let paymentMethod = 'pix';
+                const payLower = (payment || '').toLowerCase();
+                if (payLower.indexOf('pix') !== -1) paymentMethod = 'pix';
+                else if (payLower.indexOf('debit') !== -1 || payLower.indexOf('débito') !== -1) paymentMethod = 'debit';
+                else if (payLower.indexOf('auto') !== -1) paymentMethod = 'auto';
+                else if (payLower.indexOf('transf') !== -1) paymentMethod = 'transfer';
+                transactionsToAdd.push({ id: this.generateUniqueId(), date, amount: signedAmount, category: category ? category.id : '', description: desc, statusOk: status.toLowerCase().indexOf('conclu') !== -1, paymentMethod, accountId: '' });
+            }
+            if (replace) {
+                const m = this.currentMonth.getMonth(), y = this.currentMonth.getFullYear();
+                this.transactions = this.transactions.filter(t => { const d = new Date(t.date + 'T12:00:00'); return !(d.getMonth() === m && d.getFullYear() === y); });
+            }
+            this.transactions = this.transactions.concat(transactionsToAdd);
+            this.clearCache(); this.saveTransactions(); this.currentPage = 1; this.render(); this.updateCharts(); this.updateAlertBadge(); this.checkNegativeBalance();
+            closeModal('importCsvModal'); this.showToast(transactionsToAdd.length + ' transações importadas!' + (skipped > 0 ? ' (' + skipped + ' ignoradas)' : '')); window._pendingCsvData = null;
+        }
+
+        parseCSVLine(line) {
+            const result = []; let current = ''; let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const c = line[i];
+                if (c === '"') { if (inQuotes && line[i+1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } } 
+                else if (c === ';' && !inQuotes) { result.push(current.trim()); current = ''; } 
+                else { current += c; }
+            }
+            result.push(current.trim()); return result;
+        }
+
+        clearAllData(skipConfirm = false) {
+            if (!skipConfirm && !confirm('Tem certeza que deseja apagar todos os dados?')) return;
+            this.transactions = []; this.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+            this.accounts = []; this.cards = []; this.demoMode = false;
+            this.clearCache(); this.saveTransactions(); this.saveCategories(); this.saveAccounts(); this.saveCards();
+            localStorage.setItem('smartwallet_demo', 'false');
+            this.populateCategorySelects(); this.populatePaymentMethodSelects(); this.populateAccountSelects(); this.populateCardFilter();
+            this.currentPage = 1; this.render(); this.updateCharts(); this.updateAlertBadge(); this.applyDemoBadge();
+            const alert = document.getElementById('negativeBalanceAlert'); if (alert) alert.style.display = 'none';
+            closeModal('clearDataModal'); this.showToast('🗑️ Dados apagados!');
+        }
+
+        // ===== CONTAS =====
+        saveAccount() {
+            if (!this.validateForm([{ id: 'accountName', label: this.t('informName'), required: true }])) return;
+            const id = document.getElementById('accountEditId').value;
+            const name = document.getElementById('accountName').value.trim();
+            const type = document.getElementById('accountType').value;
+            const balance = parseFloat(document.getElementById('accountBalance').value) || 0;
+            const color = document.getElementById('accountColor').value;
+            if (id) { for (let i = 0; i < this.accounts.length; i++) { if (this.accounts[i].id === id) { this.accounts[i] = { id, name, type, balance, color }; break; } } } 
+            else { this.accounts.push({ id: this.generateUniqueId(), name, type, balance, color }); }
+            this.clearCache(); this.saveAccounts(); this.populateAccountSelects(); this.renderAccountsList(); this.render(); this.updateDashboard(); this.checkNegativeBalance();
+            closeModal('newAccountModal'); this.showToast(id ? '✅ Conta atualizada!' : '✅ Conta cadastrada!');
+        }
+
+        deleteAccount(id) {
+            if (!confirm('Excluir esta conta?')) return;
+            this.accounts = this.accounts.filter(a => a.id !== id);
+            this.clearCache(); this.saveAccounts(); this.populateAccountSelects(); this.renderAccountsList(); this.render(); this.updateDashboard(); this.checkNegativeBalance();
+            this.showToast('✅ Conta removida!');
+        }
+
+        editAccount(id) {
+            const acc = this.getAccountById(id); if (!acc) return;
+            document.getElementById('accountEditId').value = acc.id;
+            document.getElementById('accountName').value = acc.name;
+            document.getElementById('accountType').value = acc.type;
+            document.getElementById('accountBalance').value = acc.balance;
+            document.getElementById('accountColor').value = acc.color;
+            document.getElementById('newAccountTitle').textContent = 'Editar Conta';
+            openModal('newAccountModal');
+        }
+
+        renderAccountsList() {
+            const container = document.getElementById('accountsList'); if (!container) return;
+            if (!this.accounts.length) { container.innerHTML = '<div style="text-align:center; padding:40px 20px; color:var(--text-secondary);"><div style="font-size:3rem; margin-bottom:12px; opacity:0.5;">🏦</div><h3>Nenhuma conta cadastrada</h3></div>'; return; }
+            const self = this;
+            container.innerHTML = '<div class="accounts-grid">' + this.accounts.map(acc => {
+                let balanceClass = ''; if (acc.type === 'checking' && acc.balance < 0) balanceClass = 'negative-balance';
+                return '<div class="account-card ' + balanceClass + '" style="background:linear-gradient(135deg, ' + acc.color + ' 0%, ' + self.adjustColor(acc.color, -30) + ' 100%);" data-account-id="' + acc.id + '"><div class="account-card-actions"><button class="cc-action-btn edit-account-btn" data-account-id="' + acc.id + '">✏️</button><button class="cc-action-btn delete-account-btn" data-account-id="' + acc.id + '">🗑️</button></div><div class="account-card-header"><div class="account-card-type">' + (acc.type === 'checking' ? '💳 Conta Corrente' : '📈 Investimento') + '</div></div><div class="account-card-name">' + self.escapeHtml(acc.name) + '</div><div class="account-card-balance">' + self.formatCurrency(acc.balance) + '</div></div>';
+            }).join('') + '</div>';
+            container.querySelectorAll('.edit-account-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); self.editAccount(btn.dataset.accountId); }));
+            container.querySelectorAll('.delete-account-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); self.deleteAccount(btn.dataset.accountId); }));
+        }
+
+        // ===== BILLS =====
+        renderBillsModal() {
+            const container = document.getElementById('billsList'); if (!container) return;
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const in3Days = new Date(today); in3Days.setDate(in3Days.getDate() + 3);
+            const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+            const self = this;
+            const bills = this.transactions.filter(t => { if (t.statusOk || t.amount >= 0) return false; const tDate = new Date(t.date + 'T12:00:00'); return tDate <= in3Days; }).sort((a, b) => new Date(a.date) - new Date(b.date));
+            const closingAlerts = [];
+            this.cards.forEach(card => {
+                const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                const closingDay = Math.min(card.closingDay, lastDayOfMonth);
+                const closingDate = new Date(today.getFullYear(), today.getMonth(), closingDay); closingDate.setHours(0, 0, 0, 0);
+                if (closingDate.getTime() === tomorrow.getTime()) {
+                    // CORREÇÃO v4.4.3: XSS - escapar card.name
+                    closingAlerts.push({ card: card, closingDate: closingDate, message: 'O cartão ' + self.escapeHtml(card.name) + ' fecha amanhã!' });
+                }
+            });
+            if (bills.length === 0 && closingAlerts.length === 0) { container.innerHTML = '<div style="text-align:center; padding:40px 20px; color:var(--text-secondary);"><div style="font-size:3rem; margin-bottom:12px;">✅</div><h3>Nenhuma conta pendente!</h3></div>'; return; }
+            let total = 0; bills.forEach(b => total += Math.abs(b.amount));
+            let html = '';
+            if (closingAlerts.length > 0) {
+                html += '<div style="margin-bottom: 20px;"><h3 style="color: var(--accent-color); margin-bottom: 12px; font-size: 1.1rem;">🔔 Fechamento de Fatura</h3>';
+                closingAlerts.forEach(alert => {
+                    html += '<div class="bill-item closing-alert"><div class="bill-info"><div class="bill-desc">💳 ' + alert.message + '</div><div class="bill-meta"><span>📅 Fechamento: ' + self.formatDate(alert.closingDate.toISOString().split('T')[0]) + '</span></div></div><div style="display:flex; gap:4px;"><button class="btn btn-secondary btn-small view-card-btn">Ver Cartão</button></div></div>';
+                });
+                html += '</div>';
+            }
+            if (bills.length > 0) {
+                html += '<div style="background:var(--input-bg); border-radius:14px; padding:16px; margin-bottom:16px;"><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-color);"><span style="color:var(--text-secondary);">Total de contas</span><span style="font-weight:600;">' + bills.length + '</span></div><div style="display:flex; justify-content:space-between; padding:12px 0 0 0; margin-top:4px; border-top:2px solid var(--border-color); font-weight:700; font-size:1.1rem;"><span>Total a pagar</span><span style="color:var(--danger-color);">' + self.formatCurrency(total) + '</span></div></div>';
+                bills.forEach(bill => {
+                    const cat = self.getCategoryById(bill.category); const billDate = new Date(bill.date + 'T12:00:00');
+                    const diffDays = Math.round((billDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    let daysClass = 'warning', daysText = '', itemClass = '';
+                    if (diffDays < 0) { daysClass = 'overdue'; daysText = Math.abs(diffDays) + 'd atrasada'; itemClass = 'overdue'; } 
+                    else if (diffDays === 0) { daysClass = 'urgent'; daysText = 'Vence hoje'; itemClass = 'urgent'; } 
+                    else if (diffDays === 1) { daysClass = 'urgent'; daysText = 'Vence amanhã'; itemClass = 'urgent'; } 
+                    else { daysText = 'Em ' + diffDays + ' dias'; }
+                    html += '<div class="bill-item ' + itemClass + '"><div class="bill-info"><div class="bill-desc">' + self.escapeHtml(bill.description) + '<span class="bill-days ' + daysClass + '">' + daysText + '</span></div><div class="bill-meta"><span>📅 ' + self.formatDate(bill.date) + '</span><span style="color:' + cat.color + ';">● ' + self.escapeHtml(cat.name) + '</span></div></div><div class="bill-amount">' + self.formatCurrency(Math.abs(bill.amount)) + '</div><div style="display:flex; gap:4px;"><button class="btn btn-success btn-small mark-paid-btn" data-id="' + bill.id + '">✓</button><button class="btn btn-secondary btn-small edit-bill-btn" data-id="' + bill.id + '">✏️</button></div></div>';
+                });
+            }
+            container.innerHTML = html;
+            container.querySelectorAll('.view-card-btn').forEach(btn => btn.addEventListener('click', () => { openCreditCardsModal(); closeModal('billsModal'); }));
+            container.querySelectorAll('.mark-paid-btn').forEach(btn => btn.addEventListener('click', () => self.markBillAsPaid(btn.dataset.id)));
+            container.querySelectorAll('.edit-bill-btn').forEach(btn => btn.addEventListener('click', () => { self.editTransaction(btn.dataset.id); closeModal('billsModal'); }));
+        }
+
+        markBillAsPaid(id) {
+            const t = this.transactions.find(x => x.id === id);
+            if (t) { t.statusOk = true; this.clearCache(); this.saveTransactions(); this.render(); this.updateAlertBadge(); this.renderBillsModal(); this.showToast('✅ Conta paga!'); }
+        }
+
+        // ===== INVESTIMENTOS =====
+        updateInvestmentChart() {
+            const section = document.getElementById('investmentsChartSection'); if (!section) return;
+            const investmentAccounts = this.accounts.filter(a => a.type === 'investment');
+            if (!investmentAccounts.length) { section.style.display = 'none'; return; }
+            section.style.display = 'block';
+            const colors = this.getChartColors(); const now = new Date(); const monthsShort = this.getMonths('short');
+            const labels = []; const accountDatasets = []; const accountColors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+            for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); labels.push(monthsShort[d.getMonth()] + '/' + d.getFullYear()); }
+            investmentAccounts.forEach((acc, idx) => {
+                const color = acc.color || accountColors[idx % accountColors.length]; const balanceHistory = [];
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1); let futureOutflows = 0; let futureInflows = 0;
+                    this.transactions.forEach(t => { if (t.accountId !== acc.id) return; const tDate = new Date(t.date + 'T12:00:00'); if (tDate > d) { if (t.amount < 0) futureOutflows += Math.abs(t.amount); else futureInflows += t.amount; } });
+                    const balanceAtMonth = (parseFloat(acc.balance) || 0) - futureInflows + futureOutflows; balanceHistory.push(Math.max(0, balanceAtMonth));
+                }
+                accountDatasets.push({ label: acc.name, data: balanceHistory, borderColor: color, backgroundColor: color + '20', borderWidth: 2, fill: true, tension: 0.4 });
+            });
+            const totalData = labels.map((_, i) => accountDatasets.reduce((sum, ds) => sum + ds.data[i], 0));
+            if (this.charts.invest) this.charts.invest.destroy();
+            const canvas = document.getElementById('investChart'); if (!canvas) return;
+            this.charts.invest = new Chart(canvas.getContext('2d'), {
+                type: 'line', data: { labels, datasets: [...accountDatasets, { label: 'Total Aplicações', data: totalData, borderColor: '#1e293b', backgroundColor: 'rgba(30, 41, 59, 0.1)', borderWidth: 3, borderDash: [5, 5], fill: false, tension: 0.4, pointRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: colors.text } }, tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + smartwallet.formatCurrency(context.parsed.y); } } } }, scales: { y: { beginAtZero: true, ticks: { color: colors.textSecondary, callback: v => smartwallet.formatCurrency(v) }, grid: { color: colors.grid } }, x: { ticks: { color: colors.textSecondary }, grid: { color: colors.grid } } } }
+            });
+            const summaryEl = document.getElementById('investSummary');
+            if (summaryEl) {
+                const totalBalance = investmentAccounts.reduce((sum, a) => sum + (parseFloat(a.balance) || 0), 0);
+                summaryEl.innerHTML = '<div class="investment-summary"><h3>📊 Resumo das Aplicações</h3><div class="investment-summary-grid"><div class="investment-summary-item"><div class="investment-summary-label">Total em Aplicações</div><div class="investment-summary-value privacy-value">' + this.formatCurrency(totalBalance) + '</div></div><div class="investment-summary-item"><div class="investment-summary-label">Contas de Investimento</div><div class="investment-summary-value">' + investmentAccounts.length + '</div></div><div class="investment-summary-item"><div class="investment-summary-label">Período</div><div class="investment-summary-value" style="font-size:1rem;">Últimos 6 meses</div></div></div></div>';
+            }
+        }
+
+        saveInvestment() {
+            const name = document.getElementById('investmentName').value.trim();
+            const initial = parseFloat(document.getElementById('investmentInitial').value);
+            const current = parseFloat(document.getElementById('investmentCurrent').value);
+            const date = document.getElementById('investmentDate').value;
+            if (!name) { this.showToast('❌ Informe o nome da aplicação'); document.getElementById('investmentName').focus(); return; }
+            if (isNaN(initial) || initial < 0) { this.showToast('❌ Valor inicial inválido'); document.getElementById('investmentInitial').focus(); return; }
+            if (isNaN(current) || current < 0) { this.showToast('❌ Valor atual inválido'); document.getElementById('investmentCurrent').focus(); return; }
+            if (!date) { this.showToast('❌ Selecione a data da aplicação'); document.getElementById('investmentDate').focus(); return; }
+            const id = document.getElementById('investmentEditId').value;
+            if (id) {
+                for (let i = 0; i < this.accounts.length; i++) { if (this.accounts[i].id === id) { this.accounts[i] = { id, name, type: 'investment', balance: current, color: this.accounts[i].color || '#10b981' }; break; } }
+            } else {
+                this.accounts.push({ id: this.generateUniqueId(), name, type: 'investment', balance: current, color: '#10b981' });
+            }
+            this.saveAccounts(); this.clearCache(); this.renderInvestmentsModal(); this.updateInvestmentChart(); this.renderAccountsList(); this.updateDashboard();
+            closeModal('newInvestmentModal'); this.showToast(id ? '✅ Aplicação atualizada!' : '✅ Aplicação cadastrada!');
+        }
+
+        deleteInvestment(id) {
+            if (!confirm('Excluir esta aplicação?')) return;
+            this.accounts = this.accounts.filter(a => a.id !== id); this.saveAccounts();
+            this.clearCache(); this.renderInvestmentsModal(); this.updateInvestmentChart(); this.renderAccountsList(); this.updateDashboard(); this.showToast('✅ Aplicação excluída!');
+        }
+
+        editInvestment(id) {
+            const acc = this.getAccountById(id); if (!acc || acc.type !== 'investment') return;
+            document.getElementById('investmentEditId').value = acc.id; document.getElementById('investmentName').value = acc.name;
+            document.getElementById('investmentInitial').value = acc.balance; document.getElementById('investmentCurrent').value = acc.balance;
+            document.getElementById('investmentDate').value = new Date().toISOString().split('T')[0]; document.getElementById('investmentRate').value = '';
+            document.getElementById('newInvestmentTitle').textContent = 'Editar Aplicação'; openModal('newInvestmentModal');
+        }
+
+        openUpdateInvestment(id) {
+            const acc = this.getAccountById(id); if (!acc) return;
+            document.getElementById('updateInvestmentId').value = acc.id; document.getElementById('updateInvestmentName').textContent = acc.name;
+            document.getElementById('updateInvestmentValue').value = acc.balance; document.getElementById('updateInvestmentDate').value = new Date().toISOString().split('T')[0];
+            openModal('updateInvestmentModal');
+        }
+
+        updateInvestmentValue() {
+            const id = document.getElementById('updateInvestmentId').value; const newValue = parseFloat(document.getElementById('updateInvestmentValue').value);
+            if (isNaN(newValue) || newValue < 0) { this.showToast('❌ Valor inválido'); return; }
+            const acc = this.getAccountById(id); if (!acc) return;
+            acc.balance = newValue; this.saveAccounts(); this.renderAccountsList(); this.renderInvestmentsModal(); this.updateInvestmentChart(); this.updateDashboard();
+            closeModal('updateInvestmentModal'); this.showToast('✅ Valor atualizado!');
+        }
+
+        renderInvestmentsModal() {
+            const container = document.getElementById('investmentsContent'); if (!container) return;
+            const investmentAccounts = this.accounts.filter(a => a.type === 'investment');
+            if (!investmentAccounts.length) { container.innerHTML = '<div style="text-align:center; padding:40px 20px; color:var(--text-secondary);"><div style="font-size:3rem; margin-bottom:12px; opacity:0.5;">📈</div><h3>Nenhuma conta de investimento cadastrada</h3><p style="margin-top:12px;">Adicione uma conta do tipo "Investimento" em Minhas Contas.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="openAccountsModal()">➕ Nova Conta</button></div>'; return; }
+            const self = this; let totalBalance = 0; let html = '<div>';
+            investmentAccounts.forEach(acc => {
+                const balance = parseFloat(acc.balance) || 0; totalBalance += balance;
+                const inflows = this.transactions.filter(t => t.accountId === acc.id && t.amount > 0 && t.paymentMethod === 'transfer');
+                const totalInflows = inflows.reduce((sum, t) => sum + t.amount, 0);
+                const outflows = this.transactions.filter(t => t.accountId === acc.id && t.amount < 0 && t.paymentMethod === 'transfer');
+                const totalOutflows = outflows.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                html += '<div class="investment-card" style="border-left: 4px solid ' + acc.color + ';"><div class="investment-card-header"><div><div class="investment-card-title">📈 ' + self.escapeHtml(acc.name) + '</div><div class="investment-card-type">Conta de Investimento</div></div><div class="investment-card-actions"><button class="btn btn-secondary btn-small update-invest-btn" data-id="' + acc.id + '">💰</button><button class="btn btn-secondary btn-small edit-invest-btn" data-id="' + acc.id + '">✏️</button><button class="btn btn-danger btn-small delete-invest-btn" data-id="' + acc.id + '">🗑️</button></div></div><div class="investment-card-values"><div class="investment-value-item"><div class="investment-value-label">Saldo Atual</div><div class="investment-value-amount privacy-value" style="color: ' + acc.color + ';">' + self.formatCurrency(balance) + '</div></div><div class="investment-value-item"><div class="investment-value-label">Total Aplicado</div><div class="investment-value-amount positive privacy-value">' + self.formatCurrency(totalInflows) + '</div></div><div class="investment-value-item"><div class="investment-value-label">Total Resgatado</div><div class="investment-value-amount negative privacy-value">' + self.formatCurrency(totalOutflows) + '</div></div></div></div>';
+            });
+            html += '</div><div class="investment-summary"><h3>📊 Resumo Geral</h3><div class="investment-summary-grid"><div class="investment-summary-item"><div class="investment-summary-label">Total em Aplicações</div><div class="investment-summary-value privacy-value">' + this.formatCurrency(totalBalance) + '</div></div><div class="investment-summary-item"><div class="investment-summary-label">Contas</div><div class="investment-summary-value">' + investmentAccounts.length + '</div></div><div class="investment-summary-item"><div class="investment-summary-label">Última atualização</div><div class="investment-summary-value" style="font-size:0.9rem;">' + new Date().toLocaleDateString(this.getLanguage()) + '</div></div></div></div>';
+            container.innerHTML = html;
+            container.querySelectorAll('.update-invest-btn').forEach(btn => btn.addEventListener('click', () => self.openUpdateInvestment(btn.dataset.id)));
+            container.querySelectorAll('.edit-invest-btn').forEach(btn => btn.addEventListener('click', () => self.editInvestment(btn.dataset.id)));
+            container.querySelectorAll('.delete-invest-btn').forEach(btn => btn.addEventListener('click', () => self.deleteInvestment(btn.dataset.id)));
+        }
+
+        // ===== ORÇAMENTO POR CATEGORIA =====
+        renderCategoryBudget() {
+            const container = document.getElementById('categoryBudgetContent'); if (!container) return;
+            const self = this; const currentMonthExpenses = this.getMonthTransactions().filter(t => t.amount < 0);
+            const categoryTotals = {}; currentMonthExpenses.forEach(t => { if (!categoryTotals[t.category]) categoryTotals[t.category] = 0; categoryTotals[t.category] += Math.abs(t.amount); });
+            const last3Months = []; for (let i = 1; i <= 3; i++) { const d = new Date(this.currentMonth); d.setMonth(d.getMonth() - i); last3Months.push(d); }
+            const categoryAverages = {};
+            last3Months.forEach(monthDate => { const monthTrans = this.getMonthTransactions(monthDate).filter(t => t.amount < 0); monthTrans.forEach(t => { if (!categoryAverages[t.category]) categoryAverages[t.category] = []; categoryAverages[t.category].push(Math.abs(t.amount)); }); });
+            Object.keys(categoryAverages).forEach(catId => { const values = categoryAverages[catId]; categoryAverages[catId] = values.reduce((a, b) => a + b, 0) / values.length; });
+            let html = '<div style="margin-bottom: 20px; padding: 16px; background: var(--glass-bg); border-radius: 14px;"><p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">📊 Comparativo com a média dos últimos 3 meses</p></div><div>';
+            const sortedCategories = Object.keys(categoryTotals).sort((a, b) => categoryTotals[b] - categoryTotals[a]);
+            sortedCategories.forEach(catId => {
+                const category = self.getCategoryById(catId); const currentAmount = categoryTotals[catId]; const averageAmount = categoryAverages[catId] || 0;
+                const percentage = averageAmount > 0 ? (currentAmount / averageAmount) * 100 : 0; let barClass = '';
+                if (percentage > 100) barClass = 'danger'; else if (percentage > 80) barClass = 'warning';
+                html += '<div class="category-budget-item" style="border-left-color: ' + category.color + ';"><div class="category-budget-header"><div class="category-budget-name"><span style="width: 12px; height: 12px; background: ' + category.color + '; border-radius: 50%; display: inline-block;"></span>' + self.escapeHtml(category.name) + '</div><div class="category-budget-amount">' + self.formatCurrency(currentAmount) + '</div></div><div class="category-budget-bar"><div class="category-budget-progress ' + barClass + '" style="width: ' + Math.min(percentage, 100) + '%"></div></div><div class="category-budget-info"><span>' + percentage.toFixed(0) + '% da média</span><span>Média: ' + self.formatCurrency(averageAmount) + '</span></div>';
+                if (averageAmount > 0) { const diff = currentAmount - averageAmount; const diffText = diff > 0 ? '+' + self.formatCurrency(diff) : self.formatCurrency(diff); html += '<div class="category-budget-average" style="color: ' + (diff > 0 ? 'var(--danger-color)' : 'var(--success-color)') + ';">' + (diff > 0 ? '⬆️' : '⬇️') + ' ' + diffText + ' vs média</div>'; }
+                html += '</div>';
+            });
+            html += '</div>';
+            if (Object.keys(categoryTotals).length === 0) html = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);"><div style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;">📊</div><h3>Nenhuma despesa este mês</h3></div>';
+            container.innerHTML = html;
+        }
+
+        // ===== TRANSFERÊNCIA =====
+        saveTransfer() {
+            if (!this.validateForm([{ id: 'transferFrom', label: 'Conta de origem', required: true }, { id: 'transferTo', label: 'Conta de destino', required: true }, { id: 'transferAmount', label: 'Valor', required: true, type: 'number', min: 0.01 }, { id: 'transferDate', label: this.t('selectDate'), required: true }])) return;
+            const fromId = document.getElementById('transferFrom').value; const toId = document.getElementById('transferTo').value;
+            const amount = parseFloat(document.getElementById('transferAmount').value); const date = document.getElementById('transferDate').value;
+            const description = document.getElementById('transferDescription').value || 'Transferência';
+            if (fromId === toId) { this.showToast('❌ Contas devem ser diferentes'); return; }
+            const fromAcc = this.getAccountById(fromId); const toAcc = this.getAccountById(toId);
+            if (!fromAcc || !toAcc) { this.showToast('❌ Contas não encontradas'); return; }
+            if (this.settings.blockNegativeBalance && fromAcc.balance < amount) { this.showToast(this.t('negativeBalanceBlocked')); return; }
+            const originalFromBalance = fromAcc.balance; const originalToBalance = toAcc.balance;
+            fromAcc.balance -= amount; toAcc.balance += amount;
+            const isToInvestment = toAcc.type === 'investment'; const isFromInvestment = fromAcc.type === 'investment';
+            this.transactions.push({ id: this.generateUniqueId(), date: date, amount: -amount, category: isToInvestment ? 'reserva_aplicacao' : 'reserva_aplicacao', description: description + ' (saída)', statusOk: true, paymentMethod: 'transfer', accountId: fromId });
+            this.transactions.push({ id: this.generateUniqueId(), date: date, amount: amount, category: isFromInvestment ? 'resgate' : 'reserva_aplicacao', description: description + ' (entrada)', statusOk: true, paymentMethod: 'transfer', accountId: toId });
+            try {
+                this.clearCache(); this.saveTransactions(); this.saveAccounts(); this.render(); this.renderAccountsList(); this.updateDashboard(); this.checkNegativeBalance();
+                closeModal('transferModal'); this.showToast('✅ Transferência realizada!');
+            } catch (e) {
+                fromAcc.balance = originalFromBalance; toAcc.balance = originalToBalance; this.saveAccounts(); this.showToast('❌ Erro na transferência: ' + e.message);
+            }
+        }
+
+        // ===== SWIPE GESTURES =====
+        initSwipeGestures() {
+            const self = this; let touchStartX = 0, touchStartY = 0; let currentRow = null; let isSwiping = false;
+            document.addEventListener('touchstart', function(e) { const row = e.target.closest('.transaction-row'); if (!row) return; touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; currentRow = row; isSwiping = false; }, { passive: true });
+            document.addEventListener('touchmove', function(e) { if (!currentRow) return; const diffX = touchStartX - e.changedTouches[0].screenX; const diffY = Math.abs(touchStartY - e.changedTouches[0].screenY); if (Math.abs(diffX) > 30 && diffY < 50) { isSwiping = true; if (diffX < -30) { currentRow.classList.add('swiping-right'); currentRow.classList.remove('swiping-left'); } else if (diffX > 30) { currentRow.classList.add('swiping-left'); currentRow.classList.remove('swiping-right'); } } }, { passive: true });
+            document.addEventListener('touchend', function(e) { if (!currentRow || !isSwiping) { if (currentRow) currentRow.classList.remove('swiping-right', 'swiping-left'); currentRow = null; return; } const diff = touchStartX - e.changedTouches[0].screenX; const id = currentRow.dataset.id; if (Math.abs(diff) > 80 && id) { if (diff < -80) self.completeTransaction(id); else if (diff > 80) self.deleteTransactionSwipe(id); } else { currentRow.classList.remove('swiping-right', 'swiping-left'); } currentRow = null; isSwiping = false; }, { passive: true });
+        }
+
+        completeTransaction(id) { const t = this.transactions.find(x => String(x.id) === String(id)); if (t) { t.statusOk = true; this.clearCache(); this.saveTransactions(); this.render(); this.updateAlertBadge(); this.showToast('✅ Transação concluída!'); } }
+        deleteTransactionSwipe(id) { if (confirm('Excluir esta transação?')) { const t = this.transactions.find(x => String(x.id) === String(id)); if (t && t.accountId) this.updateAccountBalance(t.accountId, -t.amount); this.transactions = this.transactions.filter(x => String(x.id) !== String(id)); this.clearCache(); this.saveTransactions(); this.render(); this.updateCharts(); this.updateAlertBadge(); this.checkNegativeBalance(); this.showToast('🗑️ Excluída!'); } }
+
+        // ===== IMPRESSÃO DO MANUAL =====
+        printManual() {
+            try {
+                const printWindow = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
+                if (!printWindow) { this.showToast('⚠️ ' + this.t('allowPopups')); return; }
+                const fileName = this.generateTimestamp() + '_manual_smart_wallet.pdf';
+                const content = '<!DOCTYPE html><html lang="' + this.getLanguage() + '"><head><meta charset="UTF-8"><title>' + fileName + '</title><style>@page{size:A4;margin:2cm;}body{font-family:Georgia,serif;color:#1e293b;line-height:1.6;font-size:11pt;padding:20px;max-width:800px;margin:0 auto;}h1{color:#6366f1;font-size:28pt;text-align:center;}h2{color:#6366f1;font-size:16pt;margin-top:30px;border-bottom:2px solid #6366f1;padding-bottom:8px;}h3{color:#06b6d4;font-size:13pt;margin-top:20px;}p{margin-bottom:12px;}ul,ol{margin-left:24px;margin-bottom:16px;}li{margin-bottom:8px;}.manual-cover{text-align:center;padding:40px 20px;border:3px solid #6366f1;border-radius:16px;margin-bottom:30px;}.manual-quote{margin:24px 0;padding:20px 30px;border-left:4px solid #6366f1;background:#f8fafc;border-radius:8px;font-style:italic;}.quote-author{font-size:9pt;font-weight:600;color:#6366f1;text-align:right;margin-top:12px;font-style:normal;}.manual-blessing{text-align:center;margin-top:40px;padding:30px;background:#f8fafc;border-radius:16px;}.manual-tip,.manual-success,.manual-warning{padding:12px 16px;margin:12px 0;border-radius:8px;border-left:4px solid;}.manual-tip{background:rgba(6,182,212,0.1);border-color:#06b6d4;}.manual-success{background:rgba(16,185,129,0.1);border-color:#10b981;}.manual-warning{background:rgba(245,158,11,0.1);border-color:#f59e0b;}@media print{.manual-cover{page-break-after:always;}}</style></head><body>' + manualHTML + '</body></html>';
+                printWindow.document.write(content); printWindow.document.close(); printWindow.document.title = fileName;
+                setTimeout(() => { printWindow.focus(); printWindow.print(); }, 500);
+            } catch (e) { this.showToast('❌ Erro: ' + e.message); }
+        }
+
+        // ===== SISTEMA DE ATUALIZAÇÃO =====
+        checkVersionUpdate() {
+            const CURRENT_VERSION = '4.4.3'; const STORAGE_KEY = 'smartwallet_last_version';
+            try { const lastVersion = localStorage.getItem(STORAGE_KEY); if (!lastVersion) { localStorage.setItem(STORAGE_KEY, CURRENT_VERSION); return; } if (lastVersion !== CURRENT_VERSION) { this.showWhatsNewModal(CURRENT_VERSION); localStorage.setItem(STORAGE_KEY, CURRENT_VERSION); } } catch (e) {}
+        }
+
+        showWhatsNewModal(version) {
+            const WHATS_NEW_DATA = { '4.4.3': { version: '4.4.3', features: [ { type: 'new', icon: '🎯', title: 'Splash Inteligente', description: 'Tela de abertura aparece apenas na primeira visita, tornando o retorno ao app muito mais rápido.' }, { type: 'new', icon: '💬', title: 'Dicas do Coach', description: 'Ao recarregar a página, uma citação financeira motivacional aparece para inspirar seu dia.' }, { type: 'improved', icon: '⚡', title: 'Performance', description: 'Carregamento instantâneo do app principal em visitas subsequentes.' } ] } };
+            const data = WHATS_NEW_DATA[version]; if (!data) return;
+            const versionEl = document.getElementById('whatsNewVersion'); if (versionEl) versionEl.textContent = data.version;
+            const featuresContainer = document.getElementById('whatsNewFeatures');
+            if (featuresContainer) { let html = ''; data.features.forEach(feature => { const badgeText = feature.type === 'new' ? 'NOVO' : feature.type === 'improved' ? 'MELHORADO' : 'CORRIGIDO'; html += '<div class="feature-item ' + feature.type + '"><div class="feature-icon">' + feature.icon + '</div><div class="feature-content"><h4>' + this.escapeHtml(feature.title) + ' <span class="feature-badge ' + feature.type + '">' + badgeText + '</span></h4><p>' + this.escapeHtml(feature.description) + '</p></div></div>'; }); featuresContainer.innerHTML = html; }
+            openModal('whatsNewModal');
+        }
+    } // FIM DA CLASSE SmartWallet
+
+    // ===== INSTÂNCIA GLOBAL =====
+    window.smartwallet = new SmartWallet();
+
+    // ===== MODAL DE CONFIRMAÇÃO CUSTOM =====
+    function showConfirm(title, message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirmModal'); const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage'); const yesBtn = document.getElementById('confirmYesBtn'); const noBtn = document.getElementById('confirmNoBtn');
+            if (!modal || !titleEl || !messageEl || !yesBtn || !noBtn) { resolve(confirm(title + '\n\n' + message)); return; }
+            titleEl.textContent = title; messageEl.innerHTML = message.replace(/\n/g, '<br>');
+            const newYesBtn = yesBtn.cloneNode(true); const newNoBtn = noBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYesBtn, yesBtn); noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+            newYesBtn.addEventListener('click', () => { closeModal('confirmModal'); resolve(true); });
+            newNoBtn.addEventListener('click', () => { closeModal('confirmModal'); resolve(false); });
+            openModal('confirmModal'); setTimeout(() => newNoBtn.focus(), 100);
+        });
+    }
+    window.showConfirm = showConfirm;
+
+    // ===== HELPERS DE MODAIS =====
+    function openModal(id) {
+        const modal = document.getElementById(id); if (!modal) return;
+        document.querySelectorAll('.modal-front').forEach(m => m.classList.remove('modal-front'));
+        modal.classList.add('modal-front');
+        document.body.style.setProperty('--scroll-y', -window.scrollY + 'px');
+        document.body.classList.add('modal-open'); modal.classList.add('active');
+        if (id === 'settingsModal') smartwallet.updateSettingsUI();
+        setTimeout(() => { const focusable = modal.querySelector('.modal-content'); if (focusable) focusable.focus(); }, 50);
+    }
+
+    function closeModal(id) {
+        const modal = document.getElementById(id); if (!modal) return;
+        modal.classList.remove('modal-front', 'active');
+        const stillOpen = document.querySelector('.modal.active');
+        if (!stillOpen) { document.body.classList.remove('modal-open'); document.body.style.removeProperty('--scroll-y'); window.scrollTo(0, 0); } 
+        else { stillOpen.classList.add('modal-front'); }
+    }
+
+    function closeAllDropdowns() {
+        const info = document.getElementById('infoMenu'); const main = document.getElementById('mainMenu');
+        if (info) info.classList.remove('active'); if (main) main.classList.remove('active');
+        document.querySelectorAll('.header-btn').forEach(b => b.classList.remove('menu-active'));
+    }
+
+    // ===== FUNÇÕES GLOBAIS =====
+    window.selectTransactionType = function(t) { smartwallet.currentTransactionType = t; document.querySelectorAll('#transactionForm .type-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-type') === t)); smartwallet.filterCategoriesByType('category', t); };
+    window.selectEditType = function(t) { smartwallet.currentEditType = t; document.querySelectorAll('#editForm .type-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-type') === t)); smartwallet.filterCategoriesByType('editCategory', t); };
+    
+    window.dashboardAction = function(action) {
+        const typeFilter = document.getElementById('typeFilter'); const statusFilter = document.getElementById('statusFilter'); const categoryFilter = document.getElementById('categoryFilter'); const accountFilter = document.getElementById('accountFilter'); const cardFilter = document.getElementById('cardFilter'); const searchFilter = document.getElementById('searchFilter');
+        document.querySelectorAll('.card.clickable').forEach(c => c.classList.remove('active-filter'));
+        switch(action) {
+            case 'accounts': openAccountsModal(); break;
+            case 'income': if (typeFilter) typeFilter.value = 'income'; if (statusFilter) statusFilter.value = ''; if (categoryFilter) categoryFilter.value = ''; if (accountFilter) accountFilter.value = ''; if (cardFilter) cardFilter.value = ''; if (searchFilter) searchFilter.value = ''; smartwallet.currentPage = 1; smartwallet.clearCache(); smartwallet.render(); smartwallet.saveFilters(); document.querySelectorAll('.card.clickable')[1].classList.add('active-filter'); scrollToTransactions(); break;
+            case 'expense': if (typeFilter) typeFilter.value = 'expense'; if (statusFilter) statusFilter.value = ''; if (categoryFilter) categoryFilter.value = ''; if (accountFilter) accountFilter.value = ''; if (cardFilter) cardFilter.value = ''; if (searchFilter) searchFilter.value = ''; smartwallet.currentPage = 1; smartwallet.clearCache(); smartwallet.render(); smartwallet.saveFilters(); document.querySelectorAll('.card.clickable')[2].classList.add('active-filter'); scrollToTransactions(); break;
+            case 'cards': openCreditCardsModal(); break;
+        }
+    };
+    function scrollToTransactions() { const section = document.querySelector('.transactions-section'); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    window.sortTransactions = function(column) { if (smartwallet.sortColumn === column) { smartwallet.sortDirection = smartwallet.sortDirection === 'asc' ? 'desc' : 'asc'; } else { smartwallet.sortColumn = column; smartwallet.sortDirection = column === 'date' ? 'desc' : 'asc'; } smartwallet.render(); };
+    window.changeCardMonth = function(delta) { smartwallet.cardModalMonth.setMonth(smartwallet.cardModalMonth.getMonth() + delta); smartwallet.renderCreditCardsList(); };
+    window.changeCardMonthToToday = function() { smartwallet.cardModalMonth = new Date(); smartwallet.cardModalMonth.setDate(1); smartwallet.renderCreditCardsList(); };
+
+    window.openNewTransactionModal = function() { smartwallet.setDefaultDate(); smartwallet.currentTransactionType = 'expense'; document.querySelectorAll('#transactionForm .type-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-type') === 'expense')); smartwallet.populateCategorySelects(); smartwallet.populatePaymentMethodSelects(); smartwallet.populateAccountSelects(); openModal('newTransactionModal'); };
+    window.closeNewTransactionModal = function() { closeModal('newTransactionModal'); smartwallet.clearForm(); };
+    window.closeEditModal = function() { closeModal('editModal'); smartwallet.currentEditId = null; };
+    window.openExportModal = function() { openModal('exportModal'); };
+    window.closeExportModal = function() { closeModal('exportModal'); };
+    window.openGoalModal = function() { openModal('goalModal'); };
+    window.closeGoalModal = function() { closeModal('goalModal'); };
+    window.openImportCsvModal = function() { window._pendingCsvData = null; document.getElementById('csvFileInput').value = ''; document.getElementById('csvFileName').textContent = 'Clique para selecionar'; document.getElementById('csvReplaceData').checked = false; openModal('importCsvModal'); closeAllDropdowns(); };
+    window.closeImportCsvModal = function() { closeModal('importCsvModal'); };
+    window.openImportBackupModal = function() { window._pendingBackupData = null; document.getElementById('backupFileInput').value = ''; document.getElementById('backupFileName').textContent = 'Clique para selecionar'; openModal('importBackupModal'); closeAllDropdowns(); };
+    window.closeImportBackupModal = function() { closeModal('importBackupModal'); };
+    window.openClearDataModal = function() { document.getElementById('clearStep1').style.display = 'block'; document.getElementById('clearStep2').style.display = 'none'; document.getElementById('clearConfirmInput').value = ''; document.getElementById('clearConfirmInput').classList.remove('match'); document.getElementById('finalClearBtn').disabled = true; document.getElementById('finalClearBtn').style.opacity = '0.5'; openModal('clearDataModal'); closeAllDropdowns(); };
+    window.closeClearDataModal = function() { closeModal('clearDataModal'); };
+    window.openAccountsModal = function() { smartwallet.renderAccountsList(); openModal('accountsModal'); closeAllDropdowns(); };
+    window.closeAccountsModal = function() { closeModal('accountsModal'); };
+    window.openNewAccountModal = function() { document.getElementById('accountEditId').value = ''; document.getElementById('accountForm').reset(); document.getElementById('accountColor').value = '#6366f1'; document.getElementById('newAccountTitle').textContent = 'Nova Conta'; openModal('newAccountModal'); };
+    window.closeNewAccountModal = function() { closeModal('newAccountModal'); };
+    window.openCreditCardsModal = function() { smartwallet.cardModalMonth = new Date(smartwallet.currentMonth); smartwallet.renderCreditCardsList(); openModal('creditCardsModal'); closeAllDropdowns(); };
+    window.closeCreditCardsModal = function() { closeModal('creditCardsModal'); };
+    window.openNewCardModal = function() { document.getElementById('cardEditId').value = ''; document.getElementById('cardForm').reset(); document.getElementById('cardClosingDay').value = 20; document.getElementById('cardDueDay').value = 27; document.getElementById('cardColor').value = '#6366f1'; document.getElementById('newCardTitle').textContent = 'Novo Cartão'; openModal('newCardModal'); };
+    window.closeNewCardModal = function() { closeModal('newCardModal'); };
+    window.openInvoiceModal = function(cardId) { smartwallet.openInvoice(cardId); };
+    window.closeInvoiceModal = function() { closeModal('invoiceModal'); };
+    window.openBillsModal = function() { smartwallet.renderBillsModal(); openModal('billsModal'); };
+    window.closeBillsModal = function() { closeModal('billsModal'); };
+    window.openInvestmentsModal = function() { smartwallet.renderInvestmentsModal(); openModal('investmentsModal'); closeAllDropdowns(); };
+    window.closeInvestmentsModal = function() { closeModal('investmentsModal'); };
+    window.openNewInvestmentModal = function() { document.getElementById('investmentEditId').value = ''; document.getElementById('investmentName').value = ''; document.getElementById('investmentInitial').value = ''; document.getElementById('investmentCurrent').value = ''; document.getElementById('investmentDate').value = new Date().toISOString().split('T')[0]; document.getElementById('investmentRate').value = ''; document.getElementById('newInvestmentTitle').textContent = 'Nova Aplicação'; openModal('newInvestmentModal'); };
+    window.closeNewInvestmentModal = function() { closeModal('newInvestmentModal'); };
+    window.closeUpdateInvestmentModal = function() { closeModal('updateInvestmentModal'); };
+    window.openManualModal = function() { document.getElementById('manualContent').innerHTML = manualHTML; openModal('manualModal'); closeAllDropdowns(); };
+    window.closeManualModal = function() { closeModal('manualModal'); };
+    window.printManual = function() { smartwallet.printManual(); };
+    window.openTermsModal = function() { openModal('disclaimerModal'); initDisclaimer(); closeAllDropdowns(); };
+    window.openThanksModal = function() { openModal('thanksModal'); closeAllDropdowns(); };
+    window.closeThanksModal = function() { closeModal('thanksModal'); };
+    window.openCategoryBudgetModal = function() { smartwallet.renderCategoryBudget(); openModal('categoryBudgetModal'); closeAllDropdowns(); };
+    window.closeCategoryBudgetModal = function() { closeModal('categoryBudgetModal'); };
+    window.openSettingsModal = function() { openModal('settingsModal'); closeAllDropdowns(); };
+    window.closeSettingsModal = function() { closeModal('settingsModal'); };
+    window.exportBackup = function() { smartwallet.exportBackup(); closeAllDropdowns(); };
+    window.toggleDemoMode = function() { smartwallet.toggleDemoMode(); closeAllDropdowns(); };
+    window.enableNotifications = function() { smartwallet.requestNotifications(); closeAllDropdowns(); };
+
+    window.toggleFab = function() { const fab = document.getElementById('fabBtn'); const actions = document.getElementById('fabActions'); const plusIcon = fab.querySelector('.fab-icon-plus'); const closeIcon = fab.querySelector('.fab-icon-close'); fab.classList.toggle('active'); actions.classList.toggle('active'); const isExpanded = fab.classList.contains('active'); fab.setAttribute('aria-expanded', isExpanded); if (plusIcon && closeIcon) { plusIcon.style.display = isExpanded ? 'none' : 'block'; closeIcon.style.display = isExpanded ? 'block' : 'none'; } };
+    window.openExpenseModal = function() { if (document.getElementById('fabBtn').classList.contains('active')) toggleFab(); smartwallet.setDefaultDate(); smartwallet.currentTransactionType = 'expense'; document.querySelectorAll('#transactionForm .type-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-type') === 'expense')); smartwallet.populateCategorySelects(); smartwallet.populatePaymentMethodSelects(); smartwallet.populateAccountSelects(); openModal('newTransactionModal'); };
+    window.openIncomeModal = function() { if (document.getElementById('fabBtn').classList.contains('active')) toggleFab(); smartwallet.setDefaultDate(); smartwallet.currentTransactionType = 'income'; document.querySelectorAll('#transactionForm .type-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-type') === 'income')); smartwallet.populateCategorySelects(); smartwallet.populatePaymentMethodSelects(); smartwallet.populateAccountSelects(); openModal('newTransactionModal'); };
+    window.openTransferModal = function() { if (document.getElementById('fabBtn').classList.contains('active')) toggleFab(); smartwallet.populateAccountSelects(); document.getElementById('transferForm').reset(); document.getElementById('transferDate').value = new Date().toISOString().split('T')[0]; openModal('transferModal'); };
+    window.closeTransferModal = function() { closeModal('transferModal'); };
+
+    window.togglePrivacy = function() { smartwallet.privacyOn = !smartwallet.privacyOn; localStorage.setItem('smartwallet_privacy', smartwallet.privacyOn); smartwallet.applyPrivacy(); };
+    window.toggleTheme = function() { smartwallet.darkMode = !smartwallet.darkMode; localStorage.setItem('smartwallet_dark', smartwallet.darkMode); smartwallet.applyTheme(); };
+    window.toggleMenu = function(e) { if (e) e.stopPropagation(); const main = document.getElementById('mainMenu'); const info = document.getElementById('infoMenu'); const isActive = main.classList.contains('active'); if (info) info.classList.remove('active'); document.querySelectorAll('.header-btn.info-btn').forEach(b => b.classList.remove('menu-active')); main.classList.toggle('active'); const menuBtn = document.querySelector('.header-btn.menu-btn'); if (menuBtn) menuBtn.classList.toggle('menu-active', !isActive); };
+    window.toggleInfoMenu = function(e) { if (e) e.stopPropagation(); const info = document.getElementById('infoMenu'); const main = document.getElementById('mainMenu'); const isActive = info.classList.contains('active'); if (main) main.classList.remove('active'); document.querySelectorAll('.header-btn.menu-btn').forEach(b => b.classList.remove('menu-active')); info.classList.toggle('active'); const infoBtn = document.querySelector('.header-btn.info-btn'); if (infoBtn) infoBtn.classList.toggle('menu-active', !isActive); };
+    window.toggleLanguage = function() { const currentLang = smartwallet.getLanguage(); const newLang = currentLang === 'pt-BR' ? 'en-US' : 'pt-BR'; smartwallet.setLanguage(newLang); const langText = document.getElementById('languageText'); if (langText) langText.textContent = newLang === 'pt-BR' ? 'Idioma: Português' : 'Language: English'; smartwallet.updateCurrencySelectorVisibility(); closeAllDropdowns(); };
+    window.toggleCurrency = function() { const currentCurrency = smartwallet.getCurrency(); const newCurrency = currentCurrency === 'BRL' ? 'USD' : 'BRL'; smartwallet.setCurrency(newCurrency); const currencyText = document.getElementById('currencyText'); if (currencyText) currencyText.textContent = newCurrency === 'BRL' ? 'Moeda: R$' : 'Currency: $'; closeAllDropdowns(); };
+
+    window.handleCsvFileSelect = function(event) { const file = event.target.files[0]; if (!file) return; if (!file.name.toLowerCase().endsWith('.csv')) { smartwallet.showToast('⚠️ Selecione um arquivo .csv'); event.target.value = ''; return; } if (file.size > 10 * 1024 * 1024) { smartwallet.showToast('⚠️ Arquivo muito grande (máx 10MB)'); event.target.value = ''; return; } document.getElementById('csvFileName').textContent = '📄 ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)'; const reader = new FileReader(); reader.onload = (e) => { window._pendingCsvData = e.target.result; }; reader.onerror = () => { smartwallet.showToast('❌ Erro ao ler arquivo'); event.target.value = ''; }; reader.readAsText(file, 'UTF-8'); };
+    window.handleBackupFileSelect = function(event) { const file = event.target.files[0]; if (!file) return; if (!file.name.toLowerCase().endsWith('.json')) { smartwallet.showToast('⚠️ Selecione um arquivo .json'); event.target.value = ''; return; } if (file.size > 10 * 1024 * 1024) { smartwallet.showToast('⚠️ Arquivo muito grande (máx 10MB)'); event.target.value = ''; return; } document.getElementById('backupFileName').textContent = '💾 ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)'; const reader = new FileReader(); reader.onload = (e) => { try { JSON.parse(e.target.result); window._pendingBackupData = e.target.result; smartwallet.showToast('✅ Arquivo carregado!'); } catch (error) { smartwallet.showToast('❌ JSON inválido: ' + error.message); event.target.value = ''; window._pendingBackupData = null; } }; reader.onerror = () => { smartwallet.showToast('❌ Erro ao ler arquivo'); event.target.value = ''; }; reader.readAsText(file, 'UTF-8'); };
+
+    window.showClearStep2 = function() { document.getElementById('clearStep1').style.display = 'none'; document.getElementById('clearStep2').style.display = 'block'; setTimeout(() => document.getElementById('clearConfirmInput').focus(), 100); };
+    window.checkClearConfirm = function() { const input = document.getElementById('clearConfirmInput'); const btn = document.getElementById('finalClearBtn'); if (input.value.trim().toUpperCase() === 'LIMPAR') { input.classList.add('match'); btn.disabled = false; btn.style.opacity = '1'; } else { input.classList.remove('match'); btn.disabled = true; btn.style.opacity = '0.5'; } };
+    window.copyPixKey = function() { const key = document.getElementById('pixKey').textContent; navigator.clipboard.writeText(key).then(() => smartwallet.showToast('✅ Chave PIX copiada!')).catch(() => smartwallet.showToast('❌ Copie: ' + key)); };
+
+    function initDisclaimer() {
+        let countdown = 12; const timerEl = document.getElementById('disclaimerTimer'); const btnEl = document.getElementById('acceptDisclaimerBtn');
+        if (!timerEl || !btnEl) return; btnEl.classList.remove('enabled'); btnEl.disabled = true;
+        timerEl.innerHTML = '⏱️ Aguarde <span id="countdown">' + countdown + '</span> segundos';
+        const interval = setInterval(() => { countdown--; const span = document.getElementById('countdown'); if (span) span.textContent = countdown; if (countdown <= 0) { clearInterval(interval); btnEl.classList.add('enabled'); btnEl.disabled = false; timerEl.innerHTML = '✅ Pode aceitar os termos'; } }, 1000);
+    }
+
+    function showQuoteModal() {
+        const quote = FINANCIAL_QUOTES[Math.floor(Math.random() * FINANCIAL_QUOTES.length)];
+        const quoteText = document.getElementById('quoteText'); const quoteAuthor = document.getElementById('quoteAuthor');
+        if (quoteText) quoteText.textContent = '"' + quote.text + '"'; if (quoteAuthor) quoteAuthor.textContent = '— ' + quote.author;
+        document.getElementById('quoteModal').classList.add('active');
+    }
+
+    window.acceptDisclaimer = function() {
+        const btn = document.getElementById('acceptDisclaimerBtn'); if (!btn || !btn.classList.contains('enabled')) return;
+        localStorage.setItem('smartwallet_disclaimer_accepted', 'true');
+        localStorage.setItem('smartwallet_first_visit', 'false'); // Marca como não sendo mais primeira visita
+        const disclaimer = document.getElementById('disclaimerModal'); const splash = document.getElementById('splashScreen');
+        const main = document.getElementById('mainApp'); const fab = document.getElementById('fabBtn');
+        if (disclaimer) {
+            disclaimer.classList.add('disintegrating');
+            setTimeout(() => {
+                disclaimer.classList.remove('active', 'disintegrating'); disclaimer.style.display = 'none';
+                if (splash) { splash.classList.add('fade-out'); setTimeout(() => { splash.style.display = 'none'; if (main) main.style.display = 'block'; if (fab) fab.style.display = 'flex'; setTimeout(showQuoteModal, 300); }, 800); } 
+                else { if (main) main.style.display = 'block'; if (fab) fab.style.display = 'flex'; setTimeout(showQuoteModal, 300); }
+            }, 600);
+        }
+    };
+
+    window.startApp = function() { const quote = document.getElementById('quoteModal'); const main = document.getElementById('mainApp'); const fab = document.getElementById('fabBtn'); if (quote) { quote.classList.remove('active'); quote.style.display = 'none'; } if (main) main.style.display = 'block'; if (fab) fab.style.display = 'flex'; };
+    window.closeWhatsNewModal = function() { closeModal('whatsNewModal'); };
+    window.printManualFromWhatsNew = function() { closeWhatsNewModal(); setTimeout(() => { smartwallet.printManual(); }, 300); };
+    window.openManualFromWhatsNew = function() { closeWhatsNewModal(); setTimeout(() => { openManualModal(); }, 300); };
+
+    // ===== EVENT LISTENERS GLOBAIS =====
+    window.addEventListener('load', () => {
+        const dateEl = document.getElementById('printDate');
+        if (dateEl) dateEl.textContent = 'Gerado em: ' + new Date().toLocaleString('pt-BR');
+
+        const accepted = localStorage.getItem('smartwallet_disclaimer_accepted') === 'true';
+        const firstVisit = localStorage.getItem('smartwallet_first_visit') !== 'false';
+        const splash = document.getElementById('splashScreen');
+        const disclaimer = document.getElementById('disclaimerModal');
+        const main = document.getElementById('mainApp');
+        const fab = document.getElementById('fabBtn');
+        
+        if (firstVisit) {
+            console.log('[SmartWallet] Primeira visita detectada');
+            if (splash) { splash.style.display = 'flex'; splash.classList.remove('fade-out'); }
+            setTimeout(() => {
+                if (!accepted && disclaimer) {
+                    disclaimer.classList.add('active'); disclaimer.style.display = 'flex'; initDisclaimer();
+                } else {
+                    setTimeout(() => {
+                        if (splash) { splash.classList.add('fade-out'); setTimeout(() => { splash.style.display = 'none'; if (main) main.style.display = 'block'; if (fab) fab.style.display = 'flex'; showQuoteModal(); localStorage.setItem('smartwallet_first_visit', 'false'); }, 800); }
+                    }, 3000);
+                }
+            }, 3500);
+        } else {
+            console.log('[SmartWallet] Retorno detectado - pulando splash');
+            if (splash) splash.style.display = 'none';
+            if (main) main.style.display = 'block';
+            if (fab) fab.style.display = 'flex';
+            setTimeout(() => { showQuoteModal(); }, 500);
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('mainMenu'); const info = document.getElementById('infoMenu');
+        const menuBtn = document.querySelector('.header-btn.menu-btn'); const infoBtn = document.querySelector('.header-btn.info-btn');
+        if (menu && menu.classList.contains('active') && !e.target.closest('.dropdown-wrapper')) { menu.classList.remove('active'); if (menuBtn) menuBtn.classList.remove('menu-active'); }
+        if (info && info.classList.contains('active') && !e.target.closest('.dropdown-wrapper')) { info.classList.remove('active'); if (infoBtn) infoBtn.classList.remove('menu-active'); }
+        const fabWrapper = document.getElementById('fabWrapper'); const fab = document.getElementById('fabBtn');
+        if (fabWrapper && !fabWrapper.contains(e.target) && fab && fab.classList.contains('active')) { toggleFab(); }
+    });
+
+    document.addEventListener('keydown', (e) => { if (e.target.classList.contains('clickable') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.target.click(); } });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then(reg => console.log('[SmartWallet] SW registrado:', reg.scope)).catch(err => console.log('[SmartWallet] SW falhou:', err));
+        });
+    }
+
+    console.log('🎉 Smart Wallet v4.4.3 carregado com sucesso!');
+})();
