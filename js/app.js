@@ -5388,8 +5388,14 @@
         const btn = document.getElementById('acceptDisclaimerBtn');
         if (!btn || !btn.classList.contains('enabled')) return;
         localStorage.setItem('smartwallet_disclaimer_accepted', 'true');
+        // CORREÇÃO v4.4.3: Marcar como não sendo mais primeira visita
+        localStorage.setItem('smartwallet_first_visit', 'false');
+        
         const disclaimer = document.getElementById('disclaimerModal');
         const splash = document.getElementById('splashScreen');
+        const main = document.getElementById('mainApp');
+        const fab = document.getElementById('fabBtn');
+        
         if (disclaimer) {
             disclaimer.classList.add('disintegrating');
             setTimeout(() => {
@@ -5399,9 +5405,13 @@
                     splash.classList.add('fade-out');
                     setTimeout(() => {
                         splash.style.display = 'none';
+                        if (main) main.style.display = 'block';
+                        if (fab) fab.style.display = 'flex';
                         setTimeout(showQuoteModal, 300);
                     }, 800);
                 } else {
+                    if (main) main.style.display = 'block';
+                    if (fab) fab.style.display = 'flex';
                     setTimeout(showQuoteModal, 300);
                 }
             }, 600);
@@ -5430,36 +5440,71 @@
     };
 
     // ===== EVENT LISTENERS GLOBAIS =====
+    // ===== EVENT LISTENERS GLOBAIS =====
+    // ===== EVENT LISTENERS GLOBAIS =====
     window.addEventListener('load', () => {
         const dateEl = document.getElementById('printDate');
         if (dateEl) dateEl.textContent = 'Gerado em: ' + new Date().toLocaleString('pt-BR');
 
         const accepted = localStorage.getItem('smartwallet_disclaimer_accepted') === 'true';
+        const firstVisit = localStorage.getItem('smartwallet_first_visit') !== 'false';
         const splash = document.getElementById('splashScreen');
         const disclaimer = document.getElementById('disclaimerModal');
-        if (splash) {
-            splash.style.display = 'flex';
-            splash.classList.remove('fade-out');
-        }
-        setTimeout(() => {
-            if (!accepted && disclaimer) {
-                disclaimer.classList.add('active');
-                disclaimer.style.display = 'flex';
-                initDisclaimer();
-            } else {
-                setTimeout(() => {
-                    if (splash) {
-                        splash.classList.add('fade-out');
-                        setTimeout(() => {
-                            splash.style.display = 'none';
-                            showQuoteModal();
-                        }, 800);
-                    }
-                }, 3000);
+        const main = document.getElementById('mainApp');
+        const fab = document.getElementById('fabBtn');
+        
+        if (firstVisit) {
+            // 🎯 PRIMEIRA VISITA: Fluxo completo (Splash → Disclaimer → Quote)
+            console.log('[SmartWallet] Primeira visita detectada');
+            
+            if (splash) {
+                splash.style.display = 'flex';
+                splash.classList.remove('fade-out');
             }
-        }, 3500);
+            
+            setTimeout(() => {
+                if (!accepted && disclaimer) {
+                    // Mostra disclaimer
+                    disclaimer.classList.add('active');
+                    disclaimer.style.display = 'flex';
+                    initDisclaimer();
+                } else {
+                    // Disclaimer já aceito, vai para quote
+                    setTimeout(() => {
+                        if (splash) {
+                            splash.classList.add('fade-out');
+                            setTimeout(() => {
+                                splash.style.display = 'none';
+                                if (main) main.style.display = 'block';
+                                if (fab) fab.style.display = 'flex';
+                                showQuoteModal();
+                                // Marca como não sendo mais primeira visita
+                                localStorage.setItem('smartwallet_first_visit', 'false');
+                            }, 800);
+                        }
+                    }, 3000);
+                }
+            }, 3500);
+        } else {
+            // 🔄 REFRESH/RETORNO: Pula splash, mostra apenas Quote Modal
+            console.log('[SmartWallet] Retorno detectado - pulando splash');
+            
+            // Esconde splash imediatamente
+            if (splash) {
+                splash.style.display = 'none';
+            }
+            
+            // Mostra app principal imediatamente
+            if (main) main.style.display = 'block';
+            if (fab) fab.style.display = 'flex';
+            
+            // Mostra quote modal após pequeno delay (UX suave)
+            setTimeout(() => {
+                showQuoteModal();
+            }, 500);
+        }
     });
-
+	
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('mainMenu');
         const info = document.getElementById('infoMenu');
