@@ -1934,17 +1934,23 @@
                     this.updateAccountBalance(accountId, monthTotal);
                 }
                 
-                this.clearCache(); 
-                this.saveTransactions(); 
-                this.render(); 
-                this.updateCharts(); 
-                this.updateAlertBadge();
-                this.showToast('✅ ' + createdCount + ' ' + this.t('recurringCreated'));
-                closeModal('newTransactionModal'); 
-                this.clearForm();
-                this.checkNegativeBalance();
-                return;
-            }
+            this.clearCache(); 
+            this.saveTransactions(); 
+            this.render(); 
+            this.updateCharts(); 
+            this.updateAlertBadge();
+            this.checkNegativeBalance();
+            
+            // CORREÇÃO v4.4.4: Perguntar se quer continuar inserindo
+            askContinueOrClose(
+                'newTransactionModal',
+                '✅ ' + this.t('transactionAdded'),
+                () => {
+                    // Callback para limpar form e reabrir
+                    this.clearForm();
+                    openModal('newTransactionModal');
+                }
+            );
 
             const transaction = {
                 id: this.generateUniqueId(), 
@@ -2091,16 +2097,23 @@
                 recurrence: recurrenceData
             };
 
-            this.updateAccountBalance(accountId, newAmount);
-            this.clearCache(); 
-            this.saveTransactions(); 
-            this.render();
-            this.updateCharts(); 
-            this.updateAlertBadge();
-            closeModal('editModal');
-            this.showToast('✅ ' + this.t('transactionUpdated'));
-            this.checkNegativeBalance();
-        }
+                this.clearCache(); 
+                this.saveTransactions(); 
+                this.render(); 
+                this.updateCharts(); 
+                this.updateAlertBadge();
+                this.checkNegativeBalance();
+                
+                // CORREÇÃO v4.4.4: Perguntar se quer continuar inserindo
+                askContinueOrClose(
+                    'newTransactionModal',
+                    '✅ ' + createdCount + ' ' + this.t('recurringCreated'),
+                    () => {
+                        this.clearForm();
+                        openModal('newTransactionModal');
+                    }
+                );
+                return;
 
         deleteFromEdit() {
             if (!this.currentEditId) return;
@@ -2557,9 +2570,26 @@
             this.saveCards(); 
             this.populatePaymentMethodSelects(); 
             this.renderCreditCardsList();
-            closeModal('newCardModal');
-            this.showToast('✅ ' + (id ? this.t('cardUpdated') : this.t('cardCreated')));
-        }
+            
+            // CORREÇÃO v4.4.4: Perguntar se quer continuar inserindo (apenas em criação)
+            if (id) {
+                closeModal('newCardModal');
+                this.showToast('✅ ' + this.t('cardUpdated'));
+            } else {
+                askContinueOrClose(
+                    'newCardModal',
+                    '✅ ' + this.t('cardCreated'),
+                    () => {
+                        document.getElementById('cardEditId').value = '';
+                        document.getElementById('cardForm').reset();
+                        document.getElementById('cardClosingDay').value = 20;
+                        document.getElementById('cardDueDay').value = 27;
+                        document.getElementById('cardColor').value = '#6366f1';
+                        document.getElementById('newCardTitle').textContent = 'Novo Cartão';
+                        openModal('newCardModal');
+                    }
+                );
+            }
 
         deleteCard(id) {
             if (!confirm('Excluir este cartão?')) return;
@@ -2800,12 +2830,25 @@
             setTimeout(() => { printWindow.focus(); printWindow.print(); }, 300);
         }
 
+        // CORREÇÃO v4.4.4: Backup com proteção contra splash screen no mobile
         exportBackup() {
-            if (this.isSaving) return;
+            if (this.isSaving) {
+                this.showToast('⏳ Aguarde, backup em andamento...');
+                return;
+            }
             this.isSaving = true;
+            
+            // CORREÇÃO v4.4.4: Timeout de segurança para liberar isSaving
+            const safetyTimeout = setTimeout(() => {
+                if (this.isSaving) {
+                    console.warn('[SmartWallet] Timeout de segurança ativado - liberando isSaving');
+                    this.isSaving = false;
+                }
+            }, 30000); // 30 segundos
+            
             try {
                 const backup = {
-                    version: '4.4.3', exportDate: new Date().toISOString(), appName: 'Smart Wallet', 
+                    version: '4.4.4', exportDate: new Date().toISOString(), appName: 'Smart Wallet', 
                     language: this.getLanguage(), currency: this.getCurrency(), transactions: this.transactions,
                     categories: this.categories, accounts: this.accounts, cards: this.cards,
                     darkMode: this.darkMode, privacyOn: this.privacyOn, settings: this.settings
@@ -2813,14 +2856,30 @@
                 const jsonString = JSON.stringify(backup, null, 2);
                 const blob = new Blob(['\ufeff' + jsonString], { type: 'application/json;charset=utf-8' });
                 const fileName = this.generateTimestamp() + '_backup.json';
+                
                 saveFileWithPicker(blob, fileName, 'application/json').then(result => {
+                    clearTimeout(safetyTimeout);
                     if (result === 'saved' || result === 'downloaded') {
                         localStorage.setItem('smartwallet_last_backup', Date.now().toString());
                         this.showToast('✅ ' + this.t('backupExported'));
                         this.updateSettingsUI();
+                    } else if (result === 'error') {
+                        this.showToast('❌ Erro ao gerar backup. Tente novamente.');
                     }
-                }).catch(e => this.showToast('❌ ' + e.message)).finally(() => { this.isSaving = false; });
-            } catch (e) { this.isSaving = false; this.showToast('❌ Erro: ' + e.message); }
+                    // CORREÇÃO v4.4.4: Garantir que isSaving seja resetado
+                    this.isSaving = false;
+                }).catch(e => {
+                    clearTimeout(safetyTimeout);
+                    console.error('[SmartWallet] Erro no backup:', e);
+                    this.showToast('❌ ' + e.message);
+                    this.isSaving = false;
+                });
+            } catch (e) {
+                clearTimeout(safetyTimeout);
+                console.error('[SmartWallet] Erro crítico no backup:', e);
+                this.isSaving = false;
+                this.showToast('❌ Erro: ' + e.message);
+            }
         }
 
         importBackup() {
@@ -2920,8 +2979,24 @@
             if (id) { for (let i = 0; i < this.accounts.length; i++) { if (this.accounts[i].id === id) { this.accounts[i] = { id, name, type, balance, color }; break; } } } 
             else { this.accounts.push({ id: this.generateUniqueId(), name, type, balance, color }); }
             this.clearCache(); this.saveAccounts(); this.populateAccountSelects(); this.renderAccountsList(); this.render(); this.updateDashboard(); this.checkNegativeBalance();
-            closeModal('newAccountModal'); this.showToast(id ? '✅ Conta atualizada!' : '✅ Conta cadastrada!');
-        }
+            
+            // CORREÇÃO v4.4.4: Perguntar se quer continuar inserindo (apenas em criação)
+            if (id) {
+                closeModal('newAccountModal');
+                this.showToast('✅ Conta atualizada!');
+            } else {
+                askContinueOrClose(
+                    'newAccountModal',
+                    '✅ Conta cadastrada!',
+                    () => {
+                        document.getElementById('accountEditId').value = '';
+                        document.getElementById('accountForm').reset();
+                        document.getElementById('accountColor').value = '#6366f1';
+                        document.getElementById('newAccountTitle').textContent = 'Nova Conta';
+                        openModal('newAccountModal');
+                    }
+                );
+            }
 
         deleteAccount(id) {
             if (!confirm('Excluir esta conta?')) return;
@@ -3051,10 +3126,28 @@
                 for (let i = 0; i < this.accounts.length; i++) { if (this.accounts[i].id === id) { this.accounts[i] = { id, name, type: 'investment', balance: current, color: this.accounts[i].color || '#10b981' }; break; } }
             } else {
                 this.accounts.push({ id: this.generateUniqueId(), name, type: 'investment', balance: current, color: '#10b981' });
-            }
             this.saveAccounts(); this.clearCache(); this.renderInvestmentsModal(); this.updateInvestmentChart(); this.renderAccountsList(); this.updateDashboard();
-            closeModal('newInvestmentModal'); this.showToast(id ? '✅ Aplicação atualizada!' : '✅ Aplicação cadastrada!');
-        }
+            
+            // CORREÇÃO v4.4.4: Perguntar se quer continuar inserindo (apenas em criação)
+            if (id) {
+                closeModal('newInvestmentModal');
+                this.showToast('✅ Aplicação atualizada!');
+            } else {
+                askContinueOrClose(
+                    'newInvestmentModal',
+                    '✅ Aplicação cadastrada!',
+                    () => {
+                        document.getElementById('investmentEditId').value = '';
+                        document.getElementById('investmentName').value = '';
+                        document.getElementById('investmentInitial').value = '';
+                        document.getElementById('investmentCurrent').value = '';
+                        document.getElementById('investmentDate').value = new Date().toISOString().split('T')[0];
+                        document.getElementById('investmentRate').value = '';
+                        document.getElementById('newInvestmentTitle').textContent = 'Nova Aplicação';
+                        openModal('newInvestmentModal');
+                    }
+                );
+            }
 
         deleteInvestment(id) {
             if (!confirm('Excluir esta aplicação?')) return;
@@ -3146,7 +3239,16 @@
             this.transactions.push({ id: this.generateUniqueId(), date: date, amount: amount, category: isFromInvestment ? 'resgate' : 'reserva_aplicacao', description: description + ' (entrada)', statusOk: true, paymentMethod: 'transfer', accountId: toId });
             try {
                 this.clearCache(); this.saveTransactions(); this.saveAccounts(); this.render(); this.renderAccountsList(); this.updateDashboard(); this.checkNegativeBalance();
-                closeModal('transferModal'); this.showToast('✅ Transferência realizada!');
+                // CORREÇÃO v4.4.4: Perguntar se quer continuar inserindo
+                askContinueOrClose(
+                    'transferModal',
+                    '✅ Transferência realizada!',
+                    () => {
+                        document.getElementById('transferForm').reset();
+                        document.getElementById('transferDate').value = new Date().toISOString().split('T')[0];
+                        openModal('transferModal');
+                    }
+                );
             } catch (e) {
                 fromAcc.balance = originalFromBalance; toAcc.balance = originalToBalance; this.saveAccounts(); this.showToast('❌ Erro na transferência: ' + e.message);
             }
@@ -3210,6 +3312,35 @@
     }
     window.showConfirm = showConfirm;
 
+    // CORREÇÃO v4.4.4: Função para perguntar se quer continuar inserindo
+    function askContinueOrClose(modalId, successMessage, clearFormCallback) {
+        return new Promise((resolve) => {
+            // Mostrar toast de sucesso
+            if (successMessage) smartwallet.showToast(successMessage);
+            
+            // Perguntar se quer continuar
+            showConfirm(
+                '✅ Operação Concluída!',
+                successMessage + '<br><br>Deseja inserir outro registro?'
+            ).then(wantContinue => {
+                if (wantContinue) {
+                    // Reabrir modal limpo
+                    if (clearFormCallback && typeof clearFormCallback === 'function') {
+                        clearFormCallback();
+                    }
+                    // Manter modal aberto
+                    resolve(true);
+                } else {
+                    // Fechar modal
+                    closeModal(modalId);
+                    resolve(false);
+                }
+            });
+        });
+    }
+    
+    window.askContinueOrClose = askContinueOrClose;
+    
     // ===== HELPERS DE MODAIS =====
     function openModal(id) {
         const modal = document.getElementById(id); if (!modal) return;
@@ -3354,6 +3485,16 @@
     window.openManualFromWhatsNew = function() { closeWhatsNewModal(); setTimeout(() => { openManualModal(); }, 300); };
 
     // ===== EVENT LISTENERS GLOBAIS =====
+
+    // CORREÇÃO v4.4.4: Prevenir recarregamento acidental durante backup
+    window.addEventListener('beforeunload', (e) => {
+        if (window.smartwallet && window.smartwallet.isSaving) {
+            e.preventDefault();
+            e.returnValue = 'Backup em andamento. Deseja realmente sair?';
+            return e.returnValue;
+        }
+    });
+    
     window.addEventListener('load', () => {
         const dateEl = document.getElementById('printDate');
         if (dateEl) dateEl.textContent = 'Gerado em: ' + new Date().toLocaleString('pt-BR');
