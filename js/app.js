@@ -1017,7 +1017,45 @@
             if (alertNeg) alertNeg.checked = this.settings.alertNegativeBalance;
             if (blockNeg) blockNeg.checked = this.settings.blockNegativeBalance;
             if (autoBackup) autoBackup.checked = this.settings.autoBackupEnabled;
-            if (notifyBills) { notifyBills.checked = this.settings.notifyBills; notifyBills.disabled = !('Notification' in window) || Notification.permission !== 'granted'; }
+            
+            // CORREÇÃO v4.4.4: Permitir ativar notificações via toggle
+            if (notifyBills) {
+                notifyBills.checked = this.settings.notifyBills;
+                // Só desabilita se o navegador não suporta notificações
+                notifyBills.disabled = !('Notification' in window);
+                
+                // Adicionar listener para solicitar permissão ao clicar
+                notifyBills.addEventListener('change', () => {
+                    if (notifyBills.checked && 'Notification' in window) {
+                        if (Notification.permission === 'granted') {
+                            this.settings.notifyBills = true;
+                            this.saveSettings();
+                            this.showToast('✅ Notificações ativadas!');
+                        } else if (Notification.permission === 'denied') {
+                            notifyBills.checked = false;
+                            this.showToast('❌ Notificações bloqueadas pelo navegador. Habilite nas configurações do navegador.');
+                        } else {
+                            // permission === 'default' - precisa solicitar
+                            Notification.requestPermission().then(permission => {
+                                if (permission === 'granted') {
+                                    this.settings.notifyBills = true;
+                                    this.saveSettings();
+                                    this.showToast('✅ Notificações ativadas!');
+                                } else {
+                                    notifyBills.checked = false;
+                                    this.showToast('❌ Permissão negada. Notificações desativadas.');
+                                }
+                                this.updateSettingsUI();
+                            });
+                        }
+                    } else if (!notifyBills.checked) {
+                        this.settings.notifyBills = false;
+                        this.saveSettings();
+                        this.showToast('🔕 Notificações desativadas.');
+                    }
+                });
+            }
+            
             if (pageSize) pageSize.value = this.settings.pageSize.toString();
             
             if (lastBackupDate) {
@@ -1031,10 +1069,15 @@
             }
             
             if (notificationsStatus) {
-                if (!('Notification' in window)) notificationsStatus.textContent = '❌ Não suportado';
-                else if (Notification.permission === 'granted') notificationsStatus.textContent = '✅ Ativado';
-                else if (Notification.permission === 'denied') notificationsStatus.textContent = '❌ Bloqueado';
-                else notificationsStatus.textContent = '⏳ Pendente';
+                if (!('Notification' in window)) {
+                    notificationsStatus.textContent = '❌ Não suportado';
+                } else if (Notification.permission === 'granted') {
+                    notificationsStatus.textContent = '✅ Ativado';
+                } else if (Notification.permission === 'denied') {
+                    notificationsStatus.textContent = '❌ Bloqueado pelo navegador';
+                } else {
+                    notificationsStatus.textContent = '⏳ Pendente - clique no toggle para ativar';
+                }
             }
         }
 
