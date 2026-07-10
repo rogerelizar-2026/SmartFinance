@@ -53,7 +53,7 @@ const FINANCIAL_QUOTES = [
     { text: "Quem compra o que não precisa, rouba a si mesmo.", author: "Provérbio Popular" }
 ];
 
-const manualHTML = '<div class="manual-cover"><h1>📘 Manual do Usuário</h1><h2>Smart Wallet Brasil</h2><p>Controle Financeiro Pessoal Inteligente</p><p class="version">Versão 4.4.4 - 2026</p><p class="author">Idealizado por RogerElizar™</p></div><div class="manual-quote"><p>"Toda boa dádiva e todo dom perfeito vêm do alto, descendo do Pai das luzes."</p><div class="quote-author">— Tiago 1:17</div></div><h2>🎯 Bem-vindo ao Smart Wallet!</h2><p>Parabéns por dar o primeiro passo rumo à sua <strong>liberdade financeira</strong>!</p><h2> Novidades v4.4.4</h2><ul><li><strong>Continuar Inserindo:</strong> Após salvar, pergunte se quer adicionar outro registro</li><li><strong>Backup Mobile:</strong> Corrigido bug que voltava para splash screen</li><li><strong>Splash Inteligente:</strong> Aparece apenas na primeira visita</li><li><strong>Contas de Investimento:</strong> Separadas do saldo unificado</li></ul><h2>📱 Instalação como WebApp</h2><ol><li>Acesse o site pelo navegador</li><li>Procure o ícone de instalação</li><li>Confirme a instalação</li></ol><div class="manual-blessing"><h3>🙏 É Isso! 💰</h3><div class="manual-quote"><p>Que Deus abençoe sua jornada financeira.</p><div class="quote-author">Com amor e orações,<br>RogerElizar®</div></div></div>';
+const manualHTML = '<div class="manual-cover"><h1>📘 Manual do Usuário</h1><h2>Smart Wallet Brasil</h2><p>Controle Financeiro Pessoal Inteligente</p><p class="version">Versão 4.4.4 - 2026</p><p class="author">Idealizado por RogerElizar™</p></div><div class="manual-quote"><p>"Toda boa dádiva e todo dom perfeito vêm do alto, descendo do Pai das luzes."</p><div class="quote-author">— Tiago 1:17</div></div><h2>🎯 Bem-vindo ao Smart Wallet!</h2><p>Parabéns por dar o primeiro passo rumo à sua <strong>liberdade financeira</strong>!</p><h2>🆕 Novidades v4.4.4</h2><ul><li><strong>Correções de Bugs:</strong> Backup, datas, confirmações e investimentos corrigidos</li><li><strong>Modal de Confirmação:</strong> Substituído confirm() nativo por modal customizado</li><li><strong>Investimentos:</strong> Salvamento e carregamento corrigidos</li></ul><h2>📱 Instalação como WebApp</h2><ol><li>Acesse o site pelo navegador</li><li>Procure o ícone de instalação</li><li>Confirme a instalação</li></ol><div class="manual-blessing"><h3>🙏 É Isso! </h3><div class="manual-quote"><p>Que Deus abençoe sua jornada financeira.</p><div class="quote-author">Com amor e orações,<br>RogerElizar®</div></div></div>';
 
 // ===== TRADUÇÕES v4.4.4 =====
 const TRANSLATIONS = {
@@ -86,7 +86,7 @@ const TRANSLATIONS = {
         completed: 'Concluído',
         pending: 'Pendente',
         incomeGroup: '💰 Receitas',
-        expenseGroup: '💸 Despesas',
+        expenseGroup: ' Despesas',
         allCards: 'Todos Cartões',
         allCategories: 'Todas as categorias',
         allAccounts: 'Todas as contas',
@@ -232,7 +232,7 @@ const TRANSLATIONS = {
         negativeBalanceAlert: 'Warning: {count} account(s) with negative balance!',
         negativeBalanceBlocked: '❌ Insufficient balance! Transaction blocked.',
         settingsSaved: 'Settings saved!',
-        autoBackupSuggested: '💾 Backup your data!',
+        autoBackupSuggested: ' Backup your data!',
         lastBackup: 'Last backup: {date}',
         neverBackedUp: 'Never done',
         notificationsEnabled: 'Notifications enabled!',
@@ -248,11 +248,21 @@ const CURRENCIES = {
     'USD': { symbol: '$', code: 'USD', locale: 'en-US', name: 'US Dollar' }
 };
 
-// ===== CORREÇÃO v4.4.4: Função robusta para download =====
+// ===== CORREÇÃO v4.4.4: Função para ler datas corretamente (sem bug de fuso horário) =====
+function parseDate(dateString) {
+    if (!dateString) return new Date();
+    const parts = dateString.split('-');
+    if (parts.length !== 3) return new Date(dateString);
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+}
+
+// ===== CORREÇÃO v4.4.4: Função robusta para download em todos os dispositivos =====
 async function saveFileWithPicker(blob, suggestedName, mimeType) {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isDesktopChrome = !isMobile && window.showSaveFilePicker && navigator.userAgent.indexOf('Chrome') > -1;
-    
     if (isDesktopChrome) {
         try {
             const ext = suggestedName.split('.').pop().toLowerCase();
@@ -277,7 +287,6 @@ async function saveFileWithPicker(blob, suggestedName, mimeType) {
             console.warn('[SmartWallet] File System Access API falhou:', err);
         }
     }
-    
     try {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -379,7 +388,7 @@ class SmartWallet {
     saveCategories() { try { localStorage.setItem('smartwallet_categories', JSON.stringify(this.categories)); } catch(e) {} }
     saveAccounts() { try { localStorage.setItem('smartwallet_accounts', JSON.stringify(this.accounts)); } catch(e) {} }
     saveCards() { try { localStorage.setItem('smartwallet_cards', JSON.stringify(this.cards)); } catch(e) {} }
-    saveInvestments() { try { localStorage.setItem('smartwallet_investments', JSON.stringify(this.investments)); } catch(e) {} }
+    saveInvestments() { try { localStorage.setItem('smartwallet_investments', JSON.stringify(this.investments)); } catch(e) {} } // CORREÇÃO: Função criada
     clearCache() { this._cache = {}; }
 
     // ===== CONFIGURAÇÕES =====
@@ -442,14 +451,14 @@ class SmartWallet {
     applyCurrency() { this.clearCache(); this.render(); this.updateCharts(); this.updateCurrencySelectorVisibility(); }
     updateCurrencySelectorVisibility() { const lang = this.getLanguage(); const currencyItem = document.getElementById('currencyMenuItem'); if (currencyItem) currencyItem.style.display = lang === 'en-US' ? 'flex' : 'none'; }
 
-     formatCurrency(value) {
-         const currency = this.getCurrency();
-         const data = CURRENCIES[currency];
-         return new Intl.NumberFormat(data.locale, { style: 'currency', currency: data.code, minimumFractionDigits: 2, maximumFractionDigits: 2, notation: 'standard' }).format(value || 0);
-     }
-      // ===== INICIALIZAÇÃO =====
+    formatCurrency(value) {
+        const currency = this.getCurrency();
+        const data = CURRENCIES[currency];
+        return new Intl.NumberFormat(data.locale, { style: 'currency', currency: data.code, minimumFractionDigits: 2, maximumFractionDigits: 2, notation: 'standard' }).format(value || 0);
+    }
+        // ===== INICIALIZAÇÃO =====
     init() {
-        console.log('✅ Smart Wallet v4.4.4 inicializado');
+        console.log('✅ Smart Wallet v4.4.3 inicializado');
         this.applyTheme();
         this.applyPrivacy();
         this.applyDemoBadge();
@@ -485,10 +494,10 @@ class SmartWallet {
         }
         if (infoDemoBtn && infoDemoText) {
             if (this.demoMode) {
-                infoDemoText.textContent = 'Encerrar Demonstração';
+                infoDemoText.textContent = '🔴 Encerrar Demonstração';
                 infoDemoBtn.classList.add('demo-active');
             } else {
-                infoDemoText.textContent = 'Modo Demonstração';
+                infoDemoText.textContent = '🎯 Modo Demonstração';
                 infoDemoBtn.classList.remove('demo-active');
             }
         }
@@ -526,7 +535,7 @@ class SmartWallet {
                 });
             }
         });
-    
+
         const recurringCheckbox = document.getElementById('recurring');
         if (recurringCheckbox) {
             recurringCheckbox.addEventListener('change', function() {
@@ -969,7 +978,7 @@ class SmartWallet {
     async toggleDemoMode() {
         if (this.demoMode) {
             const confirmed = await showConfirm(
-                'Encerrar Demonstração?',
+                '⚠️ Encerrar Demonstração?',
                 'Encerrar modo demonstração e limpar todos os dados?<br><br>Esta ação não pode ser desfeita.'
             );
             if (confirmed) {
@@ -981,7 +990,7 @@ class SmartWallet {
             }
         } else {
             const confirmed = await showConfirm(
-                'Carregar Demonstração?',
+                '🎯 Carregar Demonstração?',
                 'Carregar dados de exemplo?<br><br>Seus dados atuais serão substituídos pelos dados de demonstração.<br><br>Recomendamos fazer backup antes de continuar.'
             );
             if (confirmed) {
@@ -1014,7 +1023,7 @@ class SmartWallet {
                 paymentMethod: 'pix',
                 accountId: 'acc1'
             });
-        this.transactions.push({
+            this.transactions.push({
                 id: this.generateUniqueId() + '_alg_' + m,
                 date: new Date(month.getFullYear(), month.getMonth(), 10).toISOString().split('T')[0],
                 amount: -1500,
@@ -1266,7 +1275,18 @@ class SmartWallet {
             }
         });
     }
-      // ===== TRANSAÇÕES DO MÊS =====
+        // ===== CORREÇÃO v4.4.4: Função para ler datas corretamente =====
+    parseDate(dateString) {
+        if (!dateString) return new Date();
+        const parts = dateString.split('-');
+        if (parts.length !== 3) return new Date(dateString);
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        return new Date(year, month, day);
+    }
+
+    // ===== TRANSAÇÕES DO MÊS =====
     getMonthTransactions(date) {
         if (!date) date = this.currentMonth;
         if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
@@ -1280,7 +1300,7 @@ class SmartWallet {
         if (this._cache.monthTransactions[key]) return this._cache.monthTransactions[key];
         const m = date.getMonth(), y = date.getFullYear();
         const result = this.transactions.filter(t => {
-            const d = new Date(t.date + 'T12:00:00');
+            const d = this.parseDate(t.date);
             return d.getMonth() === m && d.getFullYear() === y;
         });
         this._cache.monthTransactions[key] = result;
@@ -1292,7 +1312,7 @@ class SmartWallet {
         const m = date.getMonth(), y = date.getFullYear();
         return this.transactions.filter(t => {
             if (t.paymentMethod !== 'card:' + cardId || t.amount >= 0) return false;
-            const d = new Date(t.date + 'T12:00:00');
+            const d = this.parseDate(t.date);
             return d.getMonth() === m && d.getFullYear() === y;
         });
     }
@@ -1303,7 +1323,7 @@ class SmartWallet {
         return this.transactions.filter(t => {
             if (t.paymentMethod !== 'card:' + cardId) return false;
             if (t.amount >= 0) return false;
-            const tDate = new Date(t.date + 'T12:00:00');
+            const tDate = this.parseDate(t.date);
             return tDate >= start && tDate <= end;
         });
     }
@@ -1340,7 +1360,7 @@ class SmartWallet {
             const currentVal = sel.value;
             sel.innerHTML = '<option value="">' + self.t('selectPayment') + '</option>';
             const group = document.createElement('optgroup');
-            group.label = '💰 Formas de Pagamento';
+            group.label = ' Formas de Pagamento';
             PAYMENT_METHODS.forEach(pm => {
                 const opt = document.createElement('option');
                 opt.value = pm.id;
@@ -1376,7 +1396,7 @@ class SmartWallet {
             self.accounts.forEach(acc => {
                 const opt = document.createElement('option');
                 opt.value = acc.id;
-                opt.textContent = (acc.type === 'checking' ? '💳 ' : ' ') + acc.name;
+                opt.textContent = (acc.type === 'checking' ? '💳 ' : '📈 ') + acc.name;
                 sel.appendChild(opt);
             });
             sel.value = val;
@@ -1391,7 +1411,7 @@ class SmartWallet {
         this.cards.forEach(card => {
             const opt = document.createElement('option');
             opt.value = 'card:' + card.id;
-            opt.textContent = ' ' + card.name;
+            opt.textContent = '💳 ' + card.name;
             sel.appendChild(opt);
         });
         sel.value = val;
@@ -1459,7 +1479,7 @@ class SmartWallet {
 
     formatDate(d) {
         if (!d) return '';
-        return new Date(d + 'T12:00:00').toLocaleDateString(this.getLanguage());
+        return this.parseDate(d).toLocaleDateString(this.getLanguage());
     }
 
     escapeHtml(t) {
@@ -1488,8 +1508,6 @@ class SmartWallet {
         const mt = this.getMonthTransactions();
         let inc = 0, exp = 0;
         mt.forEach(t => { if (t.amount > 0) inc += t.amount; else exp += t.amount; });
-        // CORREÇÃO v4.4.3: Saldo unificado = APENAS contas correntes (checking)
-        // Contas de investimento são separadas e consultadas apenas no menu Aplicações
         let unifiedBalance = 0;
         this.accounts.forEach(a => {
             if (a.type === 'checking') unifiedBalance += (parseFloat(a.balance) || 0);
@@ -1549,17 +1567,13 @@ class SmartWallet {
             const incomeLabel = document.createElement('tr');
             incomeLabel.innerHTML = '<td colspan="' + (isMobile ? 1 : 7) + '" class="transactions-group-label income"><span>' + this.t('incomeGroup') + ' (' + incomeGroup.length + ')</span><span class="group-total">+ ' + this.formatCurrency(totalIncome) + '</span></td>';
             fragment.appendChild(incomeLabel);
-            incomeGroup.forEach(t => {
-                fragment.appendChild(self.createTransactionRow(t, isMobile));
-            });
+            incomeGroup.forEach(t => { fragment.appendChild(self.createTransactionRow(t, isMobile)); });
         }
         if (expenseGroup.length > 0) {
             const expenseLabel = document.createElement('tr');
             expenseLabel.innerHTML = '<td colspan="' + (isMobile ? 1 : 7) + '" class="transactions-group-label expense"><span>' + this.t('expenseGroup') + ' (' + expenseGroup.length + ')</span><span class="group-total">- ' + this.formatCurrency(Math.abs(totalExpense)) + '</span></td>';
             fragment.appendChild(expenseLabel);
-            expenseGroup.forEach(t => {
-                fragment.appendChild(self.createTransactionRow(t, isMobile));
-            });
+            expenseGroup.forEach(t => { fragment.appendChild(self.createTransactionRow(t, isMobile)); });
         }
         tbody.innerHTML = '';
         tbody.appendChild(fragment);
@@ -1574,12 +1588,6 @@ class SmartWallet {
         const statusClass = t.statusOk ? 'status-done' : 'status-pending';
         const statusText = t.statusOk ? this.t('completed') : this.t('pending');
         const paymentName = this.getPaymentMethodName(t.paymentMethod);
-        let recurrenceHtml = '-';
-        if (t.recurrence) {
-            if (t.recurrence.type === 'installment') recurrenceHtml = '<span class="recurrence-badge">📅 ' + (t.recurrence.current || 1) + '/' + (t.recurrence.total || 1) + '</span>';
-            else if (t.recurrence.type === 'monthly') recurrenceHtml = '<span class="recurrence-badge"> Mensal</span>';
-            else if (t.recurrence.type === 'yearly') recurrenceHtml = '<span class="recurrence-badge">📅 Anual</span>';
-        }
         const tr = document.createElement('tr');
         tr.className = 'transaction-row';
         tr.dataset.id = t.id;
@@ -1613,39 +1621,19 @@ class SmartWallet {
         const dir = this.sortDirection === 'asc' ? 1 : -1;
         let va, vb;
         switch(col) {
-            case 'date':
-                va = new Date(a.date).getTime();
-                vb = new Date(b.date).getTime();
-                break;
-            case 'description':
-                va = (a.description || '').toLowerCase();
-                vb = (b.description || '').toLowerCase();
-                break;
-            case 'category':
-                va = this.getCategoryById(a.category).name.toLowerCase();
-                vb = this.getCategoryById(b.category).name.toLowerCase();
-                break;
+            case 'date': va = new Date(a.date).getTime(); vb = new Date(b.date).getTime(); break;
+            case 'description': va = (a.description || '').toLowerCase(); vb = (b.description || '').toLowerCase(); break;
+            case 'category': va = this.getCategoryById(a.category).name.toLowerCase(); vb = this.getCategoryById(b.category).name.toLowerCase(); break;
             case 'account':
                 const accA = this.getAccountById(a.accountId);
                 const accB = this.getAccountById(b.accountId);
                 va = (accA ? accA.name : '').toLowerCase();
                 vb = (accB ? accB.name : '').toLowerCase();
                 break;
-            case 'payment':
-                va = this.getPaymentMethodName(a.paymentMethod).toLowerCase();
-                vb = this.getPaymentMethodName(b.paymentMethod).toLowerCase();
-                break;
-            case 'status':
-                va = a.statusOk ? 1 : 0;
-                vb = b.statusOk ? 1 : 0;
-                break;
-            case 'amount':
-                va = a.amount;
-                vb = b.amount;
-                break;
-            default:
-                va = a.id;
-                vb = b.id;
+            case 'payment': va = this.getPaymentMethodName(a.paymentMethod).toLowerCase(); vb = this.getPaymentMethodName(b.paymentMethod).toLowerCase(); break;
+            case 'status': va = a.statusOk ? 1 : 0; vb = b.statusOk ? 1 : 0; break;
+            case 'amount': va = a.amount; vb = b.amount; break;
+            default: va = a.id; vb = b.id;
         }
         if (va < vb) return -1 * dir;
         if (va > vb) return 1 * dir;
@@ -1711,7 +1699,6 @@ class SmartWallet {
         const accountId = document.getElementById('transactionAccount').value;
         const isRecurring = document.getElementById('recurring').checked;
         const signedAmount = this.currentTransactionType === 'expense' ? -Math.abs(amount) : Math.abs(amount);
-        // Verificar saldo negativo antes de adicionar
         if (this.settings.blockNegativeBalance && signedAmount < 0) {
             const acc = this.getAccountById(accountId);
             if (acc) {
@@ -1725,11 +1712,11 @@ class SmartWallet {
         if (isRecurring) {
             const recurrenceType = document.getElementById('recurrenceType').value;
             const recurrenceCount = parseInt(document.getElementById('recurrenceCount').value);
-            if (recurrenceCount < 2) { 
-                this.showToast('❌ ' + this.t('minInstallments')); 
-                return; 
+            if (recurrenceCount < 2) {
+                this.showToast('❌ ' + this.t('minInstallments'));
+                return;
             }
-            const startDate = new Date(date + 'T12:00:00');
+            const startDate = this.parseDate(date);
             const recurrenceGroupId = this.generateUniqueId();
             let createdCount = 0;
             for (let i = 0; i < recurrenceCount; i++) {
@@ -1749,30 +1736,29 @@ class SmartWallet {
                 }
                 const uniqueId = this.generateUniqueId() + '_' + i;
                 this.transactions.push({
-                    id: uniqueId, 
-                    date: transDate.toISOString().split('T')[0], 
+                    id: uniqueId,
+                    date: transDate.toISOString().split('T')[0],
                     amount: signedAmount,
-                    category: category, 
-                    description: transDescription, 
+                    category: category,
+                    description: transDescription,
                     statusOk: statusOk,
-                    paymentMethod: paymentMethod, 
+                    paymentMethod: paymentMethod,
                     accountId: accountId,
-                    recurrence: { 
-                        groupId: recurrenceGroupId, 
-                        type: recurrenceType, 
-                        total: recurrenceCount, 
-                        current: i + 1 
+                    recurrence: {
+                        groupId: recurrenceGroupId,
+                        type: recurrenceType,
+                        total: recurrenceCount,
+                        current: i + 1
                     }
                 });
                 createdCount++;
             }
-            // CORREÇÃO v4.4.3: Atualizar saldo de TODAS as parcelas no mês atual
             const currentMonth = this.currentMonth.getMonth();
             const currentYear = this.currentMonth.getFullYear();
             const monthTrans = this.transactions.filter(t => {
                 if (t.accountId !== accountId) return false;
                 if (!t.recurrence || t.recurrence.groupId !== recurrenceGroupId) return false;
-                const d = new Date(t.date);
+                const d = this.parseDate(t.date);
                 return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
             });
             if (monthTrans.length > 0) {
@@ -1780,25 +1766,30 @@ class SmartWallet {
                 monthTrans.forEach(t => monthTotal += t.amount);
                 this.updateAccountBalance(accountId, monthTotal);
             }
-            this.clearCache(); 
-            this.saveTransactions(); 
-            this.render(); 
-            this.updateCharts(); 
+            this.clearCache();
+            this.saveTransactions();
+            this.render();
+            this.updateCharts();
             this.updateAlertBadge();
-            this.showToast('✅ ' + createdCount + ' ' + this.t('recurringCreated'));
-            closeModal('newTransactionModal'); 
-            this.clearForm();
             this.checkNegativeBalance();
+            askContinueOrClose(
+                'newTransactionModal',
+                createdCount + ' ' + this.t('recurringCreated'),
+                () => {
+                    this.clearForm();
+                    openModal('newTransactionModal');
+                }
+            );
             return;
         }
         const transaction = {
-            id: this.generateUniqueId(), 
-            date: date, 
+            id: this.generateUniqueId(),
+            date: date,
             amount: signedAmount,
-            category: category, 
-            description: description, 
+            category: category,
+            description: description,
             statusOk: statusOk,
-            paymentMethod: paymentMethod, 
+            paymentMethod: paymentMethod,
             accountId: accountId
         };
         this.transactions.push(transaction);
@@ -1807,15 +1798,20 @@ class SmartWallet {
             this.transactions.pop();
             return;
         }
-        this.clearCache(); 
-        this.saveTransactions(); 
-        this.render(); 
-        this.updateCharts(); 
+        this.clearCache();
+        this.saveTransactions();
+        this.render();
+        this.updateCharts();
         this.updateAlertBadge();
-        this.showToast('✅ ' + this.t('transactionAdded'));
-        closeModal('newTransactionModal'); 
-        this.clearForm();
         this.checkNegativeBalance();
+        askContinueOrClose(
+            'newTransactionModal',
+            this.t('transactionAdded'),
+            () => {
+                this.clearForm();
+                openModal('newTransactionModal');
+            }
+        );
     }
 
     clearForm() {
@@ -1877,21 +1873,14 @@ class SmartWallet {
         const accountId = document.getElementById('editTransactionAccount').value;
         let idx = -1;
         for (let i = 0; i < this.transactions.length; i++) {
-            if (String(this.transactions[i].id) === String(id)) { 
-                idx = i; 
-                break; 
-            }
+            if (String(this.transactions[i].id) === String(id)) { idx = i; break; }
         }
-        if (idx === -1) { 
-            this.showToast('❌ ' + this.t('transactionNotFound')); 
-            return; 
-        }
+        if (idx === -1) { this.showToast('❌ ' + this.t('transactionNotFound')); return; }
         const oldTransaction = this.transactions[idx];
         const oldAmount = oldTransaction.amount;
         const oldAccountId = oldTransaction.accountId;
         const newAmount = this.currentEditType === 'expense' ? -Math.abs(amount) : Math.abs(amount);
         if (oldAccountId) this.updateAccountBalance(oldAccountId, -oldAmount);
-        // Verificar saldo negativo
         if (this.settings.blockNegativeBalance && newAmount < 0) {
             const acc = this.getAccountById(accountId);
             if (acc) {
@@ -1908,62 +1897,45 @@ class SmartWallet {
         if (isRecurring) {
             const recurrenceType = document.getElementById('editRecurrenceType').value;
             const recurrenceCount = parseInt(document.getElementById('editRecurrenceCount').value);
-            recurrenceData = { 
-                type: recurrenceType, 
-                total: recurrenceCount, 
-                current: oldTransaction.recurrence ? oldTransaction.recurrence.current : 1 
-            };
+            recurrenceData = { type: recurrenceType, total: recurrenceCount, current: oldTransaction.recurrence ? oldTransaction.recurrence.current : 1 };
         }
         this.transactions[idx] = {
-            id: oldTransaction.id, 
-            date: date, 
-            amount: newAmount,
-            category: category, 
-            description: document.getElementById('editDescription').value,
+            id: oldTransaction.id, date: date, amount: newAmount,
+            category: category, description: document.getElementById('editDescription').value,
             statusOk: document.getElementById('editStatusOk').checked,
-            paymentMethod: paymentMethod, 
-            accountId: accountId,
+            paymentMethod: paymentMethod, accountId: accountId,
             recurrence: recurrenceData
         };
         this.updateAccountBalance(accountId, newAmount);
-        this.clearCache(); 
-        this.saveTransactions(); 
-        this.render();
-        this.updateCharts(); 
-        this.updateAlertBadge();
+        this.clearCache(); this.saveTransactions(); this.render();
+        this.updateCharts(); this.updateAlertBadge();
         closeModal('editModal');
         this.showToast('✅ ' + this.t('transactionUpdated'));
         this.checkNegativeBalance();
     }
 
-     async deleteFromEdit() {
-         if (!this.currentEditId) return;
-         const confirmed = await showConfirm('Excluir esta transação?', 'Esta ação não pode ser desfeita.');
-         if (!confirmed) return;
+    async deleteFromEdit() {
+        if (!this.currentEditId) return;
+        const confirmed = await showConfirm('Excluir esta transação?', 'Esta ação não pode ser desfeita.');
+        if (!confirmed) return;
         const t = this.transactions.find(x => x.id === this.currentEditId);
         if (t && t.accountId) this.updateAccountBalance(t.accountId, -t.amount);
         this.transactions = this.transactions.filter(x => x.id !== this.currentEditId);
-        this.clearCache(); 
-        this.saveTransactions(); 
-        this.render();
-        this.updateCharts(); 
-        this.updateAlertBadge();
+        this.clearCache(); this.saveTransactions(); this.render();
+        this.updateCharts(); this.updateAlertBadge();
         closeModal('editModal');
         this.showToast('✅ ' + this.t('transactionDeleted'));
         this.checkNegativeBalance();
     }
 
-     async deleteTransaction(id) {
-         const confirmed = await showConfirm('Excluir esta transação?', 'Esta ação não pode ser desfeita.');
-         if (!confirmed) return;
+    async deleteTransaction(id) {
+        const confirmed = await showConfirm('Excluir esta transação?', 'Esta ação não pode ser desfeita.');
+        if (!confirmed) return;
         const t = this.transactions.find(x => x.id === id);
         if (t && t.accountId) this.updateAccountBalance(t.accountId, -t.amount);
         this.transactions = this.transactions.filter(x => x.id !== id);
-        this.clearCache(); 
-        this.saveTransactions(); 
-        this.render();
-        this.updateCharts(); 
-        this.updateAlertBadge();
+        this.clearCache(); this.saveTransactions(); this.render();
+        this.updateCharts(); this.updateAlertBadge();
         this.showToast('✅ ' + this.t('transactionDeleted'));
         this.checkNegativeBalance();
     }
@@ -1978,11 +1950,7 @@ class SmartWallet {
                 : '<svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
         }
         if (Object.keys(this.charts).length > 0) {
-            try { 
-                this.updateChartsTheme(); 
-            } catch (e) { 
-                console.warn('[SmartWallet] Erro tema:', e); 
-            }
+            try { this.updateChartsTheme(); } catch (e) { console.warn('[SmartWallet] Erro tema:', e); }
         }
     }
 
@@ -2008,123 +1976,55 @@ class SmartWallet {
     }
 
     initCharts() {
-        if (typeof Chart === 'undefined') { 
-            console.error('[SmartWallet] Chart.js não carregado!'); 
-            return; 
-        }
+        if (typeof Chart === 'undefined') { console.error('[SmartWallet] Chart.js não carregado!'); return; }
         const colors = this.getChartColors();
         const lineOpts = {
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { 
-                    position: 'top', 
-                    labels: { color: colors.text } 
-                } 
-            },
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { color: colors.text } } },
             scales: {
-                y: { 
-                    beginAtZero: true, 
-                    ticks: { color: colors.textSecondary }, 
-                    grid: { color: colors.grid } 
-                },
-                x: { 
-                    ticks: { color: colors.textSecondary }, 
-                    grid: { color: colors.grid } 
-                }
+                y: { beginAtZero: true, ticks: { color: colors.textSecondary }, grid: { color: colors.grid } },
+                x: { ticks: { color: colors.textSecondary }, grid: { color: colors.grid } }
             }
         };
         try {
             this.charts.line = new Chart(document.getElementById('lineChart').getContext('2d'), {
                 type: 'line',
-                data: { 
-                    labels: [], 
-                    datasets: [
-                        { 
-                            label: this.t('income_plural'), 
-                            data: [], 
-                            borderColor: '#10b981', 
-                            backgroundColor: 'rgba(16,185,129,0.1)', 
-                            tension: 0.4 
-                        },
-                        { 
-                            label: this.t('expense_plural'), 
-                            data: [], 
-                            borderColor: '#ef4444', 
-                            backgroundColor: 'rgba(239,68,68,0.1)', 
-                            tension: 0.4 
-                        }
-                    ]
-                },
+                data: { labels: [], datasets: [
+                    { label: this.t('income_plural'), data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.4 },
+                    { label: this.t('expense_plural'), data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', tension: 0.4 }
+                ]},
                 options: lineOpts
             });
-        } catch (e) { 
-            console.error('[SmartWallet] Erro line:', e); 
-        }
+        } catch (e) { console.error('[SmartWallet] Erro line:', e); }
         try {
             this.charts.pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
                 type: 'bar',
-                data: { 
-                    labels: [], 
-                    datasets: [{ data: [], backgroundColor: [] }] 
-                },
+                data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
                 options: {
-                    indexAxis: 'y', 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false } 
-                    },
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { 
-                            beginAtZero: true, 
-                            ticks: { color: colors.textSecondary }, 
-                            grid: { color: colors.grid } 
-                        },
-                        y: { 
-                            ticks: { color: colors.textSecondary }, 
-                            grid: { color: colors.grid } 
-                        }
+                        x: { beginAtZero: true, ticks: { color: colors.textSecondary }, grid: { color: colors.grid } },
+                        y: { ticks: { color: colors.textSecondary }, grid: { color: colors.grid } }
                     },
-                    barPercentage: 0.3, 
-                    categoryPercentage: 0.5
+                    barPercentage: 0.3, categoryPercentage: 0.5
                 }
             });
-        } catch (e) { 
-            console.error('[SmartWallet] Erro pie:', e); 
-        }
+        } catch (e) { console.error('[SmartWallet] Erro pie:', e); }
         try {
             this.charts.cards = new Chart(document.getElementById('cardsChart').getContext('2d'), {
                 type: 'line',
-                data: { 
-                    labels: [], 
-                    datasets: [] 
-                },
+                data: { labels: [], datasets: [] },
                 options: {
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            position: 'top', 
-                            labels: { color: colors.text } 
-                        } 
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { color: colors.text } } },
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            ticks: { color: colors.textSecondary }, 
-                            grid: { color: colors.grid } 
-                        },
-                        x: { 
-                            ticks: { color: colors.textSecondary }, 
-                            grid: { color: colors.grid } 
-                        }
+                        y: { beginAtZero: true, ticks: { color: colors.textSecondary }, grid: { color: colors.grid } },
+                        x: { ticks: { color: colors.textSecondary }, grid: { color: colors.grid } }
                     }
                 }
             });
-        } catch (e) { 
-            console.error('[SmartWallet] Erro cards:', e); 
-        }
+        } catch (e) { console.error('[SmartWallet] Erro cards:', e); }
         this.updateCharts();
     }
 
@@ -2141,9 +2041,7 @@ class SmartWallet {
                 if (chart.options.scales?.x?.grid) chart.options.scales.x.grid.color = colors.grid;
                 if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = colors.text;
                 chart.update('none');
-            } catch (e) { 
-                console.warn('[SmartWallet] Erro tema gráfico:', e); 
-            }
+            } catch (e) { console.warn('[SmartWallet] Erro tema gráfico:', e); }
         });
     }
 
@@ -2157,10 +2055,7 @@ class SmartWallet {
             lLabels.push(monthsShort[d.getMonth()] + '/' + d.getFullYear());
             const mt = this.getMonthTransactions(d);
             let inc = 0, exp = 0;
-            mt.forEach(t => { 
-                if (t.amount > 0) inc += t.amount; 
-                else exp += t.amount; 
-            });
+            mt.forEach(t => { if (t.amount > 0) inc += t.amount; else exp += t.amount; });
             lInc.push(inc);
             lExp.push(Math.abs(exp));
         }
@@ -2203,12 +2098,9 @@ class SmartWallet {
                     data.push(total);
                 }
                 cardDatasets.push({
-                    label: card.name, 
-                    data: data,
-                    borderColor: card.color, 
-                    backgroundColor: card.color + '20',
-                    tension: 0.4, 
-                    fill: false
+                    label: card.name, data: data,
+                    borderColor: card.color, backgroundColor: card.color + '20',
+                    tension: 0.4, fill: false
                 });
             });
             this.charts.cards.data.labels = cardLabels;
@@ -2221,15 +2113,12 @@ class SmartWallet {
 
     // ===== ALERTAS =====
     updateAlertBadge() {
-        const today = new Date(); 
-        today.setHours(0, 0, 0, 0);
-        const in3Days = new Date(today); 
-        in3Days.setDate(in3Days.getDate() + 3);
-        const tomorrow = new Date(today); 
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const in3Days = new Date(today); in3Days.setDate(in3Days.getDate() + 3);
+        const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
         const bills = this.transactions.filter(t => {
             if (t.statusOk || t.amount >= 0) return false;
-            const tDate = new Date(t.date + 'T12:00:00');
+            const tDate = this.parseDate(t.date);
             return tDate <= in3Days;
         });
         let closingAlertsCount = 0;
@@ -2253,7 +2142,6 @@ class SmartWallet {
                 btn.classList.remove('has-alerts');
             }
         }
-        // Notificações push
         if (this.settings.notifyBills && bills.length > 0 && Notification.permission === 'granted') {
             const notifKey = 'smartwallet_notif_' + today.toISOString().split('T')[0];
             if (!localStorage.getItem(notifKey)) {
@@ -2265,7 +2153,618 @@ class SmartWallet {
             }
         }
     }
-      // ===== EXPORTAÇÕES =====
+
+    checkNegativeBalance() {
+        if (!this.settings.alertNegativeBalance) {
+            const alert = document.getElementById('negativeBalanceAlert');
+            if (alert) alert.style.display = 'none';
+            return;
+        }
+        const negativeAccounts = this.accounts.filter(a =>
+            a.type === 'checking' && (parseFloat(a.balance) || 0) < 0
+        );
+        const alert = document.getElementById('negativeBalanceAlert');
+        const message = document.getElementById('negativeBalanceMessage');
+        if (negativeAccounts.length > 0 && alert && message) {
+            const names = negativeAccounts.map(a => a.name).join(', ');
+            message.textContent = this.t('negativeBalanceAlert', { count: negativeAccounts.length }) + ' (' + names + ')';
+            alert.style.display = 'block';
+        } else if (alert) {
+            alert.style.display = 'none';
+        }
+    }
+
+    checkAutoBackup() {
+        if (!this.settings.autoBackupEnabled) return;
+        const lastBackup = localStorage.getItem('smartwallet_last_backup');
+        const now = Date.now();
+        const weekMs = 7 * 24 * 60 * 60 * 1000;
+        if (!lastBackup || (now - parseInt(lastBackup)) > weekMs) {
+            if (this.transactions.length > 10) {
+                setTimeout(() => {
+                    this.showToast(this.t('autoBackupSuggested'));
+                }, 3000);
+            }
+        }
+    }
+
+    async toggleDemoMode() {
+        if (this.demoMode) {
+            const confirmed = await showConfirm(
+                '️ Encerrar Demonstração?',
+                'Encerrar modo demonstração e limpar todos os dados?<br><br>Esta ação não pode ser desfeita.'
+            );
+            if (confirmed) {
+                this.clearAllData(true);
+                this.demoMode = false;
+                localStorage.setItem('smartwallet_demo', 'false');
+                this.applyDemoBadge();
+                this.showToast(this.t('demoCleared'));
+            }
+        } else {
+            const confirmed = await showConfirm(
+                '🎯 Carregar Demonstração?',
+                'Carregar dados de exemplo?<br><br>Seus dados atuais serão substituídos pelos dados de demonstração.<br><br>Recomendamos fazer backup antes de continuar.'
+            );
+            if (confirmed) {
+                this.loadDemoData();
+            }
+        }
+    }
+
+    loadDemoData() {
+        this.accounts = [
+            { id: 'acc1', name: 'Conta Corrente Principal', type: 'checking', balance: 3500, color: '#6366f1' },
+            { id: 'acc2', name: 'Poupança', type: 'checking', balance: 8200, color: '#10b981' },
+            { id: 'acc3', name: 'Investimentos', type: 'investment', balance: 39000, color: '#f59e0b' }
+        ];
+        this.cards = [
+            { id: 'card1', name: 'Nubank', brand: 'Mastercard', last4: '4532', closingDay: 15, dueDay: 22, limit: 5000, color: '#8b5cf6' },
+            { id: 'card2', name: 'Inter', brand: 'Visa', last4: '8821', closingDay: 20, dueDay: 27, limit: 3000, color: '#f97316' }
+        ];
+        this.transactions = [];
+        const today = new Date();
+        for (let m = 0; m < 6; m++) {
+            const month = new Date(today.getFullYear(), today.getMonth() - m, 1);
+            this.transactions.push({
+                id: this.generateUniqueId() + '_sal_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 5).toISOString().split('T')[0],
+                amount: 5000,
+                category: 'salario',
+                description: 'Salário Mensal',
+                statusOk: true,
+                paymentMethod: 'pix',
+                accountId: 'acc1'
+            });
+            this.transactions.push({
+                id: this.generateUniqueId() + '_alg_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 10).toISOString().split('T')[0],
+                amount: -1500,
+                category: 'casa',
+                description: 'Aluguel Apartamento',
+                statusOk: true,
+                paymentMethod: 'auto',
+                accountId: 'acc1'
+            });
+            for (let d = 0; d < 4; d++) {
+                this.transactions.push({
+                    id: this.generateUniqueId() + '_sup_' + m + '_' + d,
+                    date: new Date(month.getFullYear(), month.getMonth(), 3 + d * 7).toISOString().split('T')[0],
+                    amount: -(200 + Math.floor(Math.random() * 300)),
+                    category: 'despensa',
+                    description: 'Supermercado - Compra ' + (d + 1),
+                    statusOk: true,
+                    paymentMethod: 'card:card1',
+                    accountId: 'acc1'
+                });
+            }
+            this.transactions.push({
+                id: this.generateUniqueId() + '_trans_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 15).toISOString().split('T')[0],
+                amount: -350,
+                category: 'transporte',
+                description: 'Combustível + Uber',
+                statusOk: true,
+                paymentMethod: 'debit',
+                accountId: 'acc1'
+            });
+            this.transactions.push({
+                id: this.generateUniqueId() + '_laz_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 20).toISOString().split('T')[0],
+                amount: -400,
+                category: 'lazer',
+                description: 'Cinema + Restaurante',
+                statusOk: true,
+                paymentMethod: 'card:card2',
+                accountId: 'acc1'
+            });
+            this.transactions.push({
+                id: this.generateUniqueId() + '_inv_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 25).toISOString().split('T')[0],
+                amount: -1000,
+                category: 'reserva_aplicacao',
+                description: 'Aporte mensal investimentos',
+                statusOk: true,
+                paymentMethod: 'transfer',
+                accountId: 'acc1'
+            });
+        }
+        this.investments = [
+            { id: 'inv1', name: 'CDB Banco XYZ', type: 'cdb', initial: 10000, current: 11200, date: '2025-01-15', rate: 12, accountId: 'acc3' },
+            { id: 'inv2', name: 'Tesouro IPCA+ 2029', type: 'tesouro', initial: 5000, current: 5800, date: '2025-03-10', rate: 6.5, accountId: 'acc3' }
+        ];
+        this.demoMode = true;
+        localStorage.setItem('smartwallet_demo', 'true');
+        this.clearCache();
+        this.saveTransactions();
+        this.saveAccounts();
+        this.saveCards();
+        this.saveInvestments();
+        this.applyDemoBadge();
+        this.populateCategorySelects();
+        this.populatePaymentMethodSelects();
+        this.populateAccountSelects();
+        this.populateCardFilter();
+        this.render();
+        this.updateCharts();
+        this.updateAlertBadge();
+        this.checkNegativeBalance();
+        this.showToast(this.t('demoLoaded'));
+    }
+
+    requestNotifications() {
+        if (!('Notification' in window)) {
+            this.showToast(this.t('notificationsNotSupported'));
+            return;
+        }
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                this.settings.notifyBills = true;
+                this.saveSettings();
+                this.updateSettingsUI();
+                this.showToast(this.t('notificationsEnabled'));
+                new Notification('Smart Wallet', {
+                    body: 'Notificações ativadas com sucesso!',
+                    icon: 'favicon.svg'
+                });
+            } else {
+                this.showToast(this.t('notificationsDenied'));
+            }
+        });
+    }
+
+    saveSettingsFromModal() {
+        this.settings.alertNegativeBalance = document.getElementById('alertNegativeBalance').checked;
+        this.settings.blockNegativeBalance = document.getElementById('blockNegativeBalance').checked;
+        this.settings.autoBackupEnabled = document.getElementById('autoBackupEnabled').checked;
+        this.settings.notifyBills = document.getElementById('notifyBills').checked;
+        this.settings.pageSize = parseInt(document.getElementById('settingsPageSize').value);
+        this.pageSize = this.settings.pageSize;
+        this.currentPage = 1;
+        this.saveSettings();
+        this.checkNegativeBalance();
+        this.render();
+        closeModal('settingsModal');
+        this.showToast(this.t('settingsSaved'));
+    }
+
+    updateSettingsUI() {
+        const alertNeg = document.getElementById('alertNegativeBalance');
+        const blockNeg = document.getElementById('blockNegativeBalance');
+        const autoBackup = document.getElementById('autoBackupEnabled');
+        const notifyBills = document.getElementById('notifyBills');
+        const pageSize = document.getElementById('settingsPageSize');
+        const lastBackupDate = document.getElementById('lastBackupDate');
+        const notificationsStatus = document.getElementById('notificationsStatus');
+        if (alertNeg) alertNeg.checked = this.settings.alertNegativeBalance;
+        if (blockNeg) blockNeg.checked = this.settings.blockNegativeBalance;
+        if (autoBackup) autoBackup.checked = this.settings.autoBackupEnabled;
+        if (notifyBills) {
+            notifyBills.checked = this.settings.notifyBills;
+            notifyBills.disabled = !('Notification' in window) || Notification.permission !== 'granted';
+        }
+        if (pageSize) pageSize.value = this.settings.pageSize.toString();
+        if (lastBackupDate) {
+            const lastBackup = localStorage.getItem('smartwallet_last_backup');
+            if (lastBackup) {
+                const date = new Date(parseInt(lastBackup));
+                lastBackupDate.textContent = this.t('lastBackup', { date: date.toLocaleString(this.getLanguage()) });
+            } else {
+                lastBackupDate.textContent = this.t('neverBackedUp');
+            }
+        }
+        if (notificationsStatus) {
+            if (!('Notification' in window)) {
+                notificationsStatus.textContent = '❌ Não suportado';
+            } else if (Notification.permission === 'granted') {
+                notificationsStatus.textContent = '✅ Ativado';
+            } else if (Notification.permission === 'denied') {
+                notificationsStatus.textContent = '❌ Bloqueado';
+            } else {
+                notificationsStatus.textContent = '⏳ Pendente';
+            }
+        }
+    }
+
+    renderWaterfallChart() {
+        const canvas = document.getElementById('waterfallChart');
+        if (!canvas) return;
+        const months = this.getMonths('short');
+        const labels = [];
+        const incomeData = [];
+        const expenseData = [];
+        const balanceData = [];
+        let runningBalance = 0;
+        for (let i = -5; i <= 0; i++) {
+            const d = new Date(this.currentMonth);
+            d.setMonth(d.getMonth() + i);
+            labels.push(months[d.getMonth()] + '/' + d.getFullYear());
+            const mt = this.getMonthTransactions(d);
+            let inc = 0, exp = 0;
+            mt.forEach(t => {
+                if (t.amount > 0) inc += t.amount;
+                else exp += Math.abs(t.amount);
+            });
+            incomeData.push(inc);
+            expenseData.push(exp);
+            runningBalance += (inc - exp);
+            balanceData.push(runningBalance);
+        }
+        const colors = this.getChartColors();
+        if (this.charts.waterfall) {
+            this.charts.waterfall.destroy();
+        }
+        this.charts.waterfall = new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: incomeData,
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: '#10b981',
+                        borderWidth: 1,
+                        stack: 'stack1'
+                    },
+                    {
+                        label: 'Despesas',
+                        data: expenseData.map(v => -v),
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: '#ef4444',
+                        borderWidth: 1,
+                        stack: 'stack1'
+                    },
+                    {
+                        label: 'Saldo Acumulado',
+                        data: balanceData,
+                        type: 'line',
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: colors.text }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                const value = Math.abs(context.parsed.y);
+                                label += smartwallet.formatCurrency(value);
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stacked: true,
+                        ticks: { color: colors.textSecondary },
+                        grid: { color: colors.grid }
+                    },
+                    y1: {
+                        position: 'right',
+                        ticks: { color: colors.textSecondary },
+                        grid: { display: false }
+                    },
+                    x: {
+                        stacked: true,
+                        ticks: { color: colors.textSecondary },
+                        grid: { color: colors.grid }
+                    }
+                }
+            }
+        });
+    }
+
+    // ===== FATURA DE CARTÃO =====
+    getInvoicePeriod(card, referenceDate) {
+        const refDate = referenceDate || this.cardModalMonth || new Date();
+        const year = refDate.getFullYear();
+        const month = refDate.getMonth();
+        const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+        const closingDay = Math.min(card.closingDay, lastDayOfMonth);
+        let closingDate = new Date(year, month, closingDay);
+        const previousClosingDate = new Date(closingDate);
+        previousClosingDate.setMonth(previousClosingDate.getMonth() - 1);
+        previousClosingDate.setDate(previousClosingDate.getDate() + 1);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const isClosed = closingDate < today;
+        let dueDate = new Date(closingDate);
+        if (isClosed) dueDate.setMonth(dueDate.getMonth() + 1);
+        dueDate.setDate(card.dueDay);
+        return { startDate: previousClosingDate, closingDate: closingDate, dueDate: dueDate, isClosed: isClosed };
+    }
+
+    calculateInvoiceTotal(purchases) {
+        let total = 0;
+        purchases.forEach(p => total += Math.abs(p.amount));
+        return total;
+    }
+
+    renderCreditCardsList() {
+        const container = document.getElementById('creditCardsList');
+        if (!container) return;
+        this.updateCardMonthLabel();
+        if (!this.cards.length) {
+            container.innerHTML = '<div style="text-align:center; padding:40px 20px; color:var(--text-secondary);"><div style="font-size:3rem; margin-bottom:12px; opacity:0.5;"></div><h3>Nenhum cartão cadastrado</h3></div>';
+            return;
+        }
+        const self = this;
+        const refDate = this.cardModalMonth;
+        let html = '<div class="credit-cards-grid">';
+        this.cards.forEach(card => {
+            const period = self.getInvoicePeriod(card, refDate);
+            const purchases = self.getCardTransactionsForPeriod(card.id, period.startDate, period.closingDate);
+            const total = self.calculateInvoiceTotal(purchases);
+            const available = card.limit - total;
+            const usedPct = Math.min(100, (total / card.limit) * 100);
+            html += '<div class="credit-card-visual" style="background:linear-gradient(135deg, ' + card.color + ' 0%, ' + self.adjustColor(card.color, -30) + ' 100%);" data-card-id="' + card.id + '">';
+            html += '<div class="cc-actions"><button class="cc-action-btn edit-card-btn" data-card-id="' + card.id + '">✏️</button><button class="cc-action-btn delete-card-btn" data-card-id="' + card.id + '">🗑️</button></div>';
+            html += '<div class="cc-header"><div class="cc-brand">' + self.escapeHtml(card.brand) + '</div><div class="cc-chip"></div></div>';
+            html += '<div class="cc-name">' + self.escapeHtml(card.name) + '</div>';
+            html += '<div class="cc-number">•••• •••• •••• ' + self.escapeHtml(card.last4 || '****') + '</div>';
+            html += '<div class="cc-footer"><div><div class="cc-label">Fatura Atual</div><div class="cc-value">' + self.formatCurrency(total) + '</div></div><div style="text-align:right;"><div class="cc-label">Disponível</div><div class="cc-value">' + self.formatCurrency(available) + '</div></div></div>';
+            html += '<div style="position:absolute; bottom:0; left:0; right:0; height:4px; background:rgba(0,0,0,0.3);"><div style="height:100%; width:' + usedPct + '%; background:' + (usedPct > 80 ? '#ef4444' : usedPct > 50 ? '#f59e0b' : '#10b981') + ';"></div></div>';
+            html += '</div>';
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        container.querySelectorAll('.credit-card-visual').forEach(cardEl => {
+            cardEl.addEventListener('click', () => {
+                const cardId = cardEl.dataset.cardId;
+                openInvoiceModal(cardId);
+            });
+        });
+        container.querySelectorAll('.edit-card-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                self.editCard(btn.dataset.cardId);
+            });
+        });
+        container.querySelectorAll('.delete-card-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                self.deleteCard(btn.dataset.cardId);
+            });
+        });
+    }
+
+    updateCardMonthLabel() {
+        const months = this.getMonths();
+        const label = document.getElementById('cardMonthLabel');
+        if (label) label.textContent = months[this.cardModalMonth.getMonth()] + ' ' + this.cardModalMonth.getFullYear();
+    }
+
+    adjustColor(color, amount) {
+        const hex = color.replace('#', '');
+        const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + amount));
+        const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + amount));
+        const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + amount));
+        return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+    }
+
+    saveCard() {
+        const fields = [
+            { id: 'cardName', label: this.t('informName'), required: true }
+        ];
+        if (!this.validateForm(fields)) return;
+        const id = document.getElementById('cardEditId').value;
+        const name = document.getElementById('cardName').value.trim();
+        const brand = document.getElementById('cardBrand').value;
+        const last4 = document.getElementById('cardLast4').value.trim();
+        const closingDay = parseInt(document.getElementById('cardClosingDay').value);
+        const dueDay = parseInt(document.getElementById('cardDueDay').value);
+        const limit = parseFloat(document.getElementById('cardLimit').value);
+        const color = document.getElementById('cardColor').value;
+        if (id) {
+            for (let i = 0; i < this.cards.length; i++) {
+                if (this.cards[i].id === id) { this.cards[i] = { id, name, brand, last4, closingDay, dueDay, limit, color }; break; }
+            }
+        } else {
+            this.cards.push({ id: this.generateUniqueId(), name, brand, last4, closingDay, dueDay, limit, color });
+        }
+        this.clearCache(); this.saveCards(); this.populatePaymentMethodSelects(); this.renderCreditCardsList();
+        closeModal('newCardModal');
+        this.showToast('✅ ' + (id ? this.t('cardUpdated') : this.t('cardCreated')));
+    }
+
+    async deleteCard(id) {
+        const confirmed = await showConfirm('Excluir este cartão?', 'Esta ação não pode ser desfeita.');
+        if (!confirmed) return;
+        this.cards = this.cards.filter(c => c.id !== id);
+        this.clearCache(); this.saveCards(); this.populatePaymentMethodSelects(); this.renderCreditCardsList();
+        this.showToast('✅ ' + this.t('cardRemoved'));
+    }
+
+    editCard(id) {
+        const card = this.getCardById(id); if (!card) return;
+        document.getElementById('cardEditId').value = card.id;
+        document.getElementById('cardName').value = card.name;
+        document.getElementById('cardBrand').value = card.brand;
+        document.getElementById('cardLast4').value = card.last4 || '';
+        document.getElementById('cardClosingDay').value = card.closingDay;
+        document.getElementById('cardDueDay').value = card.dueDay;
+        document.getElementById('cardLimit').value = card.limit;
+        document.getElementById('cardColor').value = card.color;
+        document.getElementById('newCardTitle').textContent = 'Editar Cartão';
+        openModal('newCardModal');
+    }
+
+    openInvoice(cardId, offset = 0) {
+        const card = this.getCardById(cardId);
+        if (!card) return;
+        this.currentInvoiceCardId = cardId;
+        this.currentInvoiceOffset = offset;
+        const refDate = new Date(this.cardModalMonth);
+        refDate.setMonth(refDate.getMonth() + offset);
+        const period = this.getInvoicePeriod(card, refDate);
+        const purchases = this.getCardTransactionsForPeriod(card.id, period.startDate, period.closingDate);
+        const total = this.calculateInvoiceTotal(purchases);
+        const minimum = total * 0.15;
+        const available = card.limit - total;
+        const self = this;
+        document.getElementById('invoiceTitle').textContent = this.t('invoice') + ' - ' + card.name;
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const daysUntilDue = Math.ceil((period.dueDate - today) / (1000 * 60 * 60 * 24));
+        let dueClass = '';
+        let dueText = this.formatDate(period.dueDate.toISOString().split('T')[0]);
+        if (daysUntilDue < 0) { dueClass = 'overdue'; dueText += ' (' + this.t('overdue') + ' ' + Math.abs(daysUntilDue) + ' ' + this.t('days') + ')'; }
+        else if (daysUntilDue === 0) { dueClass = 'overdue'; dueText += ' (' + this.t('dueToday') + ')'; }
+        else if (daysUntilDue <= 3) { dueText += ' (' + this.t('inDays', {days: daysUntilDue}) + ')'; }
+        if (period.isClosed) dueText += ' ✓ ' + this.t('closed');
+        let html = '<div class="invoice-period-display">';
+        html += '<div class="invoice-period-info"><div class="invoice-period-label"> ' + this.t('invoicePeriod') + '</div>';
+        html += '<div class="invoice-period-value">' + this.formatDate(period.startDate.toISOString().split('T')[0]) + ' até ' + this.formatDate(period.closingDate.toISOString().split('T')[0]) + '</div></div>';
+        html += '<div class="invoice-due-info"><div class="invoice-due-label">💳 ' + this.t('dueDate') + '</div>';
+        html += '<div class="invoice-due-value ' + dueClass + '">' + dueText + '</div></div></div>';
+        html += '<div style="background:var(--input-bg); border-radius:14px; padding:16px; margin-bottom:16px;">';
+        html += '<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-color);"><span style="color:var(--text-secondary);">' + this.t('limit') + '</span><span style="font-weight:600;">' + this.formatCurrency(card.limit) + '</span></div>';
+        html += '<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-color);"><span style="color:var(--text-secondary);">' + this.t('invoiceTotal') + '</span><span style="font-weight:600; color:var(--danger-color);">' + this.formatCurrency(total) + '</span></div>';
+        html += '<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-color);"><span style="color:var(--text-secondary);">' + this.t('minimum') + '</span><span style="font-weight:600;">' + this.formatCurrency(minimum) + '</span></div>';
+        html += '<div style="display:flex; justify-content:space-between; padding:12px 0 0 0; margin-top:4px; border-top:2px solid var(--border-color); font-weight:700;"><span>' + this.t('available') + '</span><span style="color:var(--success-color);">' + this.formatCurrency(available) + '</span></div></div>';
+        html += '<div style="display:flex; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:10px;">';
+        html += '<h3 style="font-size:1.1rem;">' + this.t('purchases') + ' (' + purchases.length + ')</h3>';
+        html += '<div style="display:flex; gap:8px;">';
+        html += '<button class="btn btn-secondary btn-small" id="exportInvoiceCsvBtn">📥 CSV</button>';
+        html += '<button class="btn btn-secondary btn-small" id="printInvoicePdfBtn">🖨️ PDF</button></div></div>';
+        html += '<div>';
+        if (purchases.length === 0) {
+            html += '<p style="text-align:center; padding:20px; color:var(--text-secondary);">' + this.t('noPurchases') + '</p>';
+        } else {
+            purchases.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(p => {
+                const cat = self.getCategoryById(p.category);
+                html += '<div style="background:var(--input-bg); border-radius:12px; padding:12px 16px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:12px;">';
+                html += '<div style="flex:1;"><div style="font-weight:600;">' + self.escapeHtml(p.description) + '</div>';
+                html += '<div style="font-size:0.8rem; color:var(--text-secondary); display:flex; gap:10px;"><span>' + self.formatDate(p.date) + '</span><span style="color:' + cat.color + ';">● ' + self.escapeHtml(cat.name) + '</span></div></div>';
+                html += '<div style="font-weight:700;">' + self.formatCurrency(Math.abs(p.amount)) + '</div>';
+                html += '<button class="btn btn-danger btn-small delete-invoice-item" data-id="' + p.id + '">🗑️</button></div>';
+            });
+        }
+        html += '</div>';
+        html += '<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">';
+        html += '<button class="btn btn-success" id="payInvoiceBtn">💰 ' + this.t('payInvoice') + '</button>';
+        html += '<button class="btn btn-secondary" data-close-modal="invoiceModal">' + this.t('close') + '</button></div>';
+        document.getElementById('invoiceContent').innerHTML = html;
+        openModal('invoiceModal');
+        document.getElementById('exportInvoiceCsvBtn').addEventListener('click', () => self.exportInvoiceCSV(cardId));
+        document.getElementById('printInvoicePdfBtn').addEventListener('click', () => self.printInvoicePDF(cardId));
+        document.getElementById('payInvoiceBtn').addEventListener('click', () => self.payInvoice(cardId));
+        document.querySelectorAll('.delete-invoice-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                self.deleteTransaction(btn.dataset.id);
+                self.openInvoice(cardId, offset);
+            });
+        });
+    }
+
+    navigateInvoice(direction) {
+        if (!this.currentInvoiceCardId) return;
+        this.currentInvoiceOffset += direction;
+        this.openInvoice(this.currentInvoiceCardId, this.currentInvoiceOffset);
+    }
+
+    async payInvoice(cardId) {
+        const card = this.getCardById(cardId);
+        if (!card) return;
+        const period = this.getInvoicePeriod(card);
+        const purchases = this.getCardTransactionsForPeriod(card.id, period.startDate, period.closingDate);
+        const total = this.calculateInvoiceTotal(purchases);
+        if (total <= 0) { this.showToast('❌ ' + this.t('emptyInvoice')); return; }
+        const confirmed = await showConfirm(this.t('confirmPayment'), this.formatCurrency(total) + '?');
+        if (!confirmed) return;
+        this.transactions.push({
+            id: this.generateUniqueId(), date: new Date().toISOString().split('T')[0],
+            amount: -total, category: 'servicos', description: 'Pagamento Fatura ' + card.name,
+            statusOk: false, paymentMethod: 'pix', accountId: ''
+        });
+        this.clearCache(); this.saveTransactions(); this.render(); this.updateCharts(); this.updateAlertBadge();
+        this.showToast('✅ ' + this.t('paymentRegistered'));
+    }
+
+    exportInvoiceCSV(cardId) {
+        const card = this.getCardById(cardId);
+        if (!card) return;
+        const period = this.getInvoicePeriod(card);
+        const purchases = this.getCardTransactionsForPeriod(card.id, period.startDate, period.closingDate);
+        const self = this;
+        let csv = '\ufeff' + this.t('invoice') + ' - ' + card.name + '\n';
+        csv += this.t('invoicePeriod') + ': ' + this.formatDate(period.startDate.toISOString().split('T')[0]) + ' a ' + this.formatDate(period.closingDate.toISOString().split('T')[0]) + '\n';
+        csv += this.t('dueDate') + ': ' + this.formatDate(period.dueDate.toISOString().split('T')[0]) + '\n\n';
+        csv += this.t('date') + ';' + this.t('description') + ';' + this.t('category') + ';' + this.t('value') + '\n';
+        purchases.forEach(p => {
+            const cat = self.getCategoryById(p.category);
+            csv += p.date + ';"' + (p.description || '').replace(/"/g,'""') + '";"' + cat.name + '";' + Math.abs(p.amount).toFixed(2) + '\n';
+        });
+        const total = this.calculateInvoiceTotal(purchases);
+        csv += '\n' + this.t('invoiceTotal') + ';;;' + total.toFixed(2) + '\n';
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const fileName = this.generateTimestamp() + '_fatura_' + card.name.replace(/\s+/g,'_') + '.csv';
+        saveFileWithPicker(blob, fileName, 'text/csv').then(result => {
+            if (result === 'saved' || result === 'downloaded') this.showToast('✅ ' + this.t('backupExported'));
+        }).catch(e => this.showToast('❌ ' + e.message));
+    }
+
+    printInvoicePDF(cardId) {
+        const card = this.getCardById(cardId);
+        if (!card) return;
+        const period = this.getInvoicePeriod(card);
+        const purchases = this.getCardTransactionsForPeriod(card.id, period.startDate, period.closingDate);
+        const total = this.calculateInvoiceTotal(purchases);
+        const self = this;
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) { alert('⚠️ ' + this.t('allowPopups')); return; }
+        const rows = purchases.sort((a,b) => new Date(a.date) - new Date(b.date)).map(p => {
+            const cat = self.getCategoryById(p.category);
+            return '<tr><td>' + self.formatDate(p.date) + '</td><td>' + self.escapeHtml(p.description) + '</td><td>' + self.escapeHtml(cat.name) + '</td><td style="text-align:right;">' + self.formatCurrency(Math.abs(p.amount)) + '</td></tr>';
+        }).join('');
+        const fileName = this.generateTimestamp() + '_fatura_' + card.name.replace(/\s+/g,'_') + '.pdf';
+        printWindow.document.write('<!DOCTYPE html><html><head><title>' + fileName + '</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;}.header{border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:30px;}.header h1{color:#6366f1;margin:0 0 5px 0;}table{width:100%;border-collapse:collapse;}th,td{padding:10px;text-align:left;border-bottom:1px solid #e5e7eb;}th{background:#f1f5f9;}.total{font-weight:700;font-size:1.2rem;}.footer{margin-top:40px;padding-top:20px;border-top:2px solid #6366f1;font-size:0.85rem;color:#64748b;text-align:center;}@media print{body{padding:20px;}}</style></head><body>');
+        printWindow.document.write('<div class="header"><h1>Fatura - ' + this.escapeHtml(card.name) + '</h1><div style="color:#64748b;">' + this.escapeHtml(card.brand) + ' •••• ' + this.escapeHtml(card.last4 || '****') + '</div></div>');
+        printWindow.document.write('<p><strong>Período:</strong> ' + this.formatDate(period.startDate.toISOString().split('T')[0]) + ' a ' + this.formatDate(period.closingDate.toISOString().split('T')[0]) + '</p>');
+        printWindow.document.write('<p><strong>Vencimento:</strong> ' + this.formatDate(period.dueDate.toISOString().split('T')[0]) + '</p>');
+        printWindow.document.write('<table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr></thead><tbody>' + rows + '</tbody>');
+        printWindow.document.write('<tfoot><tr class="total"><td colspan="3" style="text-align:right;">' + this.t('total') + ':</td><td>' + this.formatCurrency(total) + '</td></tr></tfoot></table>');
+        printWindow.document.write('<div class="footer">Smart Wallet • Gerado em ' + new Date().toLocaleString(this.getLanguage()) + '<br>Idealizado por RogerElizar™</div>');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.document.title = fileName;
+        setTimeout(() => { printWindow.focus(); printWindow.print(); }, 300);
+    }
+        // ===== EXPORTAÇÕES =====
     exportCSV() {
         const mt = this.getMonthTransactions();
         if (!mt.length) { this.showToast('❌ ' + this.t('noTransactions')); return; }
@@ -2323,119 +2822,83 @@ class SmartWallet {
         setTimeout(() => { printWindow.focus(); printWindow.print(); }, 300);
     }
 
-     exportBackup() {
-         if (this.isSaving) return;
-         this.isSaving = true;
-         try {
-             const backup = {
-                 version: '4.4.4',
-                 exportDate: new Date().toISOString(),
-                 appName: 'Smart Wallet',
-                 language: this.getLanguage(),
-                 currency: this.getCurrency(),
-                 transactions: this.transactions,
-                 categories: this.categories,
-                 accounts: this.accounts,
-                 cards: this.cards,
-                 investments: this.investments,
-                 darkMode: this.darkMode,
-                 privacyOn: this.privacyOn,
-                 settings: this.settings
-             };
-             const jsonString = JSON.stringify(backup, null, 2);
-             const blob = new Blob(['\ufeff' + jsonString], { type: 'application/json;charset=utf-8;' });
-             const fileName = this.generateTimestamp() + '_backup.json';
-             saveFileWithPicker(blob, fileName, 'application/json').then(result => {
-                 if (result === 'saved' || result === 'downloaded') {
-                     localStorage.setItem('smartwallet_last_backup', Date.now().toString());
-                     this.showToast('✅ ' + this.t('backupExported'));
-                     this.updateSettingsUI();
-                 }
-             }).catch(e => this.showToast('❌ ' + e.message))
-             .finally(() => { this.isSaving = false; });
-         } catch (e) {
-             this.isSaving = false;
-             this.showToast('❌ Erro: ' + e.message);
-         }
-     }
+    exportBackup() {
+        if (this.isSaving) return;
+        this.isSaving = true;
+        try {
+            const backup = {
+                version: '4.4.4',
+                exportDate: new Date().toISOString(),
+                appName: 'Smart Wallet',
+                language: this.getLanguage(),
+                currency: this.getCurrency(),
+                transactions: this.transactions,
+                categories: this.categories,
+                accounts: this.accounts,
+                cards: this.cards,
+                investments: this.investments,
+                darkMode: this.darkMode,
+                privacyOn: this.privacyOn,
+                settings: this.settings
+            };
+            const jsonString = JSON.stringify(backup, null, 2);
+            const blob = new Blob(['\ufeff' + jsonString], { type: 'application/json;charset=utf-8;' });
+            const fileName = this.generateTimestamp() + '_backup.json';
+            saveFileWithPicker(blob, fileName, 'application/json').then(result => {
+                if (result === 'saved' || result === 'downloaded') {
+                    localStorage.setItem('smartwallet_last_backup', Date.now().toString());
+                    this.showToast('✅ ' + this.t('backupExported'));
+                    this.updateSettingsUI();
+                }
+            }).catch(e => this.showToast('❌ ' + e.message))
+            .finally(() => { this.isSaving = false; });
+        } catch (e) {
+            this.isSaving = false;
+            this.showToast('❌ Erro: ' + e.message);
+        }
+    }
 
-     async importBackup() {
-         if (!window._pendingBackupData) { this.showToast('⚠️ Selecione um arquivo'); return; }
-         try {
-             let cleanData = window._pendingBackupData;
-             if (cleanData.charCodeAt(0) === 0xFEFF) cleanData = cleanData.substring(1);
-             cleanData = cleanData.trim();
-             if (!cleanData) { this.showToast('⚠️ Arquivo vazio!'); return; }
-             const data = JSON.parse(cleanData);
-             if (!data || typeof data !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
-             const confirmed = await showConfirm('️ Substituir TODOS os dados?', 'Esta ação não pode ser desfeita.');
-             if (!confirmed) return;
-             this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
-             this.categories = Array.isArray(data.categories) ? data.categories : this.categories;
-             this.accounts = Array.isArray(data.accounts) ? data.accounts : [];
-             this.cards = Array.isArray(data.cards) ? data.cards : [];
-             this.investments = Array.isArray(data.investments) ? data.investments : [];
-             if (typeof data.darkMode === 'boolean') this.darkMode = data.darkMode;
-             if (typeof data.privacyOn === 'boolean') this.privacyOn = data.privacyOn;
-             if (data.settings) this.settings = { ...this.settings, ...data.settings };
-             if (typeof data.language === 'string') localStorage.setItem('smartwallet_language', data.language);
-             if (typeof data.currency === 'string') localStorage.setItem('smartwallet_currency', data.currency);
-             this.pageSize = this.settings.pageSize || 20;
-             this.clearCache(); this.saveTransactions(); this.saveCategories();
-             this.saveAccounts(); this.saveCards(); this.saveInvestments();
-             this.saveSettings();
-             localStorage.setItem('smartwallet_dark', this.darkMode);
-             localStorage.setItem('smartwallet_privacy', this.privacyOn);
-             this.populateCategorySelects(); this.populatePaymentMethodSelects();
-             this.populateAccountSelects(); this.applyTheme(); this.applyPrivacy();
-             this.applyLanguage(); this.applyCurrency();
-             this.currentPage = 1;
-             this.render(); this.updateCharts(); this.updateAlertBadge();
-             this.checkNegativeBalance();
-             closeModal('importBackupModal');
-             this.showToast('✅ Backup restaurado!');
-             window._pendingBackupData = null;
-         } catch (e) {
-             this.showToast('⚠️ Erro: ' + e.message);
-         }
-     }
-    
-             // NOVO v4.5.0: Migrar dados se necessário
-             const migratedData = migrateData(data);
-             if ((data.dataVersion || 1) < DATA_VERSION) {
-                 console.log(`[SmartWallet] Migrando dados v${data.dataVersion || 1} → v${DATA_VERSION}`);
-             }
-             if (!confirm('⚠️ Substituir TODOS os dados?')) return;
-             this.transactions = Array.isArray(migratedData.transactions) ? migratedData.transactions : [];
-             this.categories = Array.isArray(migratedData.categories) ? migratedData.categories : this.categories;
-             this.accounts = Array.isArray(migratedData.accounts) ? migratedData.accounts : [];
-             this.cards = Array.isArray(migratedData.cards) ? migratedData.cards : [];
-             this.investments = Array.isArray(migratedData.investments) ? migratedData.investments : [];
-             if (typeof migratedData.darkMode === 'boolean') this.darkMode = migratedData.darkMode;
-             if (typeof migratedData.privacyOn === 'boolean') this.privacyOn = migratedData.privacyOn;
-             if (migratedData.settings) this.settings = { ...this.settings, ...migratedData.settings };
-             if (typeof data.language === 'string') localStorage.setItem('smartwallet_language', data.language);
-             if (typeof data.currency === 'string') localStorage.setItem('smartwallet_currency', data.currency);
-             this.pageSize = this.settings.pageSize || 20;
-             this.clearCache(); this.saveTransactions(); this.saveCategories();
-             this.saveAccounts(); this.saveCards(); this.saveInvestments();
-             this.saveSettings();
-             localStorage.setItem('smartwallet_dark', this.darkMode);
-             localStorage.setItem('smartwallet_privacy', this.privacyOn);
-             this.populateCategorySelects(); this.populatePaymentMethodSelects();
-             this.populateAccountSelects(); this.applyTheme(); this.applyPrivacy();
-             this.applyLanguage(); this.applyCurrency();
-             this.currentPage = 1;
-             this.render(); this.updateCharts(); this.updateAlertBadge();
-             this.checkNegativeBalance();
-             closeModal('importBackupModal');
-             this.showToast('✅ Backup restaurado!');
-             window._pendingBackupData = null;
-         } catch (e) {
-             this.showToast('⚠️ Erro: ' + e.message);
-         }
-     }
-    
+    async importBackup() {
+        if (!window._pendingBackupData) { this.showToast('⚠️ Selecione um arquivo'); return; }
+        try {
+            let cleanData = window._pendingBackupData;
+            if (cleanData.charCodeAt(0) === 0xFEFF) cleanData = cleanData.substring(1);
+            cleanData = cleanData.trim();
+            if (!cleanData) { this.showToast('⚠️ Arquivo vazio!'); return; }
+            const data = JSON.parse(cleanData);
+            if (!data || typeof data !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
+            const confirmed = await showConfirm('⚠️ Substituir TODOS os dados?', 'Esta ação não pode ser desfeita.');
+            if (!confirmed) return;
+            this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
+            this.categories = Array.isArray(data.categories) ? data.categories : this.categories;
+            this.accounts = Array.isArray(data.accounts) ? data.accounts : [];
+            this.cards = Array.isArray(data.cards) ? data.cards : [];
+            this.investments = Array.isArray(data.investments) ? data.investments : [];
+            if (typeof data.darkMode === 'boolean') this.darkMode = data.darkMode;
+            if (typeof data.privacyOn === 'boolean') this.privacyOn = data.privacyOn;
+            if (data.settings) this.settings = { ...this.settings, ...data.settings };
+            if (typeof data.language === 'string') localStorage.setItem('smartwallet_language', data.language);
+            if (typeof data.currency === 'string') localStorage.setItem('smartwallet_currency', data.currency);
+            this.pageSize = this.settings.pageSize || 20;
+            this.clearCache(); this.saveTransactions(); this.saveCategories();
+            this.saveAccounts(); this.saveCards(); this.saveInvestments();
+            this.saveSettings();
+            localStorage.setItem('smartwallet_dark', this.darkMode);
+            localStorage.setItem('smartwallet_privacy', this.privacyOn);
+            this.populateCategorySelects(); this.populatePaymentMethodSelects();
+            this.populateAccountSelects(); this.applyTheme(); this.applyPrivacy();
+            this.applyLanguage(); this.applyCurrency();
+            this.currentPage = 1;
+            this.render(); this.updateCharts(); this.updateAlertBadge();
+            this.checkNegativeBalance();
+            closeModal('importBackupModal');
+            this.showToast('✅ Backup restaurado!');
+            window._pendingBackupData = null;
+        } catch (e) {
+            this.showToast('⚠️ Erro: ' + e.message);
+        }
+    }
+
     importCSV() {
         if (!window._pendingCsvData) { this.showToast('Selecione um arquivo CSV'); return; }
         const replace = document.getElementById('csvReplaceData').checked;
@@ -2508,12 +2971,12 @@ class SmartWallet {
         return result;
     }
 
-     async clearAllData(skipConfirm = false) {
-         if (!skipConfirm) {
-             const confirmed = await showConfirm('Tem certeza?', 'Esta ação é IRREVERSÍVEL!');
-             if (!confirmed) return;
-         }
-        ;
+    async clearAllData(skipConfirm = false) {
+        if (!skipConfirm) {
+            const confirmed = await showConfirm('Tem certeza?', 'Esta ação é IRREVERSÍVEL!');
+            if (!confirmed) return;
+        }
+        this.transactions = [];
         this.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
         this.accounts = [];
         this.cards = [];
@@ -2564,9 +3027,9 @@ class SmartWallet {
         this.showToast(id ? '✅ Conta atualizada!' : '✅ Conta cadastrada!');
     }
 
-     async deleteAccount(id) {
-         const confirmed = await showConfirm('Excluir esta conta?', 'Esta ação não pode ser desfeita.');
-         if (!confirmed) return;
+    async deleteAccount(id) {
+        const confirmed = await showConfirm('Excluir conta?', 'Esta ação não pode ser desfeita.');
+        if (!confirmed) return;
         this.accounts = this.accounts.filter(a => a.id !== id);
         this.clearCache(); this.saveAccounts();
         this.populateAccountSelects(); this.renderAccountsList(); this.render();
@@ -2602,7 +3065,7 @@ class SmartWallet {
                 const linkedInvestments = self.investments.filter(inv => inv.accountId === acc.id);
                 if (linkedInvestments.length > 0) {
                     investmentsHtml = '<div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.2); font-size:0.85rem;">';
-                    investmentsHtml += '<div style="opacity:0.9; margin-bottom:6px;">📊 Aplicações vinculadas:</div>';
+                    investmentsHtml += '<div style="opacity:0.9; margin-bottom:6px;"> Aplicações vinculadas:</div>';
                     linkedInvestments.forEach(inv => {
                         const typeLabels = { cdb: 'CDB', tesouro: 'Tesouro', lci: 'LCI/LCA', fundo: 'Fundo', acao: 'Ações', fiis: 'FIIs', poupanca: 'Poupança', outro: 'Outro' };
                         investmentsHtml += '<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>' + (typeLabels[inv.type] || inv.type) + ': ' + self.escapeHtml(inv.name) + '</span><span>' + self.formatCurrency(inv.current) + '</span></div>';
@@ -2668,7 +3131,7 @@ class SmartWallet {
             closingAlerts.forEach(alert => {
                 html += '<div class="bill-item closing-alert">';
                 html += '<div class="bill-info"><div class="bill-desc">💳 ' + self.escapeHtml(alert.message) + '</div>';
-                html += '<div class="bill-meta"><span> Fechamento: ' + self.formatDate(alert.closingDate.toISOString().split('T')[0]) + '</span></div></div>';
+                html += '<div class="bill-meta"><span>📅 Fechamento: ' + self.formatDate(alert.closingDate.toISOString().split('T')[0]) + '</span></div></div>';
                 html += '<div style="display:flex; gap:4px;">';
                 html += '<button class="btn btn-secondary btn-small view-card-btn">Ver Cartão</button></div></div>';
             });
@@ -2907,7 +3370,7 @@ class SmartWallet {
             let accountInfo = '';
             if (inv.accountId) {
                 const linkedAccount = self.getAccountById(inv.accountId);
-                if (linkedAccount) accountInfo = ' • 🏦 ' + self.escapeHtml(linkedAccount.name);
+                if (linkedAccount) accountInfo = ' •  ' + self.escapeHtml(linkedAccount.name);
             }
             html += '<div class="investment-card"><div class="investment-card-header"><div><div class="investment-card-title">' + self.escapeHtml(inv.name) + '</div><div class="investment-card-type">' + (typeLabels[inv.type] || inv.type) + ' • ' + self.formatDate(inv.date) + accountInfo + '</div></div><div class="investment-card-actions"><button class="btn btn-secondary btn-small update-invest-btn" data-id="' + inv.id + '">💰</button><button class="btn btn-secondary btn-small edit-invest-btn" data-id="' + inv.id + '">✏️</button><button class="btn btn-danger btn-small delete-invest-btn" data-id="' + inv.id + '">🗑️</button></div></div><div class="investment-card-values"><div class="investment-value-item"><div class="investment-value-label">Inicial</div><div class="investment-value-amount privacy-value">' + self.formatCurrency(inv.initial) + '</div></div><div class="investment-value-item"><div class="investment-value-label">Atual</div><div class="investment-value-amount privacy-value">' + self.formatCurrency(inv.current) + '</div></div><div class="investment-value-item"><div class="investment-value-label">Rendimento</div><div class="investment-value-amount privacy-value ' + (profit >= 0 ? 'positive' : 'negative') + '">' + profitPct.toFixed(2) + '% (' + self.formatCurrency(profit) + ')</div></div></div>';
             if (inv.rate > 0) html += '<div style="font-size:0.85rem; color:var(--text-secondary);" class="privacy-value">Taxa: ' + inv.rate + '% ao ano</div>';
@@ -3087,17 +3550,17 @@ class SmartWallet {
         }
     }
 
-     async deleteTransactionSwipe(id) {
-         const confirmed = await showConfirm('Excluir esta transação?', 'Esta ação não pode ser desfeita.');
-         if (!confirmed) return;
-         const t = this.transactions.find(x => String(x.id) === String(id));
-         if (t && t.accountId) this.updateAccountBalance(t.accountId, -t.amount);
-         this.transactions = this.transactions.filter(x => String(x.id) !== String(id));
-         this.clearCache(); this.saveTransactions();
-         this.render(); this.updateCharts(); this.updateAlertBadge();
-         this.checkNegativeBalance();
-         this.showToast('🗑️ Excluída!');
-     }
+    async deleteTransactionSwipe(id) {
+        const confirmed = await showConfirm('Excluir transação?', 'Esta ação não pode ser desfeita.');
+        if (!confirmed) return;
+        const t = this.transactions.find(x => String(x.id) === String(id));
+        if (t && t.accountId) this.updateAccountBalance(t.accountId, -t.amount);
+        this.transactions = this.transactions.filter(x => String(x.id) !== String(id));
+        this.clearCache(); this.saveTransactions();
+        this.render(); this.updateCharts(); this.updateAlertBadge();
+        this.checkNegativeBalance();
+        this.showToast('🗑️ Excluída!');
+    }
 
     // ===== IMPRESSÃO DO MANUAL =====
     printManual() {
@@ -3570,7 +4033,7 @@ window.handleCsvFileSelect = function(event) {
     const file = event.target.files[0];
     if (!file) return;
     if (!file.name.toLowerCase().endsWith('.csv')) {
-        alert('⚠️ Selecione um arquivo .csv');
+        alert('️ Selecione um arquivo .csv');
         event.target.value = '';
         return;
     }
@@ -3579,7 +4042,7 @@ window.handleCsvFileSelect = function(event) {
         event.target.value = '';
         return;
     }
-    document.getElementById('csvFileName').textContent = '📄 ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+    document.getElementById('csvFileName').textContent = ' ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
     const reader = new FileReader();
     reader.onload = (e) => { window._pendingCsvData = e.target.result; };
     reader.onerror = () => { alert('❌ Erro ao ler arquivo'); event.target.value = ''; };
