@@ -249,15 +249,11 @@ const CURRENCIES = {
 };
 
 // ===== CORREÇÃO v4.4.4: Função para ler datas corretamente (sem bug de fuso horário) =====
-function parseDate(dateString) {
-    if (!dateString) return new Date();
-    const parts = dateString.split('-');
-    if (parts.length !== 3) return new Date(dateString);
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const day = parseInt(parts[2], 10);
-    return new Date(year, month, day);
-}
+   function parseDate(dateString) {
+       if (!dateString) return new Date();
+       const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+       return new Date(year, month - 1, day);
+   }
 
 // ===== CORREÇÃO v4.4.4: Função robusta para download em todos os dispositivos =====
 async function saveFileWithPicker(blob, suggestedName, mimeType) {
