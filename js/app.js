@@ -2360,7 +2360,7 @@ class SmartWallet {
      }
 
      async importBackup() {
-         if (!window._pendingBackupData) { this.showToast('️ Selecione um arquivo'); return; }
+         if (!window._pendingBackupData) { this.showToast('⚠️ Selecione um arquivo'); return; }
          try {
              let cleanData = window._pendingBackupData;
              if (cleanData.charCodeAt(0) === 0xFEFF) cleanData = cleanData.substring(1);
@@ -2368,7 +2368,7 @@ class SmartWallet {
              if (!cleanData) { this.showToast('⚠️ Arquivo vazio!'); return; }
              const data = JSON.parse(cleanData);
              if (!data || typeof data !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
-             const confirmed = await showConfirm('️ Substituir TODOS os dados?', 'Esta ação não pode ser desfeita.');
+             const confirmed = await showConfirm('⚠️ Substituir TODOS os dados?', 'Esta ação não pode ser desfeita.');
              if (!confirmed) return;
              this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
              this.categories = Array.isArray(data.categories) ? data.categories : this.categories;
@@ -2378,6 +2378,42 @@ class SmartWallet {
              if (typeof data.darkMode === 'boolean') this.darkMode = data.darkMode;
              if (typeof data.privacyOn === 'boolean') this.privacyOn = data.privacyOn;
              if (data.settings) this.settings = { ...this.settings, ...data.settings };
+             if (typeof data.language === 'string') localStorage.setItem('smartwallet_language', data.language);
+             if (typeof data.currency === 'string') localStorage.setItem('smartwallet_currency', data.currency);
+             this.pageSize = this.settings.pageSize || 20;
+             this.clearCache(); this.saveTransactions(); this.saveCategories();
+             this.saveAccounts(); this.saveCards(); this.saveInvestments();
+             this.saveSettings();
+             localStorage.setItem('smartwallet_dark', this.darkMode);
+             localStorage.setItem('smartwallet_privacy', this.privacyOn);
+             this.populateCategorySelects(); this.populatePaymentMethodSelects();
+             this.populateAccountSelects(); this.applyTheme(); this.applyPrivacy();
+             this.applyLanguage(); this.applyCurrency();
+             this.currentPage = 1;
+             this.render(); this.updateCharts(); this.updateAlertBadge();
+             this.checkNegativeBalance();
+             closeModal('importBackupModal');
+             this.showToast('✅ Backup restaurado!');
+             window._pendingBackupData = null;
+         } catch (e) {
+             this.showToast('⚠️ Erro: ' + e.message);
+         }
+     }
+    
+             // NOVO v4.5.0: Migrar dados se necessário
+             const migratedData = migrateData(data);
+             if ((data.dataVersion || 1) < DATA_VERSION) {
+                 console.log(`[SmartWallet] Migrando dados v${data.dataVersion || 1} → v${DATA_VERSION}`);
+             }
+             if (!confirm('⚠️ Substituir TODOS os dados?')) return;
+             this.transactions = Array.isArray(migratedData.transactions) ? migratedData.transactions : [];
+             this.categories = Array.isArray(migratedData.categories) ? migratedData.categories : this.categories;
+             this.accounts = Array.isArray(migratedData.accounts) ? migratedData.accounts : [];
+             this.cards = Array.isArray(migratedData.cards) ? migratedData.cards : [];
+             this.investments = Array.isArray(migratedData.investments) ? migratedData.investments : [];
+             if (typeof migratedData.darkMode === 'boolean') this.darkMode = migratedData.darkMode;
+             if (typeof migratedData.privacyOn === 'boolean') this.privacyOn = migratedData.privacyOn;
+             if (migratedData.settings) this.settings = { ...this.settings, ...migratedData.settings };
              if (typeof data.language === 'string') localStorage.setItem('smartwallet_language', data.language);
              if (typeof data.currency === 'string') localStorage.setItem('smartwallet_currency', data.currency);
              this.pageSize = this.settings.pageSize || 20;
