@@ -2873,22 +2873,28 @@ if (acceptCheckbox && acceptBtn) {
         }
     }
 
-    async importBackup() {
-        if (!window._pendingBackupData) { this.showToast('⚠️ Selecione um arquivo'); return; }
-        try {
-            let cleanData = window._pendingBackupData;
-            if (cleanData.charCodeAt(0) === 0xFEFF) cleanData = cleanData.substring(1);
-            cleanData = cleanData.trim();
-            if (!cleanData) { this.showToast('⚠️ Arquivo vazio!'); return; }
-            const data = JSON.parse(cleanData);
-            if (!data || typeof data !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
-            const confirmed = await showConfirm('⚠️ Substituir TODOS os dados?', 'Esta ação não pode ser desfeita.');
-            if (!confirmed) return;
-            this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
-            this.categories = Array.isArray(data.categories) ? data.categories : this.categories;
-            this.accounts = Array.isArray(data.accounts) ? data.accounts : [];
-            this.cards = Array.isArray(data.cards) ? data.cards : [];
-            this.investments = Array.isArray(data.investments) ? data.investments : [];
+async importBackup() {
+    if (!window._pendingBackupData) { this.showToast('⚠️ Selecione um arquivo'); return; }
+    try {
+        let cleanData = window._pendingBackupData;
+        if (cleanData.charCodeAt(0) === 0xFEFF) cleanData = cleanData.substring(1);
+        cleanData = cleanData.trim();
+        if (!cleanData) { this.showToast('⚠️ Arquivo vazio!'); return; }
+        
+        // CORREÇÃO: Remover espaços extras das chaves JSON
+        cleanData = cleanData.replace(/"\s*:/g, '":').replace(/:\s*"/g, ':"');
+        
+        const data = JSON.parse(cleanData);
+        if (!data || typeof data !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
+        
+        const confirmed = await showConfirm('⚠️ Substituir TODOS os dados?', 'Esta ação não pode ser desfeita.');
+        if (!confirmed) return;
+        
+        this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
+        this.categories = Array.isArray(data.categories) ? data.categories : this.categories;
+        this.accounts = Array.isArray(data.accounts) ? data.accounts : [];
+        this.cards = Array.isArray(data.cards) ? data.cards : [];
+        this.investments = Array.isArray(data.investments) ? data.investments : [];
             if (typeof data.darkMode === 'boolean') this.darkMode = data.darkMode;
             if (typeof data.privacyOn === 'boolean') this.privacyOn = data.privacyOn;
             if (data.settings) this.settings = { ...this.settings, ...data.settings };
