@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smartwallet-v4.4.3';
+const CACHE_NAME = 'smartwallet-v4.4.4';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -48,11 +48,30 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
-    // Estratégia: Network First com fallback para Cache
+    // NOVO: Estratégia Cache First para CDNs externas (Chart.js, Google Fonts)
+    // Isso deixa o app muito mais rápido!
+    if (requestUrl.origin !== location.origin) {
+        event.respondWith(
+            caches.match(event.request).then((cachedResponse) => {
+                if (cachedResponse) return cachedResponse;
+                return fetch(event.request).then((networkResponse) => {
+                    if (networkResponse.status === 200) {
+                        const responseClone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
+                    return networkResponse;
+                });
+            })
+        );
+        return;
+    }
+    
+    // Estratégia: Network First com fallback para Cache (seus arquivos locais)
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                // Clona a resposta para o cache (apenas se sucesso)
                 if (response.status === 200) {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -62,7 +81,6 @@ self.addEventListener('fetch', (event) => {
                 return response;
             })
             .catch(() => {
-                // Fallback para cache se offline
                 return caches.match(event.request).then((response) => {
                     return response || new Response('Offline', {
                         status: 503,
