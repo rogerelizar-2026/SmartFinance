@@ -479,6 +479,11 @@ class SmartWallet {
             this.initSwipeGestures();
             this.swipeInitialized = true;
         }
+                   // Ler atalhos do PWA (Manifest Shortcuts)
+           const urlParams = new URLSearchParams(window.location.search);
+           const action = urlParams.get('action');
+           if (action === 'expense') setTimeout(() => window.openExpenseModal(), 500);
+           else if (action === 'income') setTimeout(() => window.openIncomeModal(), 500);
     }
 
     applyDemoBadge() {
@@ -490,10 +495,10 @@ class SmartWallet {
         }
         if (infoDemoBtn && infoDemoText) {
             if (this.demoMode) {
-                infoDemoText.textContent = '🔴 Encerrar Demonstração';
+                infoDemoText.textContent = 'Encerrar Demonstração';
                 infoDemoBtn.classList.add('demo-active');
             } else {
-                infoDemoText.textContent = '🎯 Modo Demonstração';
+                infoDemoText.textContent = 'Modo Demonstração';
                 infoDemoBtn.classList.remove('demo-active');
             }
         }
@@ -974,7 +979,7 @@ class SmartWallet {
     async toggleDemoMode() {
         if (this.demoMode) {
             const confirmed = await showConfirm(
-                '⚠️ Encerrar Demonstração?',
+                'Encerrar Demonstração?',
                 'Encerrar modo demonstração e limpar todos os dados?<br><br>Esta ação não pode ser desfeita.'
             );
             if (confirmed) {
@@ -986,7 +991,7 @@ class SmartWallet {
             }
         } else {
             const confirmed = await showConfirm(
-                '🎯 Carregar Demonstração?',
+                'Carregar Demonstração?',
                 'Carregar dados de exemplo?<br><br>Seus dados atuais serão substituídos pelos dados de demonstração.<br><br>Recomendamos fazer backup antes de continuar.'
             );
             if (confirmed) {
@@ -2187,7 +2192,7 @@ class SmartWallet {
     async toggleDemoMode() {
         if (this.demoMode) {
             const confirmed = await showConfirm(
-                '️ Encerrar Demonstração?',
+                '️Encerrar Demonstração?',
                 'Encerrar modo demonstração e limpar todos os dados?<br><br>Esta ação não pode ser desfeita.'
             );
             if (confirmed) {
