@@ -4275,7 +4275,6 @@ window.addEventListener('load', () => {
 });
 
 // Click fora fecha MENUS (não modais!)
-// Click fora fecha MENUS (não modais!)
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('mainMenu');
     const info = document.getElementById('infoMenu');
@@ -4295,7 +4294,7 @@ document.addEventListener('click', (e) => {
         toggleFab();
     }
 });
-
+    
 document.addEventListener('keydown', (e) => {
     if (e.target.classList.contains('clickable') && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
