@@ -2889,7 +2889,7 @@ async exportBackup() {
         
         document.body.appendChild(a);
         a.click();
-    }
+    
         // 1. LIMPEZA: Remove o link do DOM e libera a memória da URL
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
@@ -2907,7 +2907,7 @@ async exportBackup() {
 }
         
         // Limpeza após download
-        setTimeout() => {
+        setTimeout(() => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             console.log('[SmartWallet] Download concluído');
