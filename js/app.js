@@ -35,6 +35,33 @@ const DEFAULT_CATEGORIES = [
     { id: 'resgate', name: 'Resgate (invest/reserva)', color: '#6366f1', type: 'income' }
 ];
 
+// Sugestão de categoria por palavra-chave (heurística simples baseada em regras,
+// não é machine learning — mas ajuda a preencher a categoria mais rápido).
+const CATEGORY_KEYWORDS = {
+    casa: ['aluguel', 'condominio', 'condomínio', 'iptu', 'luz', 'energia', 'agua', 'água', 'gas', 'gás', 'internet', 'wifi', 'imobiliaria', 'imobiliária'],
+    despensa: ['mercado', 'supermercado', 'feira', 'hortifruti', 'padaria', 'acougue', 'açougue'],
+    transporte: ['uber', '99', 'combustivel', 'combustível', 'gasolina', 'alcool', 'álcool', 'estacionamento', 'pedagio', 'pedágio', 'onibus', 'ônibus', 'metro', 'metrô'],
+    saude: ['farmacia', 'farmácia', 'remedio', 'remédio', 'medico', 'médico', 'consulta', 'plano de saude', 'plano de saúde', 'dentista', 'hospital'],
+    educacao: ['curso', 'faculdade', 'escola', 'livro', 'mensalidade'],
+    cuidados_pessoais: ['salao', 'salão', 'barbearia', 'academia', 'cabeleireiro', 'estetica', 'estética'],
+    servicos: ['assinatura', 'netflix', 'spotify', 'streaming', 'celular', 'telefone'],
+    lazer: ['cinema', 'viagem', 'show', 'bar', 'restaurante', 'ifood', 'lanche'],
+    pets: ['pet', 'veterinario', 'veterinário', 'racao', 'ração', 'petshop'],
+    inst_financeira: ['tarifa', 'taxa banco', 'anuidade', 'iof'],
+    docs_juridico: ['cartorio', 'cartório', 'advogado', 'multa'],
+    emprestimo: ['emprestimo', 'empréstimo', 'financiamento'],
+    doacao_generosidade: ['doacao', 'doação', 'dizimo', 'dízimo', 'oferta'],
+    reserva_aplicacao: ['investimento', 'aplicacao', 'aplicação', 'poupanca', 'poupança', 'cdb', 'tesouro'],
+    salario: ['salario', 'salário', 'holerite'],
+    vale_alimentacao: ['vale alimentacao', 'vale alimentação', 'alelo', 'sodexo'],
+    auxilios: ['auxilio', 'auxílio', 'bolsa'],
+    beneficios: ['beneficio', 'benefício', 'bonus', 'bônus'],
+    restituicao: ['restituicao', 'restituição', 'imposto de renda'],
+    freelance: ['freela', 'freelance'],
+    rendimentos: ['rendimento', 'juros', 'dividendo'],
+    resgate: ['resgate']
+};
+
 const FINANCIAL_QUOTES = [
     { text: "Não se trata de quanto dinheiro você ganha, mas de quanto dinheiro você guarda.", author: "Robert Kiyosaki" },
     { text: "O hábito de poupar é em si mesmo uma educação.", author: "T.T. Munger" },
@@ -317,6 +344,53 @@ async function saveFileWithPicker(blob, suggestedName, mimeType) {
 }
 
 // ===== CLASSE PRINCIPAL =====
+// ===== CRIPTOGRAFIA DE BACKUP (AES-256-GCM + PBKDF2) =====
+function arrayBufferToBase64(buf) {
+    let binary = '';
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+}
+function base64ToArrayBuffer(b64) {
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+}
+async function deriveKeyFromPassword(password, saltBytes) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: saltBytes, iterations: 250000, hash: 'SHA-256' },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+    );
+}
+async function encryptBackupData(jsonString, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKeyFromPassword(password, salt);
+    const enc = new TextEncoder();
+    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(jsonString));
+    return {
+        smartWalletEncrypted: true,
+        version: 1,
+        salt: arrayBufferToBase64(salt),
+        iv: arrayBufferToBase64(iv),
+        data: arrayBufferToBase64(ciphertext)
+    };
+}
+async function decryptBackupData(payload, password) {
+    const salt = new Uint8Array(base64ToArrayBuffer(payload.salt));
+    const iv = new Uint8Array(base64ToArrayBuffer(payload.iv));
+    const key = await deriveKeyFromPassword(password, salt);
+    const ciphertext = base64ToArrayBuffer(payload.data);
+    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+    return new TextDecoder().decode(dec);
+}
+
 class SmartWallet {
     constructor() {
         this.currentMonth = new Date();
@@ -569,8 +643,9 @@ class SmartWallet {
         const themeBtn = document.getElementById('themeBtn');
         if (themeBtn) themeBtn.addEventListener('click', () => toggleTheme());
 
-        const infoBtn = document.getElementById('infoBtn');
-        if (infoBtn) infoBtn.addEventListener('click', (e) => toggleInfoMenu(e));
+        // (Observação: o antigo botão "infoBtn"/menu de informações foi removido do layout;
+        // o restante do código relacionado é inofensivo (só age se o elemento existir),
+        // mas essa linha específica de listener foi removida por ser redundante.)
 
         const menuBtn = document.getElementById('menuBtn');
         if (menuBtn) menuBtn.addEventListener('click', (e) => toggleMenu(e));
@@ -718,11 +793,24 @@ class SmartWallet {
         const importCsvBtn = document.getElementById('importCsvBtn');
         if (importCsvBtn) importCsvBtn.addEventListener('click', () => self.importCsv());
 
+        
+
         const importBackupBtn = document.getElementById('importBackupBtn');
-        if (importBackupBtn) importBackupBtn.addEventListener('click', () => openImportBackupModal());
+        if (importBackupBtn) importBackupBtn.addEventListener('click', () => self.importBackup());
 
         const newAccountBtn = document.getElementById('newAccountBtn');
         if (newAccountBtn) newAccountBtn.addEventListener('click', () => openNewAccountModal());
+
+        const descriptionField = document.getElementById('description');
+        const categoryField = document.getElementById('category');
+        if (descriptionField && categoryField) {
+            categoryField.addEventListener('change', () => { self.categoryManuallySet = true; });
+            let suggestTimer = null;
+            descriptionField.addEventListener('input', () => {
+                clearTimeout(suggestTimer);
+                suggestTimer = setTimeout(() => self.suggestCategoryFromDescription(), 400);
+            });
+        }
 
         const newCardBtn = document.getElementById('newCardBtn');
         if (newCardBtn) newCardBtn.addEventListener('click', () => openNewCardModal());
@@ -778,6 +866,11 @@ class SmartWallet {
         const saveSettingsBtn = document.getElementById('saveSettingsBtn');
         if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', () => self.saveSettingsFromModal());
 
+        const backupEncryptEnabled = document.getElementById('backupEncryptEnabled');
+        if (backupEncryptEnabled) backupEncryptEnabled.addEventListener('change', (e) => {
+            const wrap = document.getElementById('backupPasswordFieldWrap');
+            if (wrap) wrap.style.display = e.target.checked ? 'block' : 'none';
+        });
         const doBackupNowBtn = document.getElementById('doBackupNowBtn');
         if (doBackupNowBtn) doBackupNowBtn.addEventListener('click', () => self.exportBackup());
 
@@ -1498,6 +1591,29 @@ class SmartWallet {
         this.toastT = setTimeout(() => t.classList.remove('active'), 3000);
     }
 
+    suggestCategoryFromDescription() {
+        if (this.categoryManuallySet) return;
+        const descField = document.getElementById('description');
+        const catField = document.getElementById('category');
+        if (!descField || !catField) return;
+        const text = (descField.value || '').toLowerCase().trim();
+        if (text.length < 3) return;
+        for (const [catId, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+            const match = keywords.some(kw => text.indexOf(kw) !== -1);
+            if (match) {
+                const category = this.getCategoryById(catId);
+                if (category && category.type === this.currentTransactionType) {
+                    const optionExists = Array.from(catField.options).some(o => o.value === catId);
+                    if (optionExists && catField.value !== catId) {
+                        catField.value = catId;
+                        this.showToast('💡 Categoria sugerida: ' + category.name);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
     // ===== DASHBOARD =====
     updateDashboard() {
         if (!this.currentMonth || !(this.currentMonth instanceof Date) || isNaN(this.currentMonth.getTime())) {
@@ -1532,6 +1648,35 @@ class SmartWallet {
             goalEl.textContent = this.formatCurrency(creditCardTotal);
             goalEl.className = 'card-value privacy-value negative';
         }
+        this.updateProjection();
+    }
+
+    // Projeção simples: média do saldo líquido (receitas - despesas) dos últimos 3 meses com dados,
+    // usada para estimar o próximo mês. Não é machine learning, é uma média móvel — mas dá uma
+    // referência útil sem exigir histórico complexo.
+    updateProjection() {
+        const projEl = document.getElementById('projectionBalance');
+        if (!projEl) return;
+        const netByMonth = [];
+        for (let i = 1; i <= 6 && netByMonth.length < 3; i++) {
+            const refDate = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - i, 1);
+            const monthTx = this.transactions.filter(t => {
+                const d = new Date(t.date + 'T12:00:00');
+                return d.getFullYear() === refDate.getFullYear() && d.getMonth() === refDate.getMonth();
+            });
+            if (monthTx.length > 0) {
+                const net = monthTx.reduce((sum, t) => sum + t.amount, 0);
+                netByMonth.push(net);
+            }
+        }
+        if (netByMonth.length === 0) {
+            projEl.textContent = 'Sem histórico suficiente';
+            projEl.className = 'card-value privacy-value';
+            return;
+        }
+        const avgNet = netByMonth.reduce((a, b) => a + b, 0) / netByMonth.length;
+        projEl.textContent = (avgNet >= 0 ? '+ ' : '') + this.formatCurrency(avgNet);
+        projEl.className = 'card-value privacy-value ' + (avgNet >= 0 ? 'positive' : 'negative');
     }
 
     // ===== RENDERIZAÇÃO =====
@@ -2822,10 +2967,22 @@ class SmartWallet {
         setTimeout(() => { printWindow.focus(); printWindow.print(); }, 300);
     }
 
-    exportBackup() {
+    async exportBackup() {
         if (this.isSaving) return;
         this.isSaving = true;
         try {
+            const encryptEnabled = document.getElementById('backupEncryptEnabled');
+            const usePassword = encryptEnabled && encryptEnabled.checked;
+            let password = '';
+            if (usePassword) {
+                const pwField = document.getElementById('backupPasswordField');
+                password = pwField ? pwField.value : '';
+                if (!password || password.length < 4) {
+                    this.showToast('⚠️ Digite uma senha com pelo menos 4 caracteres');
+                    this.isSaving = false;
+                    return;
+                }
+            }
             const backup = {
                 version: '4.4.4',
                 exportDate: new Date().toISOString(),
@@ -2842,12 +2999,19 @@ class SmartWallet {
                 settings: this.settings
             };
             const jsonString = JSON.stringify(backup, null, 2);
-            const blob = new Blob(['\ufeff' + jsonString], { type: 'application/json;charset=utf-8;' });
-            const fileName = this.generateTimestamp() + '_backup.json';
+            let blob, fileName;
+            if (usePassword) {
+                const encryptedPayload = await encryptBackupData(jsonString, password);
+                blob = new Blob([JSON.stringify(encryptedPayload)], { type: 'application/json;charset=utf-8;' });
+                fileName = this.generateTimestamp() + '_backup_protegido.json';
+            } else {
+                blob = new Blob(['\ufeff' + jsonString], { type: 'application/json;charset=utf-8;' });
+                fileName = this.generateTimestamp() + '_backup.json';
+            }
             saveFileWithPicker(blob, fileName, 'application/json').then(result => {
                 if (result === 'saved' || result === 'downloaded') {
                     localStorage.setItem('smartwallet_last_backup', Date.now().toString());
-                    this.showToast('✅ ' + this.t('backupExported'));
+                    this.showToast(usePassword ? '✅ Backup criptografado exportado!' : '✅ ' + this.t('backupExported'));
                     this.updateSettingsUI();
                 }
             }).catch(e => this.showToast('❌ ' + e.message))
@@ -2865,8 +3029,21 @@ class SmartWallet {
             if (cleanData.charCodeAt(0) === 0xFEFF) cleanData = cleanData.substring(1);
             cleanData = cleanData.trim();
             if (!cleanData) { this.showToast('⚠️ Arquivo vazio!'); return; }
-            const data = JSON.parse(cleanData);
-            if (!data || typeof data !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
+            let parsed = JSON.parse(cleanData);
+            if (!parsed || typeof parsed !== 'object') { this.showToast('❌ Estrutura inválida'); return; }
+            let data = parsed;
+            if (parsed.smartWalletEncrypted === true) {
+                const pwField = document.getElementById('backupImportPassword');
+                const password = pwField ? pwField.value : '';
+                if (!password) { this.showToast('⚠️ Digite a senha do backup protegido'); return; }
+                try {
+                    const decryptedJson = await decryptBackupData(parsed, password);
+                    data = JSON.parse(decryptedJson);
+                } catch (decErr) {
+                    this.showToast('❌ Senha incorreta ou arquivo corrompido');
+                    return;
+                }
+            }
             const confirmed = await showConfirm('⚠️ Substituir TODOS os dados?', 'Esta ação não pode ser desfeita.');
             if (!confirmed) return;
             this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
@@ -2899,101 +3076,72 @@ class SmartWallet {
         }
     }
 
-importCSV() {
-    if (!window._pendingCsvData) { this.showToast('Selecione um arquivo CSV'); return; }
-    const replace = document.getElementById('csvReplaceData').checked;
-    let lines = window._pendingCsvData.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length < 2) { this.showToast('CSV vazio ou inválido'); return; }
-    
-    // Remove BOM
-    if (lines[0].charCodeAt(0) === 0xFEFF) {
-        lines[0] = lines[0].substring(1);
-    }
-    
-    // Encontra header
-    let headerIndex = -1;
-    for (let i = 0; i < Math.min(lines.length, 10); i++) {
-        const line = lines[i].toLowerCase();
-        if ((line.indexOf('data') !== -1 || line.indexOf('date') !== -1) && 
-            (line.indexOf('valor') !== -1 || line.indexOf('value') !== -1)) {
-            headerIndex = i;
-            break;
+    importCsv() {
+        if (!window._pendingCsvData) { this.showToast('Selecione um arquivo Csv'); return; }
+        const replace = document.getElementById('csvReplaceData').checked;
+        const lines = window._pendingCsvData.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) { this.showToast('❌ Csv vazio: encontrei apenas ' + lines.length + ' linha(s) com conteúdo'); return; }
+        // Procura a linha de cabeçalho real (o arquivo exportado tem título e período antes dela)
+        let headerIndex = -1;
+        for (let i = 0; i < lines.length; i++) {
+            const l = lines[i].toLowerCase();
+            if (l.indexOf('data') !== -1 && l.indexOf('valor') !== -1) { headerIndex = i; break; }
         }
+        if (headerIndex === -1) {
+            const hasData = lines.some(l => l.toLowerCase().indexOf('data') !== -1);
+            const hasValor = lines.some(l => l.toLowerCase().indexOf('valor') !== -1);
+            let motivo = 'nenhuma linha contém as colunas "Data" e "Valor"';
+            if (hasData && !hasValor) motivo = 'encontrei a coluna "Data", mas não a coluna "Valor"';
+            else if (!hasData && hasValor) motivo = 'encontrei a coluna "Valor", mas não a coluna "Data"';
+            this.showToast('❌ Formato Csv inválido: ' + motivo + '. Use um Csv exportado pelo próprio Smart Wallet.');
+            return;
+        }
+        if (headerIndex + 1 >= lines.length) {
+            this.showToast('⚠️ O Csv tem cabeçalho, mas nenhuma linha de dados após ele'); return;
+        }
+        const self = this;
+        const transactionsToAdd = [];
+        let skipped = 0;
+        for (let i = headerIndex + 1; i < lines.length; i++) {
+            const cols = this.parseCsvLine(lines[i]);
+            if (cols.length < 6) { skipped++; continue; }
+            const [date, desc, catName, tipo, payment, status, valor] = cols;
+            if (!date || !valor) { skipped++; continue; }
+            const category = this.findCategoryByName(catName);
+            const amount = parseFloat(valor.replace(',', '.'));
+            if (isNaN(amount)) { skipped++; continue; }
+            const signedAmount = tipo.toLowerCase().indexOf('despesa') !== -1 ? -Math.abs(amount) : Math.abs(amount);
+            let paymentMethod = 'pix';
+            const payLower = (payment || '').toLowerCase();
+            if (payLower.indexOf('pix') !== -1) paymentMethod = 'pix';
+            else if (payLower.indexOf('debit') !== -1 || payLower.indexOf('débito') !== -1) paymentMethod = 'debit';
+            else if (payLower.indexOf('auto') !== -1) paymentMethod = 'auto';
+            else if (payLower.indexOf('transf') !== -1) paymentMethod = 'transfer';
+            transactionsToAdd.push({
+                id: this.generateUniqueId(), date, amount: signedAmount,
+                category: category ? category.id : '', description: desc,
+                statusOk: status.toLowerCase().indexOf('conclu') !== -1,
+                paymentMethod, accountId: ''
+            });
+        }
+        if (replace) {
+            const m = this.currentMonth.getMonth(), y = this.currentMonth.getFullYear();
+            this.transactions = this.transactions.filter(t => {
+                const d = new Date(t.date + 'T12:00:00');
+                return !(d.getMonth() === m && d.getFullYear() === y);
+            });
+        }
+        this.transactions = this.transactions.concat(transactionsToAdd);
+        this.clearCache(); this.saveTransactions();
+        this.currentPage = 1;
+        this.render();
+        this.updateCharts(); this.updateAlertBadge();
+        this.checkNegativeBalance();
+        closeModal('importCsvModal');
+        this.showToast(transactionsToAdd.length + ' transações importadas!' + (skipped > 0 ? ' (' + skipped + ' ignoradas)' : ''));
+        window._pendingCsvData = null;
     }
-    
-    if (headerIndex === -1) {
-        this.showToast('Formato CSV inválido: cabeçalho não encontrado');
-        return;
-    }
-    
-    const self = this;
-    const transactionsToAdd = [];
-    let skipped = 0;
-    
-    for (let i = headerIndex + 1; i < lines.length; i++) {
-        const cols = this.parseCSVLine(lines[i]);
-        if (cols.length < 6) { skipped++; continue; }
-        const [date, desc, catName, tipo, payment, status, valor] = cols;
-        if (!date || !valor) { skipped++; continue; }
-        
-        const category = this.findCategoryByName(catName);
-        const amount = parseFloat(valor.replace(',', '.'));
-        if (isNaN(amount)) { skipped++; continue; }
-        
-        const signedAmount = tipo.toLowerCase().indexOf('despesa') !== -1 ? -Math.abs(amount) : Math.abs(amount);
-        
-        let paymentMethod = 'pix';
-        const payLower = (payment || '').toLowerCase();
-        if (payLower.indexOf('pix') !== -1) paymentMethod = 'pix';
-        else if (payLower.indexOf('debit') !== -1 || payLower.indexOf('débito') !== -1) paymentMethod = 'debit';
-        else if (payLower.indexOf('auto') !== -1) paymentMethod = 'auto';
-        else if (payLower.indexOf('transf') !== -1) paymentMethod = 'transfer';
-        
-        transactionsToAdd.push({
-            id: this.generateUniqueId(), date, amount: signedAmount,
-            category: category ? category.id : '', description: desc,
-            statusOk: status.toLowerCase().indexOf('conclu') !== -1,
-            paymentMethod, accountId: ''
-        });
-    }
-    
-    if (replace) {
-        const m = this.currentMonth.getMonth(), y = this.currentMonth.getFullYear();
-        this.transactions = this.transactions.filter(t => {
-            const d = new Date(t.date + 'T12:00:00');
-            return !(d.getMonth() === m && d.getFullYear() === y);
-        });
-    }
-    
-    this.transactions = this.transactions.concat(transactionsToAdd);
-    this.clearCache(); this.saveTransactions();
-    this.currentPage = 1;
-    this.render();
-    this.updateCharts(); this.updateAlertBadge();
-    this.checkNegativeBalance();
-    closeModal('importCsvModal');
-    this.showToast(transactionsToAdd.length + ' transações importadas!' + (skipped > 0 ? ' (' + skipped + ' ignoradas)' : ''));
-    window._pendingCsvData = null;
-}
-    
-    if (replace) {
-        const m = this.currentMonth.getMonth(), y = this.currentMonth.getFullYear();
-        this.transactions = this.transactions.filter(t => {
-            const d = new Date(t.date + 'T12:00:00');
-            return !(d.getMonth() === m && d.getFullYear() === y);
-        });
-    }
-    
-    this.transactions = this.transactions.concat(transactionsToAdd);
-    this.clearCache(); this.saveTransactions();
-    this.currentPage = 1;
-    this.render();
-    this.updateCharts(); this.updateAlertBadge();
-    this.checkNegativeBalance();
-    closeModal('importCsvModal');
-    this.showToast(transactionsToAdd.length + ' transações importadas!' + (skipped > 0 ? ' (' + skipped + ' ignoradas)' : ''));
-    window._pendingCsvData = null;
-}
+
     parseCsvLine(line) {
         const result = [];
         let current = '';
@@ -3305,8 +3453,9 @@ importCSV() {
         const current = parseFloat(document.getElementById('investmentCurrent').value) || 0;
         const date = document.getElementById('investmentDate').value;
         const rate = parseFloat(document.getElementById('investmentRate').value) || 0;
-        const selectedAccountId = document.getElementById('investmentAccount').value;
-        const createLinked = document.getElementById('createLinkedAccount').checked;
+        const selectedAccountId = document.getElementById('investmentAccount') ? document.getElementById('investmentAccount').value : '';
+        const createLinkedEl = document.getElementById('createLinkedAccount');
+        const createLinked = createLinkedEl ? createLinkedEl.checked : true;
         let accountId = selectedAccountId;
         if (!accountId && createLinked) {
             const newAccountId = this.generateUniqueId();
@@ -3850,6 +3999,7 @@ window.changeCardMonthToToday = function() {
 window.openNewTransactionModal = function() {
     smartwallet.setDefaultDate();
     smartwallet.currentTransactionType = 'expense';
+    smartwallet.categoryManuallySet = false;
     document.querySelectorAll('#transactionForm .type-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-type') === 'expense');
     });
@@ -3881,6 +4031,10 @@ window.openImportBackupModal = function() {
     window._pendingBackupData = null;
     document.getElementById('backupFileInput').value = '';
     document.getElementById('backupFileName').textContent = 'Clique para selecionar';
+    const pwWrap = document.getElementById('backupImportPasswordWrap');
+    const pwInput = document.getElementById('backupImportPassword');
+    if (pwWrap) pwWrap.style.display = 'none';
+    if (pwInput) pwInput.value = '';
     openModal('importBackupModal');
     closeAllDropdowns();
 };
@@ -3938,13 +4092,15 @@ window.openNewInvestmentModal = function() {
     document.getElementById('investmentDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('newInvestmentTitle').textContent = 'Nova Aplicação';
     const accountSelect = document.getElementById('investmentAccount');
-    accountSelect.innerHTML = '<option value="">-- Criar nova --</option>';
-    smartwallet.accounts.filter(a => a.type === 'investment').forEach(acc => {
-        const opt = document.createElement('option');
-        opt.value = acc.id;
-        opt.textContent = acc.name + ' - ' + smartwallet.formatCurrency(acc.balance);
-        accountSelect.appendChild(opt);
-    });
+    if (accountSelect) {
+        accountSelect.innerHTML = '<option value="">-- Criar nova --</option>';
+        smartwallet.accounts.filter(a => a.type === 'investment').forEach(acc => {
+            const opt = document.createElement('option');
+            opt.value = acc.id;
+            opt.textContent = acc.name + ' - ' + smartwallet.formatCurrency(acc.balance);
+            accountSelect.appendChild(opt);
+        });
+    }
     openModal('newInvestmentModal');
 };
 
@@ -4087,14 +4243,54 @@ window.handleCsvFileSelect = function(event) {
     }
     document.getElementById('csvFileName').textContent = ' ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
     const reader = new FileReader();
-    reader.onload = (e) => { window._pendingCsvData = e.target.result; };
     reader.onload = function(e) {
-    // 1. Pega o conteúdo do arquivo e remove o caractere fantasma (BOM) do início
-    let text = e.target.result.replace(/^\uFEFF/, '');
-    
-    // 2. Continua com o seu código de quebrar as linhas...
-    const lines = text.split('\n');
-    const headers = lines[0].split(','); // ou ';' dependendo do seu código
+        // 1. Pega o conteúdo do arquivo e remove o caractere fantasma (BOM) do início
+        let text = e.target.result.replace(/^\uFEFF/, '');
+        
+        // 2. Continua com o seu código de quebrar as linhas...
+        const lines = text.split('\n');
+        const headers = lines[0].split(','); // ou ';' dependendo do seu código
+        window._pendingCsvData = text;
+    };
+    reader.onerror = () => { alert('❌ Erro ao ler arquivo'); event.target.value = ''; };
+    reader.readAsText(file, 'UTF-8');
+}
+
+window.handleBackupFileSelect = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.json')) {
+        alert('⚠️ Selecione um arquivo .json');
+        event.target.value = '';
+        return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+        alert('⚠️ Arquivo muito grande (máx 10MB)');
+        event.target.value = '';
+        return;
+    }
+    document.getElementById('backupFileName').textContent = '💾 ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+    const pwWrap = document.getElementById('backupImportPasswordWrap');
+    const pwInput = document.getElementById('backupImportPassword');
+    if (pwWrap) pwWrap.style.display = 'none';
+    if (pwInput) pwInput.value = '';
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const parsed = JSON.parse(e.target.result);
+            window._pendingBackupData = e.target.result;
+            if (parsed && parsed.smartWalletEncrypted === true) {
+                if (pwWrap) pwWrap.style.display = 'block';
+                smartwallet.showToast('🔒 Backup protegido por senha detectado');
+            } else {
+                smartwallet.showToast('✅ Arquivo carregado!');
+            }
+        } catch (error) {
+            alert('❌ JSON inválido: ' + error.message);
+            event.target.value = '';
+            window._pendingBackupData = null;
+        }
+    };
     reader.onerror = () => { alert('❌ Erro ao ler arquivo'); event.target.value = ''; };
     reader.readAsText(file, 'UTF-8');
 };
@@ -4238,7 +4434,7 @@ document.addEventListener('click', (e) => {
         menu.classList.remove('active');
         if (menuBtn) menuBtn.classList.remove('menu-active');
     }
-        if (info && info.classList.contains('active') && !e.target.closest('.dropdown-wrapper')) {
+    if (info && info.classList.contains('active') && !e.target.closest('.dropdown-wrapper')) {
         info.classList.remove('active');
         if (infoBtn) infoBtn.classList.remove('menu-active');
     }
@@ -4249,7 +4445,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-    document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', (e) => {
     if (e.target.classList.contains('clickable') && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
         e.target.click();
@@ -4263,7 +4459,27 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('[SmartWallet] SW falhou:', err));
     });
 }
-   
-console.log('🎉 Smart Wallet v4.4.4 carregado com sucesso!');
+document.addEventListener('DOMContentLoaded', () => {
+    // Pega o novo botão pelo ID
+    const settingsRestoreBtn = document.getElementById('settingsRestoreBtn');
+    
+    if (settingsRestoreBtn) {
+        settingsRestoreBtn.addEventListener('click', () => {
+            // 1. Primeiro, fecha o modal de Configurações para não encavalar
+            if (typeof closeModal === 'function') {
+                closeModal('settingsModal');
+            } else {
+                document.getElementById('settingsModal').classList.remove('active'); // ou 'show', dependendo do seu CSS
+            }
+            
+            // 2. Depois, abre o modal de Importar Backup
+            if (typeof openModal === 'function') {
+                openModal('importBackupModal');
+            }
+        });
+    }
+    
+    console.log('🎉 Smart Wallet v4.4.4 carregado com sucesso!');
+});
+
 })();
-}
