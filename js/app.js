@@ -2975,6 +2975,25 @@ importCSV() {
     this.showToast(transactionsToAdd.length + ' transações importadas!' + (skipped > 0 ? ' (' + skipped + ' ignoradas)' : ''));
     window._pendingCsvData = null;
 }
+    
+    if (replace) {
+        const m = this.currentMonth.getMonth(), y = this.currentMonth.getFullYear();
+        this.transactions = this.transactions.filter(t => {
+            const d = new Date(t.date + 'T12:00:00');
+            return !(d.getMonth() === m && d.getFullYear() === y);
+        });
+    }
+    
+    this.transactions = this.transactions.concat(transactionsToAdd);
+    this.clearCache(); this.saveTransactions();
+    this.currentPage = 1;
+    this.render();
+    this.updateCharts(); this.updateAlertBadge();
+    this.checkNegativeBalance();
+    closeModal('importCsvModal');
+    this.showToast(transactionsToAdd.length + ' transações importadas!' + (skipped > 0 ? ' (' + skipped + ' ignoradas)' : ''));
+    window._pendingCsvData = null;
+}
     parseCsvLine(line) {
         const result = [];
         let current = '';
@@ -4219,7 +4238,7 @@ document.addEventListener('click', (e) => {
         menu.classList.remove('active');
         if (menuBtn) menuBtn.classList.remove('menu-active');
     }
-    if (info && info.classList.contains('active') && !e.target.closest('.dropdown-wrapper')) {
+        if (info && info.classList.contains('active') && !e.target.closest('.dropdown-wrapper')) {
         info.classList.remove('active');
         if (infoBtn) infoBtn.classList.remove('menu-active');
     }
@@ -4230,7 +4249,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', (e) => {
     if (e.target.classList.contains('clickable') && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
         e.target.click();
@@ -4244,25 +4263,6 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('[SmartWallet] SW falhou:', err));
     });
 }
-document.addEventListener('DOMContentLoaded', () => {
-    // Pega o novo botão pelo ID
-    const settingsRestoreBtn = document.getElementById('settingsRestoreBtn');
-    
-    if (settingsRestoreBtn) {
-        settingsRestoreBtn.addEventListener('click', () => {
-            // 1. Primeiro, fecha o modal de Configurações para não encavalar
-            if (typeof closeModal === 'function') {
-                closeModal('settingsModal');
-            } else {
-                document.getElementById('settingsModal').classList.remove('active'); // ou 'show', dependendo do seu CSS
-            }
-            
-            // 2. Depois, abre o modal de Importar Backup
-            if (typeof openModal === 'function') {
-                openModal('importBackupModal');
-            }
-        });
-    }
-    
+   
 console.log('🎉 Smart Wallet v4.4.4 carregado com sucesso!');
 })();
