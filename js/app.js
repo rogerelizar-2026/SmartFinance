@@ -2905,12 +2905,12 @@ importCSV() {
     let lines = window._pendingCsvData.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) { this.showToast('CSV vazio ou inválido'); return; }
     
-    // Remove BOM (caractere invisível no início)
+    // Remove BOM
     if (lines[0].charCodeAt(0) === 0xFEFF) {
         lines[0] = lines[0].substring(1);
     }
     
-    // Encontra a linha do header real (que contém "Data" e "Valor")
+    // Encontra header
     let headerIndex = -1;
     for (let i = 0; i < Math.min(lines.length, 10); i++) {
         const line = lines[i].toLowerCase();
@@ -2929,9 +2929,51 @@ importCSV() {
     const self = this;
     const transactionsToAdd = [];
     let skipped = 0;
+    
     for (let i = headerIndex + 1; i < lines.length; i++) {
         const cols = this.parseCSVLine(lines[i]);
+        if (cols.length < 6) { skipped++; continue; }
+        const [date, desc, catName, tipo, payment, status, valor] = cols;
+        if (!date || !valor) { skipped++; continue; }
+        
+        const category = this.findCategoryByName(catName);
+        const amount = parseFloat(valor.replace(',', '.'));
+        if (isNaN(amount)) { skipped++; continue; }
+        
+        const signedAmount = tipo.toLowerCase().indexOf('despesa') !== -1 ? -Math.abs(amount) : Math.abs(amount);
+        
+        let paymentMethod = 'pix';
+        const payLower = (payment || '').toLowerCase();
+        if (payLower.indexOf('pix') !== -1) paymentMethod = 'pix';
+        else if (payLower.indexOf('debit') !== -1 || payLower.indexOf('débito') !== -1) paymentMethod = 'debit';
+        else if (payLower.indexOf('auto') !== -1) paymentMethod = 'auto';
+        else if (payLower.indexOf('transf') !== -1) paymentMethod = 'transfer';
+        
+        transactionsToAdd.push({
+            id: this.generateUniqueId(), date, amount: signedAmount,
+            category: category ? category.id : '', description: desc,
+            statusOk: status.toLowerCase().indexOf('conclu') !== -1,
+            paymentMethod, accountId: ''
+        });
     }
+    
+    if (replace) {
+        const m = this.currentMonth.getMonth(), y = this.currentMonth.getFullYear();
+        this.transactions = this.transactions.filter(t => {
+            const d = new Date(t.date + 'T12:00:00');
+            return !(d.getMonth() === m && d.getFullYear() === y);
+        });
+    }
+    
+    this.transactions = this.transactions.concat(transactionsToAdd);
+    this.clearCache(); this.saveTransactions();
+    this.currentPage = 1;
+    this.render();
+    this.updateCharts(); this.updateAlertBadge();
+    this.checkNegativeBalance();
+    closeModal('importCsvModal');
+    this.showToast(transactionsToAdd.length + ' transações importadas!' + (skipped > 0 ? ' (' + skipped + ' ignoradas)' : ''));
+    window._pendingCsvData = null;
 }
     parseCsvLine(line) {
         const result = [];
@@ -4034,36 +4076,6 @@ window.handleCsvFileSelect = function(event) {
     // 2. Continua com o seu código de quebrar as linhas...
     const lines = text.split('\n');
     const headers = lines[0].split(','); // ou ';' dependendo do seu código
-    reader.onerror = () => { alert('❌ Erro ao ler arquivo'); event.target.value = ''; };
-    reader.readAsText(file, 'UTF-8');
-};
-
-window.handleBackupFileSelect = function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.json')) {
-        alert('⚠️ Selecione um arquivo .json');
-        event.target.value = '';
-        return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-        alert('⚠️ Arquivo muito grande (máx 10MB)');
-        event.target.value = '';
-        return;
-    }
-    document.getElementById('backupFileName').textContent = '💾 ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            JSON.parse(e.target.result);
-            window._pendingBackupData = e.target.result;
-            smartwallet.showToast('✅ Arquivo carregado!');
-        } catch (error) {
-            alert('❌ JSON inválido: ' + error.message);
-            event.target.value = '';
-            window._pendingBackupData = null;
-        }
-    };
     reader.onerror = () => { alert('❌ Erro ao ler arquivo'); event.target.value = ''; };
     reader.readAsText(file, 'UTF-8');
 };
