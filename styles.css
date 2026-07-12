@@ -2454,3 +2454,7 @@ textarea:focus-visible {
   cursor: pointer;
   margin: 0;
 }
+/* Esconder badge DEMO */
+.demo-badge {
+  display: none !important;
+}
