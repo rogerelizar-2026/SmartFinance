@@ -2932,8 +2932,6 @@ importCSV() {
     for (let i = headerIndex + 1; i < lines.length; i++) {
         const cols = this.parseCSVLine(lines[i]);
     }
-}
-
     parseCsvLine(line) {
         const result = [];
         let current = '';
@@ -2953,6 +2951,7 @@ importCSV() {
         result.push(current.trim());
         return result;
     }
+}
 
     async clearAllData(skipConfirm = false) {
         if (!skipConfirm) {
