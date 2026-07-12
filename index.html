@@ -194,6 +194,7 @@
             <div class="card clickable" data-action="dashboard-income"><div class="card-title">Receitas</div><div class="card-value positive privacy-value" id="totalIncome">R$ 0,00</div></div>
             <div class="card clickable" data-action="dashboard-expense"><div class="card-title">Despesas</div><div class="card-value negative privacy-value" id="totalExpenses">R$ 0,00</div></div>
             <div class="card clickable" data-action="dashboard-cards"><div class="card-title">Acumulado C.Crédito</div><div class="card-value privacy-value" id="goalProgress">R$ 0,00</div></div>
+            <div class="card" title="Estimativa baseada na média dos últimos 3 meses"><div class="card-title">📈 Projeção Próx. Mês</div><div class="card-value privacy-value" id="projectionBalance">—</div></div>
         </div>
 
         <!-- Charts -->
@@ -440,6 +441,10 @@
                 <label>Selecione o arquivo JSON</label>
                 <label class="file-input-wrapper"><input type="file" id="backupFileInput" accept=".json"><div id="backupFileName">Clique para selecionar</div></label>
             </div>
+            <div class="form-group" id="backupImportPasswordWrap" style="display:none;">
+                <label for="backupImportPassword">🔒 Este backup está protegido por senha</label>
+                <input type="password" id="backupImportPassword" placeholder="Digite a senha usada na exportação" autocomplete="current-password">
+            </div>
             <div class="action-buttons">
                 <button class="btn btn-primary" id="importBackupBtn">📥 Restaurar</button>
                 <button class="btn btn-secondary" data-close-modal="importBackupModal">Cancelar</button>
@@ -590,6 +595,11 @@
                 </div>
                 <div class="form-group"><label for="investmentDate">Data da Aplicação</label><input type="date" id="investmentDate" required></div>
                 <div class="form-group"><label for="investmentRate">Taxa (% ao ano)</label><input type="number" id="investmentRate" step="0.01" min="0" placeholder="Ex: 10.5"></div>
+                <div class="form-group">
+                    <label for="investmentAccount">Vincular a conta de investimento</label>
+                    <select id="investmentAccount"><option value="">-- Criar conta nova --</option></select>
+                </div>
+                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="createLinkedAccount" checked><label for="createLinkedAccount">Criar conta vinculada automaticamente (se nenhuma selecionada acima)</label></div></div>
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-primary">💾 Salvar</button>
                     <button type="button" class="btn btn-secondary" data-close-modal="newInvestmentModal">Cancelar</button>
@@ -710,6 +720,20 @@
                         <input type="checkbox" id="autoBackupEnabled">
                         <span class="toggle-slider"></span>
                     </label>
+                </div>
+                <div class="settings-item" id="backupPasswordProtect">
+                    <div class="settings-info">
+                        <div class="settings-label">🔒 Proteger backup com senha</div>
+                        <div class="settings-description">Criptografa o arquivo exportado (AES-256). Sem a senha, o backup não pode ser restaurado — guarde-a bem.</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="backupEncryptEnabled">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="form-group" id="backupPasswordFieldWrap" style="display:none;">
+                    <label for="backupPasswordField">Senha de proteção</label>
+                    <input type="password" id="backupPasswordField" placeholder="Digite uma senha forte" autocomplete="new-password">
                 </div>
                 <div class="settings-item" id="lastBackupInfo">
                     <div class="settings-info">
