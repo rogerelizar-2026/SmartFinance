@@ -33,6 +33,10 @@ body.light {
     --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
+body.light .logomacaa {
+  filter: brightness(0) invert(1);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
@@ -205,6 +209,21 @@ body.modal-open { overflow: hidden; }
     background: var(--gradient-primary);
     border-radius: 2px;
     animation: loading 2s ease-in-out;
+}
+
+.splash-logo {
+    max-width: 400px;
+    width: 90%;
+    height: auto;
+    margin-bottom: 24px;
+    filter: drop-shadow(0 8px 24px rgba(99, 102, 241, 0.3));
+    animation: fadeInScale 0.8s ease;
+}
+
+@media (max-width: 640px) {
+    .splash-logo {
+        max-width: 300px;
+    }
 }
 
 /* ===== DISCLAIMER MODAL ===== */
@@ -578,7 +597,7 @@ body.light .info-dropdown, body.light .dropdown-menu { background: rgba(255, 255
 .dropdown-item.danger:hover { background: rgba(239, 68, 68, 0.15); }
 .dropdown-divider { height: 1px; background: var(--border-color); margin: 6px 0; }
 
-/* v4.4.3: Botão Demo ativo no menu Info */
+/* v1.0.0: Botão Demo ativo no menu Info */
 .info-item.demo-active {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
     border-left: 3px solid var(--danger-color);
@@ -886,7 +905,7 @@ td {
 
 .modal.active { display: flex; }
 
-/* v4.4.3: Modal em primeiro plano */
+/* v1.0.0: Modal em primeiro plano */
 .modal-front {
     z-index: 10000 !important;
 }
@@ -1481,7 +1500,7 @@ body.privacy-on canvas { filter: blur(6px); }
     background: rgba(255,255,255,0.35);
 }
 
-/* ===== v4.4.3: MODAL DE CONFIRMAÇÃO CUSTOM ===== */
+/* ===== v1.0.0: MODAL DE CONFIRMAÇÃO CUSTOM ===== */
 #confirmModal .modal-content {
     text-align: center;
     animation: confirmSlideIn 0.3s ease;
