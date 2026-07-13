@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-wallet-v1';
+const CACHE_NAME = 'smartfinance-v1.0.0';
 const urlsToCache = [
   '/',
   '/index.html',
