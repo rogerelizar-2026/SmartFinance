@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Smart Wallet</title>
+    <title>Smart Finance</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com;">
     <meta name="theme-color" content="#6366f1">
-    <meta name="description" content="Smart Wallet - Controle financeiro pessoal inteligente">
+    <meta name="description" content="Smart Finance - Controle financeiro pessoal inteligente">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Smart Wallet">
+    <meta name="apple-mobile-web-app-title" content="Smart Finance">
     <link rel="apple-touch-icon" href="favicon.svg">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="apple-touch-icon" href="logo.svg">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous"></script>
@@ -21,27 +20,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(() => console.log('Service Worker registrado'));
-}
-</script>
 <body>
     <div class="print-header">
-        <h1>Smart Wallet</h1>
+        <h1>Smart Finance</h1>
         <div class="print-subtitle">Controle Financeiro Pessoal Inteligente</div>
         <div class="print-date" id="printDate"></div>
     </div>
     <div class="print-footer">
         <div class="print-author">Idealizado por RogerElizar™</div>
-        <div>Smart Wallet © 2026 - rogerelizar@gmail.com</div>
+        <div>Smart Finance © 2026 - rogerelizar@gmail.com</div>
     </div>
 
     <!-- Splash Screen -->
     <div class="splash-screen" id="splashScreen" role="banner">
         <div class="splash-content">
-            <h1 class="splash-title">Smart Wallet</h1>
+            <img src="logomarca.svg" alt="Smart Finance" class="splash-logo">
             <p class="splash-subtitle">Idealizado por RogerElizar™</p>
             <p class="splash-email">rogerelizar@gmail.com</p>
             <div class="splash-icons" aria-hidden="true">
@@ -66,8 +59,8 @@ if ('serviceWorker' in navigator) {
       <p class="disclaimer-subtitle">Por favor, leia atentamente antes de continuar</p>
     </div>
     <div class="disclaimer-body">
-      <h3>📋 Sobre o Smart Wallet</h3>
-      <p>O Smart Wallet é uma ferramenta de controle financeiro pessoal desenvolvida para ajudar você a organizar suas finanças de forma simples, segura e inteligente.</p>
+      <h3>📋 Sobre o Smart Finance</h3>
+      <p>O Smart Finance é uma ferramenta de controle financeiro pessoal desenvolvida para ajudar você a organizar suas finanças de forma simples, segura e inteligente.</p>
 
       <h3>🔒 Privacidade e Segurança</h3>
       <ul>
@@ -85,7 +78,7 @@ if ('serviceWorker' in navigator) {
       </ul>
 
       <h3>📜 Propriedade Intelectual</h3>
-      <p>O Smart Wallet foi idealizado e desenvolvido por RogerElizar™. Uso gratuito para fins pessoais.</p>
+      <p>O Smart Finance foi idealizado e desenvolvido por RogerElizar™. Uso gratuito para fins pessoais.</p>
 
       <h3>✅ Seu Compromisso</h3>
       <p>Ao clicar em "Aceitar e Continuar", você declara que leu e aceitou os termos acima.</p>
@@ -121,7 +114,8 @@ if ('serviceWorker' in navigator) {
         <header class="app-header">
             <div class="header-left">
                 <div class="header-brand-row">
-                <img src="logomarca.svg" alt="Smart Wallet" style="height: 100px; width: auto;">
+                    <h1 class="header-title">Smart Finance</h1>
+                    <span class="demo-badge" id="demoBadge" style="display:none;">DEMO</span>
                 </div>
                 <p class="header-subtitle">Suas finanças sob seu domínio!</p>
                 <div class="month-selector">
@@ -645,7 +639,7 @@ if ('serviceWorker' in navigator) {
             <div class="modal-header"><h2>☕ Apoie o Projeto</h2><button class="modal-close" data-close-modal="thanksModal"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
             <div class="thanks-icon">☕</div>
             <h3 class="thanks-title">Obrigado!</h3>
-            <p style="text-align:center;line-height:1.8;margin-bottom:20px;">Se o Smart Wallet tem sido útil, que tal um cafezinho?</p>
+            <p style="text-align:center;line-height:1.8;margin-bottom:20px;">Se o Smart Finance tem sido útil, que tal um cafezinho?</p>
             <div class="pix-section">
                 <div style="color:var(--success-color);margin-bottom:12px;font-weight:700;">💚 Chave PIX</div>
                 <div class="pix-key" id="pixKey">rogerelizar@gmail.com</div>
@@ -665,7 +659,7 @@ if ('serviceWorker' in navigator) {
             <div class="whats-new-content">
                 <div class="whats-new-intro">
                     <div class="whats-new-icon">🚀</div>
-                    <h3>Smart Wallet atualizado!</h3>
+                    <h3>Smart Finance atualizado!</h3>
                     <p>Confira as novidades que preparamos para melhorar sua experiência financeira.</p>
                 </div>
                 <div id="whatsNewFeatures"></div>
