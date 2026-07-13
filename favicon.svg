@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="favGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Corpo principal da carteira -->
+  <rect x="8" y="18" width="48" height="32" rx="6" fill="none" stroke="url(#favGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Aba superior -->
+  <path d="M 8 30 Q 8 18 14 18 L 50 18 Q 56 18 56 30 L 56 36 L 8 36 Z" fill="none" stroke="url(#favGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Botão/Fecho -->
+  <circle cx="48" cy="34" r="5" fill="url(#favGrad)"/>
+  <circle cx="48" cy="34" r="2.5" fill="#0a0e1a"/>
+</svg>
