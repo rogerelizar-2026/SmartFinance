@@ -20,8 +20,7 @@
 <!-- ===== SPLASH SCREEN ===== -->
 <div id="splashScreen" class="splash-screen">
     <div class="splash-content">
-        <img src="logo.svg" alt="Smart Finance" class="splash-logo">
-        <h1>Smart Finance</h1>
+        <img src="logomarca.svg" alt="Smart Finance" class="splash-logo">
         <p>Controle Financeiro Pessoal Inteligente</p>
         <p class="splash-author">Idealizado por RogerElizar™</p>
     </div>
@@ -32,6 +31,7 @@
     <div class="modal-content">
         <div class="disclaimer-header">
             <h2><svg class="icon-inline" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19H4.5L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg> Termos de Uso e Aviso Legal</h2>
+            <h2>⚠️ Termos de Uso e Aviso Legal ⚠️</h2>
             <p>Por favor, leia atentamente antes de continuar</p>
         </div>
         <div class="disclaimer-body">
@@ -154,7 +154,8 @@
   <text x="145" y="142" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="62" font-weight="800" fill="url(#logoGradient)" letter-spacing="-1" filter="url(#textShadow)">Finance</text>
 </svg>
         </div>
-    </header>
+    </div>
+</nav>
 
     <!-- DASHBOARD -->
     <section class="dashboard">
@@ -282,53 +283,6 @@
             <button class="fab-action" data-action="openIncomeModal" title="Receita"><svg class="icon-large" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></button>
             <button class="fab-action" data-action="openExpenseModal" title="Despesa"><svg class="icon-large" viewBox="0 0 24 24"><path d="M16 13h-3V8h-2v5H8l4 4 4-4zM4 6v2h16V6H4zm0 4v2h16v-2H4zm0 4v2h16v-2H4zm0 4v2h16v-2H4z"/></svg></button>
         </div>
-    </div>
-</div>
-
-<!-- ===== BOTTOM TASKBAR (MOBILE) ===== -->
-<div id="bottomTaskbar" class="bottom-taskbar" style="display:none;">
-    <div class="taskbar-left">
-        <img src="favicon.svg" alt="Logo" class="taskbar-logo">
-        <div class="taskbar-brand">
-            <span class="taskbar-title">Smart Finance</span>
-            <span class="taskbar-subtitle">Suas finanças sob seu domínio!</span>
-        </div>
-    </div>
-    <div class="taskbar-right">
-        <button id="todayMonthBtnTaskbar" class="taskbar-btn" title="Hoje"><svg class="icon-inline" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Hoje</button>
-        <button id="prevMonthBtnTaskbar" class="taskbar-btn" title="Mês anterior"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
-        <span id="currentMonthTaskbar" class="taskbar-month">Julho 2026</span>
-        <button id="nextMonthBtnTaskbar" class="taskbar-btn" title="Próximo mês"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
-        <button id="alertBtnTaskbar" class="taskbar-btn" title="Contas a vencer">
-            <svg class="icon-inline" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg> <span id="alertBadgeTaskbar" class="alert-badge">0</span>
-        </button>
-        <button id="privacyBtnTaskbar" class="taskbar-btn" title="Privacidade">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-        <button id="themeBtnTaskbar" class="taskbar-btn" title="Tema">
-            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
-        </button>
-        <button id="menuBtnTaskbar" class="taskbar-btn menu-btn" title="Menu"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
-    </div>
-    
-    <!-- MAIN MENU DROPDOWN (same as header) -->
-    <div id="mainMenuTaskbar" class="dropdown-menu main-menu">
-        <button class="dropdown-item" data-action="openExportModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg> Exportar Extrato</button>
-        <button class="dropdown-item" data-action="openAccountsModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-17v7h3v-7h-3zm-4 5V4h-1v6h1z"/></svg> Minhas Contas</button>
-        <button class="dropdown-item" data-action="openCreditCardsModal"><svg class="icon-inline" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Meus Cartões</button>
-        <button class="dropdown-item" data-action="openInvestmentsModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg> Aplicações</button>
-        <button class="dropdown-item" data-action="openCategoryBudgetModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg> Orçamento por Categoria</button>
-        <button class="dropdown-item" data-action="openGoalModal"><svg class="icon-inline" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Meta de Reserva</button>
-        <button class="dropdown-item" data-action="openManualModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg> Manual do Usuário</button>
-        <button class="dropdown-item" data-action="openTermsModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> Termos de Uso</button>
-        <button class="dropdown-item" data-action="openThanksModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M18.5 3H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h6v2H8v2h8v-2h-2v-2h.5c1.93 0 3.5-1.57 3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5zM6 15V5h10.5c.83 0 1.5.67 1.5 1.5v7c0 .83-.67 1.5-1.5 1.5H6z"/></svg> Apoie o Projeto</button>
-        <button class="dropdown-item" data-action="toggleDemoMode"><svg class="icon-inline" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Modo Demonstração</button>
-        <button class="dropdown-item" data-action="openImportCsvModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Importar CSV</button>
-        <button class="dropdown-item" id="languageMenuItemTaskbar" data-action="toggleLanguage"><svg class="icon-inline" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> <span id="languageTextTaskbar">Idioma: Português</span></button>
-        <button class="dropdown-item" id="currencyMenuItemTaskbar" data-action="toggleCurrency" style="display:none;"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> <span id="currencyTextTaskbar">Moeda: R$</span></button>
-        <button class="dropdown-item" data-action="openSettingsModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Configurações</button>
-        <button class="dropdown-item" data-action="enableNotifications"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg> Ativar Notificações</button>
-        <button class="dropdown-item" data-action="openClearDataModal"><svg class="icon-inline" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Limpar Dados</button>
     </div>
 </div>
 
