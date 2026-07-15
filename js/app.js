@@ -586,20 +586,10 @@ const options = document.getElementById('editRecurringOptions');
 if (options) options.style.display = this.checked ? 'block' : 'none';
 });
 }
-const prevMonthBtn = document.getElementById('prevMonthBtn');
-const nextMonthBtn = document.getElementById('nextMonthBtn');
-if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => self.changeMonth(-1));
-if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => self.changeMonth(1));
-const alertBtn = document.getElementById('alertBtn');
-if (alertBtn) alertBtn.addEventListener('click', () => openBillsModal());
+// Header buttons removed - only logo remains (buttons now only in taskbar)
+// Navigation and controls are now exclusively in the bottom taskbar
 const goalBtn = document.getElementById('goalBtn');
 if (goalBtn) goalBtn.addEventListener('click', () => openGoalModal());
-const privacyBtn = document.getElementById('privacyBtn');
-if (privacyBtn) privacyBtn.addEventListener('click', () => togglePrivacy());
-const themeBtn = document.getElementById('themeBtn');
-if (themeBtn) themeBtn.addEventListener('click', () => toggleTheme());
-const menuBtn = document.getElementById('menuBtn');
-if (menuBtn) menuBtn.addEventListener('click', (e) => toggleMenu(e));
 const fabBtn = document.getElementById('fabBtn');
 if (fabBtn) fabBtn.addEventListener('click', () => toggleFab());
 document.querySelectorAll('.fab-action').forEach(btn => {
@@ -869,11 +859,9 @@ this.updateCharts();
 }
 updateMonthDisplay() {
 const months = this.getMonths();
-const el = document.getElementById('currentMonth');
 const elTaskbar = document.getElementById('currentMonthTaskbar');
 if (months) {
 const monthText = months[this.currentMonth.getMonth()] + ' ' + this.currentMonth.getFullYear();
-if (el) el.textContent = monthText;
 if (elTaskbar) elTaskbar.textContent = monthText;
 }
 }
@@ -1837,11 +1825,12 @@ this.checkNegativeBalance();
 applyTheme() {
 document.body.classList.toggle('light', !this.darkMode);
 const btn = document.getElementById('themeBtn');
-if (btn) {
-btn.innerHTML = this.darkMode
+const btnTaskbar = document.getElementById('themeBtnTaskbar');
+const iconHtml = this.darkMode
 ? '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
 : '<svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-}
+if (btn) btn.innerHTML = iconHtml;
+if (btnTaskbar) btnTaskbar.innerHTML = iconHtml;
 if (Object.keys(this.charts).length > 0) {
 try { this.updateChartsTheme(); } catch (e) { console.warn('[SmartFinance] Erro tema:', e); }
 }
@@ -1849,11 +1838,17 @@ try { this.updateChartsTheme(); } catch (e) { console.warn('[SmartFinance] Erro 
 applyPrivacy() {
 document.body.classList.toggle('privacy-on', this.privacyOn);
 const btn = document.getElementById('privacyBtn');
-if (btn) {
-btn.innerHTML = this.privacyOn
+const btnTaskbar = document.getElementById('privacyBtnTaskbar');
+const iconHtml = this.privacyOn
 ? '<svg class="icon" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
 : '<svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+if (btn) {
+btn.innerHTML = iconHtml;
 btn.classList.toggle('active', this.privacyOn);
+}
+if (btnTaskbar) {
+btnTaskbar.innerHTML = iconHtml;
+btnTaskbar.classList.toggle('active', this.privacyOn);
 }
 }
 // ===== GRÁFICOS =====
@@ -2018,7 +2013,9 @@ if (closingDate.getTime() === tomorrow.getTime()) closingAlertsCount++;
 });
 const totalAlerts = bills.length + closingAlertsCount;
 const badge = document.getElementById('alertBadge');
+const badgeTaskbar = document.getElementById('alertBadgeTaskbar');
 const btn = document.getElementById('alertBtn');
+const btnTaskbar = document.getElementById('alertBtnTaskbar');
 if (badge && btn) {
 if (totalAlerts > 0) {
 badge.textContent = totalAlerts;
@@ -2027,6 +2024,16 @@ btn.classList.add('has-alerts');
 } else {
 badge.classList.remove('visible');
 btn.classList.remove('has-alerts');
+}
+}
+if (badgeTaskbar && btnTaskbar) {
+if (totalAlerts > 0) {
+badgeTaskbar.textContent = totalAlerts;
+badgeTaskbar.classList.add('visible');
+btnTaskbar.classList.add('has-alerts');
+} else {
+badgeTaskbar.classList.remove('visible');
+btnTaskbar.classList.remove('has-alerts');
 }
 }
 if (this.settings.notifyBills && bills.length > 0 && Notification.permission === 'granted') {
@@ -3645,14 +3652,18 @@ const main = document.getElementById('mainMenu');
 const mainTaskbar = document.getElementById('mainMenuTaskbar');
 const info = document.getElementById('infoMenu');
 const isActive = main && main.classList.contains('active');
+const isTaskbarActive = mainTaskbar && mainTaskbar.classList.contains('active');
 if (info) info.classList.remove('active');
 document.querySelectorAll('.header-btn.info-btn').forEach(b => b.classList.remove('menu-active'));
+// Toggle header menu
 if (main) main.classList.toggle('active', !isActive);
-if (mainTaskbar) mainTaskbar.classList.remove('active');
+// Close taskbar menu if opening header menu, and vice versa
+if (!isActive && mainTaskbar) mainTaskbar.classList.remove('active');
+if (isTaskbarActive && main) main.classList.remove('active');
 const menuBtn = document.querySelector('.header-btn.menu-btn');
 const menuBtnTaskbar = document.getElementById('menuBtnTaskbar');
-if (menuBtn) menuBtn.classList.toggle('menu-active', !isActive);
-if (menuBtnTaskbar) menuBtnTaskbar.classList.remove('menu-active');
+if (menuBtn) menuBtn.classList.toggle('menu-active', !isActive && !isTaskbarActive);
+if (menuBtnTaskbar) menuBtnTaskbar.classList.toggle('menu-active', isTaskbarActive && !isActive);
 };
 window.toggleInfoMenu = function(e) {
 if (e) e.stopPropagation();
@@ -3808,6 +3819,7 @@ setTimeout(showQuoteModal, 300);
 }
 };
 document.addEventListener('DOMContentLoaded', () => {
+// Header buttons removed - navigation now only in taskbar
 const todayBtn = document.getElementById('todayMonthBtn');
 if (todayBtn) {
 todayBtn.addEventListener('click', () => {
