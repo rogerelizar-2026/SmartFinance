@@ -34,16 +34,16 @@ if ('serviceWorker' in navigator) {
         <div class="print-date" id="printDate"></div>
     </div>
     <div class="print-footer">
-        <div class="print-author">by RogerElizar</div>
-        <div>Smart Finance © 2026</div>
+        <div class="print-author">Idealizado por RogerElizar™</div>
+        <div>Smart Finance © 2026 - rogerelizar@gmail.com</div>
     </div>
-
     <!-- Splash Screen -->
     <div class="splash-screen" id="splashScreen" role="banner">
         <div class="splash-content">
             <h1 class="splash-title">Smart Finance</h1>
-            <p class="splash-subtitle">by RogerElizar</p>
-                <div class="splash-icons" aria-hidden="true">
+            <p class="splash-subtitle">Idealizado por RogerElizar</p>
+            <p class="splash-email">rogerelizar@gmail.com</p>
+            <div class="splash-icons" aria-hidden="true">
                 <svg class="splash-icon" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
                 <svg class="splash-icon" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
                 <svg class="splash-icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
@@ -55,18 +55,17 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Disclaimer Modal -->
 <div id="disclaimerModal" class="disclaimer-modal fullscreen">
   <div class="disclaimer-content">
     <div class="disclaimer-header">
-            <h2 class="disclaimer-title">⚠️Termos de Uso e Aviso Legal⚠️</h2>
+      <div class="disclaimer-icon">⚠️</div>
+      <h2 class="disclaimer-title">Termos de Uso e Aviso Legal</h2>
       <p class="disclaimer-subtitle">Por favor, leia atentamente antes de continuar</p>
     </div>
     <div class="disclaimer-body">
       <h3>📋 Sobre o Smart Finance</h3>
       <p>O Smart Finance é uma ferramenta de controle financeiro pessoal desenvolvida para ajudar você a organizar suas finanças de forma simples, segura e inteligente.</p>
-
       <h3>🔒 Privacidade e Segurança</h3>
       <ul>
         <li><strong>100% Offline:</strong> Todos os seus dados são armazenados localmente no seu dispositivo.</li>
@@ -74,20 +73,16 @@ if ('serviceWorker' in navigator) {
         <li><strong>Sem Rastreamento:</strong> Não utilizamos cookies de analytics ou rastreamento.</li>
         <li><strong>Controle Total:</strong> Você pode exportar e apagar todos os seus dados a qualquer momento.</li>
       </ul>
-
       <h3>⚠️ Limitações</h3>
       <ul>
         <li><strong>Ferramenta de Apoio:</strong> Não substitui consultoria financeira profissional.</li>
         <li><strong>Responsabilidade:</strong> Todas as decisões são do usuário.</li>
         <li><strong>Backup:</strong> É responsabilidade do usuário manter backups regulares.</li>
       </ul>
-
       <h3>📜 Propriedade Intelectual</h3>
       <p>O Smart Finance foi idealizado e desenvolvido por RogerElizar™. Uso gratuito para fins pessoais.</p>
-
       <h3>✅ Seu Compromisso</h3>
       <p>Ao clicar em "Aceitar e Continuar", você declara que leu e aceitou os termos acima.</p>
-
       <!-- Checkbox novo -->
       <div class="disclaimer-checkbox-group">
         <input type="checkbox" id="acceptTermsCheckbox">
@@ -101,7 +96,6 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 </div>
-
     <!-- Quote Modal -->
     <div class="quote-modal" id="quoteModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="quote-content" tabindex="0">
@@ -113,7 +107,6 @@ if ('serviceWorker' in navigator) {
             <button class="quote-btn" id="startAppBtn">Gerenciar Minhas Finanças</button>
         </div>
     </div>
-
     <!-- Container Principal -->
     <div class="container" id="mainApp" role="main">
         <header class="app-header">
@@ -143,7 +136,7 @@ if ('serviceWorker' in navigator) {
                     </button>
                     <button class="header-btn" id="themeBtn" aria-label="Alternar tema">
                         <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    </button>        
+                    </button>
                     <div class="dropdown-wrapper">
                         <button class="header-btn menu-btn" id="menuBtn" aria-label="Menu principal">
                             <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -157,7 +150,7 @@ if ('serviceWorker' in navigator) {
                             <div class="dropdown-divider"></div>
                             <button class="dropdown-item" data-action="openCategoryBudgetModal"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg><span>Orçamento por Categoria</span></button>
                             <div class="dropdown-divider"></div>
-                            <button class="dropdown-item" id="goalBtn"> 
+                            <button class="dropdown-item" id="goalBtn">
     <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
     <span>Meta de Reserva</span>
 </button>
@@ -191,7 +184,6 @@ if ('serviceWorker' in navigator) {
                 </div>
             </div>
         </header>
-
         <!-- Dashboard -->
         <div class="dashboard">
             <div class="card clickable" data-action="dashboard-accounts"><div class="card-title">Saldo Unificado</div><div class="card-value privacy-value" id="totalBalance">R$ 0,00</div></div>
@@ -200,14 +192,12 @@ if ('serviceWorker' in navigator) {
             <div class="card clickable" data-action="dashboard-cards"><div class="card-title">Acumulado C.Crédito</div><div class="card-value privacy-value" id="goalProgress">R$ 0,00</div></div>
             <div class="card" title="Estimativa baseada na média dos últimos 3 meses"><div class="card-title">📈 Projeção Próx. Mês</div><div class="card-value privacy-value" id="projectionBalance">—</div></div>
         </div>
-
         <!-- Charts -->
         <div class="charts-section">
             <div class="chart-card"><h3>📈 Entradas e Saídas</h3><div class="chart-container"><canvas id="lineChart"></canvas></div></div>
             <div class="chart-card"><h3>💳 Cartões (6 meses)</h3><div class="chart-container"><canvas id="cardsChart"></canvas></div></div>
             <div class="chart-card"><h3>🥧 Despesas por Categoria</h3><div class="chart-container"><canvas id="pieChart"></canvas></div></div>
         </div>
-
         <!-- Waterfall Chart -->
         <div class="charts-section">
             <div class="chart-card" style="grid-column: 1 / -1;">
@@ -215,12 +205,9 @@ if ('serviceWorker' in navigator) {
                 <div class="chart-container" style="height: 320px;"><canvas id="waterfallChart"></canvas></div>
             </div>
         </div>
-
-
         <!-- Transactions -->
         <div class="transactions-section" role="region">
             <h2>Histórico do Mês</h2>
-
             <div class="filters">
                 <input type="text" id="searchFilter" placeholder="Buscar...">
                 <select id="typeFilter"><option value="">Todos os tipos</option><option value="income">Receitas</option><option value="expense">Despesas</option></select>
@@ -263,7 +250,6 @@ if ('serviceWorker' in navigator) {
                 <button class="btn btn-primary" id="loadDemoFromEmptyBtn" style="margin-top:16px;">Carregar Demonstração</button>
             </div>
         </div>
-
         <!-- Investment Chart -->
         <div class="charts-section" id="investmentsChartSection">
             <div class="chart-card" style="grid-column: 1 / -1;">
@@ -273,52 +259,41 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
 <!-- ===== FLOATING ACTION BAR ===== -->
 <div id="floatingBar" class="floating-bar" style="display:none;">
     <!-- Navegação Mensal -->
     <button id="floatPrevMonth" class="float-nav-btn" title="Mês anterior">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    
     <span id="floatMonthDisplay" class="float-month-display">Julho 2026</span>
-    
     <button id="floatNextMonth" class="float-nav-btn" title="Próximo mês">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
     </button>
-    
     <div class="float-divider"></div>
-    
     <!-- Botão Adicionar -->
     <button id="floatAddBtn" class="float-btn add-btn" title="Adicionar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
     </button>
-    
     <div class="float-divider"></div>
-    
     <!-- Privacidade -->
     <button id="floatPrivacyBtn" class="float-btn" title="Privacidade">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
     </button>
-    
     <!-- Tema -->
     <button id="floatThemeBtn" class="float-btn" title="Tema">
         <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
     </button>
-    
     <!-- Notificações -->
     <button id="floatAlertBtn" class="float-btn" title="Alertas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span id="floatAlertBadge" class="alert-badge">0</span>
     </button>
-    
     <!-- Menu -->
     <button id="floatMenuBtn" class="float-btn" title="Menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
 </div>
-
 <!-- Floating Menu Dropdown -->
 <div id="floatMenuDropdown" class="menu-dropdown">
     <div class="menu-category">Visão Geral</div>
@@ -330,7 +305,6 @@ if ('serviceWorker' in navigator) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         Transações
     </button>
-    
     <div class="menu-category">Contas & Cartões</div>
     <button class="menu-item" data-action="showAccounts">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -340,7 +314,6 @@ if ('serviceWorker' in navigator) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Cartões de Crédito
     </button>
-    
     <div class="menu-category">Investimentos & Metas</div>
     <button class="menu-item" data-action="showInvestments">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M12 8H4l8-7 8 7h-8"/><rect x="8" y="13" width="8" height="8" rx="1"/></svg>
@@ -350,7 +323,6 @@ if ('serviceWorker' in navigator) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         Metas Financeiras
     </button>
-    
     <div class="menu-category">Planejamento</div>
     <button class="menu-item" data-action="showBudget">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
@@ -360,122 +332,13 @@ if ('serviceWorker' in navigator) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
         Transações Recorrentes
     </button>
-    
     <div class="menu-category">Sistema & Dados</div>
     <button class="menu-item" data-action="toggleDemoMode">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 12l5-5m-5 5l5 5"/></svg>
         Modo Demonstração
     </button>
     <button class="menu-item" data-action="exportData">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Exportar Dados
-    </button>
-    <button class="menu-item" data-action="importData">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Importar Dados
-    </button>
-    <button class="menu-item" data-action="backupRestore">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Backup & Restauração
-    </button>
-    <button class="menu-item" data-action="clearData">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-        Limpar Dados
-    </button>
-</div>
-
-<!-- ===== BOTTOM TASKBAR (MOBILE - REMOVED) ===== -->
-
-<!-- ===== MODALS ===== -->
-
-    <!-- Modal Nova Transação -->
-    <div class="modal" id="newTransactionModal" role="dialog" aria-modal="true" tabindex="-1">
-        <div class="modal-content" tabindex="0">
-            <div class="modal-header">
-                <h2 id="newTransactionTitle">Nova Transação</h2>
-                <button class="modal-close" data-close-modal="newTransactionModal"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <form id="transactionForm">
-                <div class="form-group">
-                    <label>Tipo</label>
-                    <div class="type-selector">
-                        <button type="button" class="type-btn active" data-type="expense">💸 Despesa</button>
-                        <button type="button" class="type-btn" data-type="income">💰 Receita</button>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label for="date">Data</label><input type="date" id="date" required></div>
-                    <div class="form-group"><label for="amount">Valor (R$)</label><input type="number" id="amount" step="0.01" min="0.01" required></div>
-                </div>
-                <div class="form-group"><label for="description">Descrição</label><textarea id="description" rows="2" placeholder="Ex: Supermercado, Salário..."></textarea></div>
-                <div class="form-group"><label for="category">Categoria</label><select id="category" required><option value="">Selecione...</option></select></div>
-                <div class="form-group"><label for="paymentMethod">💳 Efetuado com</label><select id="paymentMethod" required><option value="">Selecione...</option></select></div>
-                <div class="form-group"><label for="transactionAccount">🏦 Conta</label><select id="transactionAccount" required><option value="">Selecione a conta...</option></select></div>
-                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="statusOk"><label for="statusOk">✓ Status OK (Concluído)</label></div></div>
-                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="recurring"><label for="recurring">↻ Recorrente/Parcelada</label></div></div>
-                <div class="form-group" id="recurringOptions" style="display:none;">
-                    <div class="form-row">
-                        <div><label for="recurrenceType">Tipo</label><select id="recurrenceType"><option value="monthly">Mensal</option><option value="yearly">Anual</option><option value="installment">Parcelado</option></select></div>
-                        <div><label for="recurrenceCount">Parcelas</label><input type="number" id="recurrenceCount" min="2" max="360" value="2"></div>
-                    </div>
-                </div>
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary">➕ Adicionar</button>
-                    <button type="button" class="btn btn-secondary" data-close-modal="newTransactionModal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Editar -->
-    <div class="modal" id="editModal" role="dialog" aria-modal="true" tabindex="-1">
-        <div class="modal-content" tabindex="0">
-            <div class="modal-header">
-                <h2 id="editTitle">Editar Transação</h2>
-                <button class="modal-close" data-close-modal="editModal"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <form id="editForm">
-                <input type="hidden" id="editId">
-                <div class="form-group">
-                    <label>Tipo</label>
-                    <div class="type-selector">
-                        <button type="button" class="type-btn active" data-type="expense">💸 Despesa</button>
-                        <button type="button" class="type-btn" data-type="income">💰 Receita</button>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label for="editDate">Data</label><input type="date" id="editDate" required></div>
-                    <div class="form-group"><label for="editAmount">Valor (R$)</label><input type="number" id="editAmount" step="0.01" min="0.01" required></div>
-                </div>
-                <div class="form-group"><label for="editDescription">Descrição</label><textarea id="editDescription" rows="2"></textarea></div>
-                <div class="form-group"><label for="editCategory">Categoria</label><select id="editCategory" required></select></div>
-                <div class="form-group"><label for="editPaymentMethod">💳 Efetuado com</label><select id="editPaymentMethod" required></select></div>
-                <div class="form-group"><label for="editTransactionAccount">🏦 Conta</label><select id="editTransactionAccount" required></select></div>
-                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="editStatusOk"><label for="editStatusOk">✓ Status OK</label></div></div>
-                <div class="form-group"><div class="checkbox-group"><input type="checkbox" id="editRecurring"><label for="editRecurring">↻ Recorrente/Parcelada</label></div></div>
-                <div class="form-group" id="editRecurringOptions" style="display:none;">
-                    <div class="form-row">
-                        <div><label for="editRecurrenceType">Tipo</label><select id="editRecurrenceType"><option value="monthly">Mensal</option><option value="yearly">Anual</option><option value="installment">Parcelado</option></select></div>
-                        <div><label for="editRecurrenceCount">Parcelas</label><input type="number" id="editRecurrenceCount" min="2" max="360" value="2"></div>
-                    </div>
-                </div>
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
-                    <button type="button" class="btn btn-danger" id="deleteFromEditBtn">🗑️ Excluir</button>
-                    <button type="button" class="btn btn-secondary" data-close-modal="editModal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Transferência -->
-    <div class="modal" id="transferModal" role="dialog" aria-modal="true" tabindex="-1">
-        <div class="modal-content" tabindex="0">
-            <div class="modal-header"><h2>🔄 Transferência</h2><button class="modal-close" data-close-modal="transferModal"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-            <form id="transferForm">
-                <div class="form-row">
-                    <div class="form-group"><label for="transferFrom">Origem</label><select id="transferFrom" required></select></div>
-                    <div class="form-group"><label for="transferTo">Destino</label><select id="transferTo" required></select></div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="...To">Destino</label><select id="transferTo" required></select></div>
                 </div>
                 <div class="form-group"><label for="transferAmount">Valor (R$)</label><input type="number" id="transferAmount" step="0.01" min="0.01" required></div>
                 <div class="form-group"><label for="transferDate">Data</label><input type="date" id="transferDate" required></div>
@@ -487,7 +350,6 @@ if ('serviceWorker' in navigator) {
             </form>
         </div>
     </div>
-
     <!-- Modal Exportar -->
     <div class="modal" id="exportModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -498,7 +360,6 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Modal Meta -->
     <div class="modal" id="goalModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -514,7 +375,6 @@ if ('serviceWorker' in navigator) {
             </form>
         </div>
     </div>
-
     <!-- Modal Orçamento -->
     <div class="modal" id="categoryBudgetModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -522,7 +382,6 @@ if ('serviceWorker' in navigator) {
             <div id="categoryBudgetContent"></div>
         </div>
     </div>
-
     <!-- Modal Importar CSV -->
     <div class="modal" id="importCsvModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -538,7 +397,6 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Modal Restaurar Backup -->
     <div class="modal" id="importBackupModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -558,7 +416,6 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Modal Limpar -->
     <div class="modal danger-modal" id="clearDataModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -582,7 +439,6 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Modal Contas -->
     <div class="modal" id="accountsModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -594,7 +450,6 @@ if ('serviceWorker' in navigator) {
             <div id="accountsList"></div>
         </div>
     </div>
-
     <!-- Modal Nova Conta -->
     <div class="modal" id="newAccountModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -612,7 +467,6 @@ if ('serviceWorker' in navigator) {
             </form>
         </div>
     </div>
-
     <!-- Modal Cartões -->
     <div class="modal" id="creditCardsModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -630,7 +484,6 @@ if ('serviceWorker' in navigator) {
             <div id="creditCardsList"></div>
         </div>
     </div>
-
     <!-- Modal Novo Cartão -->
     <div class="modal" id="newCardModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -655,7 +508,6 @@ if ('serviceWorker' in navigator) {
             </form>
         </div>
     </div>
-
     <!-- Modal Fatura -->
     <div class="modal" id="invoiceModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -670,7 +522,6 @@ if ('serviceWorker' in navigator) {
             <div id="invoiceContent"></div>
         </div>
     </div>
-
     <!-- Modal Contas a Vencer -->
     <div class="modal" id="billsModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -679,7 +530,6 @@ if ('serviceWorker' in navigator) {
             <div id="billsList"></div>
         </div>
     </div>
-
     <!-- Modal Investimentos -->
     <div class="modal" id="investmentsModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -687,7 +537,6 @@ if ('serviceWorker' in navigator) {
             <div id="investmentsContent"></div>
         </div>
     </div>
-
     <!-- Modal Nova Aplicação -->
     <div class="modal" id="newInvestmentModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -714,7 +563,6 @@ if ('serviceWorker' in navigator) {
             </form>
         </div>
     </div>
-
     <!-- Modal Atualizar Investimento -->
     <div class="modal" id="updateInvestmentModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -731,7 +579,6 @@ if ('serviceWorker' in navigator) {
             </form>
         </div>
     </div>
-
     <!-- Modal Manual -->
     <div class="modal" id="manualModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -739,7 +586,6 @@ if ('serviceWorker' in navigator) {
             <div class="manual-content" id="manualContent"></div>
         </div>
     </div>
-
     <!-- Modal Apoio -->
     <div class="modal" id="thanksModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -758,7 +604,6 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Modal Novidades -->
     <div class="modal" id="whatsNewModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
@@ -788,7 +633,6 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Modal Configurações -->
     <div class="modal" id="settingsModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0">
@@ -900,7 +744,6 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <!-- Alerta de Saldo Negativo -->
     <div class="negative-balance-alert" id="negativeBalanceAlert" style="display:none;">
         <div class="alert-content">
@@ -911,7 +754,6 @@ if ('serviceWorker' in navigator) {
             <button class="alert-close" id="closeNegativeAlertBtn">✕</button>
         </div>
     </div>
-
     <!-- v1.0.0: Modal de Confirmação Custom -->
     <div class="modal" id="confirmModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content" tabindex="0" style="max-width: 450px;">
@@ -925,10 +767,8 @@ if ('serviceWorker' in navigator) {
             </div>
         </div>
     </div>
-
     <div class="toast" id="toast"></div>
     <div class="modal-backdrop" id="modalBackdrop"></div>
-
     <!-- Barra Flutuante Inferior -->
     <div class="floating-bottom-bar" id="floatingBottomBar">
         <div class="floating-bar-content">
@@ -942,41 +782,33 @@ if ('serviceWorker' in navigator) {
                     <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
             </div>
-
             <!-- Espaçador -->
             <div class="floating-spacer"></div>
-
             <!-- Botão Notificações -->
             <button type="button" class="floating-btn" id="floatNotificationsBtn" aria-label="Notificações">
                 <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 <span class="floating-badge" id="floatAlertBadge">0</span>
             </button>
-
             <!-- Botão Privacidade -->
             <button type="button" class="floating-btn" id="floatPrivacyBtn" aria-label="Ocultar valores">
                 <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
-
             <!-- Botão Tema Claro/Escuro -->
             <button type="button" class="floating-btn" id="floatThemeBtn" aria-label="Alternar tema">
                 <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
-
             <!-- Botão Menu -->
             <button type="button" class="floating-btn" id="floatMenuBtn" aria-label="Menu principal">
                 <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
-
             <!-- Espaçador -->
             <div class="floating-spacer"></div>
-
             <!-- Botão Adicionar (+) -->
             <button type="button" class="floating-btn floating-add-btn" id="floatAddBtn" aria-label="Adicionar transação">
                 <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
         </div>
     </div>
-
     <script src="js/app.js"></script>
 </body>
 </html>
