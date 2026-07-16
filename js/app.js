@@ -4501,8 +4501,8 @@ const taskbar = document.getElementById('bottomTaskbar');
 if (!stillOpen && taskbar) taskbar.style.display = 'flex';
 };
 console.log('🎉 Smart Finance v1.0.2 carregado com sucesso!');
-})();
-(function setupKeyboardShortcuts() {
+
+function setupKeyboardShortcuts() {
     const menu = document.getElementById('mainMenu');
     const info = document.getElementById('infoMenu');
     const menuBtn = document.querySelector('.header-btn.menu-btn');
