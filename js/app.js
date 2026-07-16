@@ -4824,6 +4824,5 @@ document.addEventListener('DOMContentLoaded', () => {
             updateFloatAlertBadge(count);
             return result;
             };
-        }
-    }
-})();
+   }
+}
