@@ -428,33 +428,9 @@ class SmartFinance {
             notifyBills: false,
             pageSize: 20
         };
-        // Cache de elementos DOM para evitar chamadas repetidas a getElementById
-        this.domCache = {};
-        this.cacheDOMElements();
         this.loadData();
         this.loadSettings();
         this.init();
-    }
-
-    // ===== CACHE DE ELEMENTOS DOM =====
-    cacheDOMElements() {
-        const elementIds = [
-            'negativeBalanceAlert', 'negativeBalanceMessage', 'waterfallChart',
-            'alertNegativeBalance', 'blockNegativeBalance', 'autoBackupEnabled',
-            'notifyBills', 'settingsPageSize', 'lastBackupDate', 'notificationsStatus'
-        ];
-        elementIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) this.domCache[id] = el;
-        });
-    }
-
-    // Helper para getElementById com cache
-    $(id) {
-        if (!this.domCache[id]) {
-            this.domCache[id] = document.getElementById(id);
-        }
-        return this.domCache[id];
     }
 
     // ===== CARREGAMENTO E SALVAMENTO =====
@@ -655,20 +631,8 @@ class SmartFinance {
         if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => self.changeMonth(-1));
         if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => self.changeMonth(1));
 
-        // Barra flutuante - seletores de mês
-        const floatPrevMonthBtn = document.getElementById('floatPrevMonthBtn');
-        const floatNextMonthBtn = document.getElementById('floatNextMonthBtn');
-        if (floatPrevMonthBtn) floatPrevMonthBtn.addEventListener('click', () => self.changeMonth(-1));
-        if (floatNextMonthBtn) floatNextMonthBtn.addEventListener('click', () => self.changeMonth(1));
-
         const alertBtn = document.getElementById('alertBtn');
         if (alertBtn) alertBtn.addEventListener('click', () => openBillsModal());
-
-        // Barra flutuante - botão notificações
-        const floatNotificationsBtn = document.getElementById('floatNotificationsBtn');
-        if (floatNotificationsBtn) floatNotificationsBtn.addEventListener('click', () => {
-            enableNotifications();
-        });
 
         const goalBtn = document.getElementById('goalBtn');
         if (goalBtn) goalBtn.addEventListener('click', () => openGoalModal());
@@ -676,16 +640,8 @@ class SmartFinance {
         const privacyBtn = document.getElementById('privacyBtn');
         if (privacyBtn) privacyBtn.addEventListener('click', () => togglePrivacy());
 
-        // Barra flutuante - botão privacidade
-        const floatPrivacyBtn = document.getElementById('floatPrivacyBtn');
-        if (floatPrivacyBtn) floatPrivacyBtn.addEventListener('click', () => togglePrivacy());
-
         const themeBtn = document.getElementById('themeBtn');
         if (themeBtn) themeBtn.addEventListener('click', () => toggleTheme());
-
-        // Barra flutuante - botão tema
-        const floatThemeBtn = document.getElementById('floatThemeBtn');
-        if (floatThemeBtn) floatThemeBtn.addEventListener('click', () => toggleTheme());
 
         // (Observação: o antigo botão "infoBtn"/menu de informações foi removido do layout;
         // o restante do código relacionado é inofensivo (só age se o elemento existir),
@@ -693,16 +649,6 @@ class SmartFinance {
 
         const menuBtn = document.getElementById('menuBtn');
         if (menuBtn) menuBtn.addEventListener('click', (e) => toggleMenu(e));
-
-        // Barra flutuante - botão menu
-        const floatMenuBtn = document.getElementById('floatMenuBtn');
-        if (floatMenuBtn) floatMenuBtn.addEventListener('click', (e) => toggleMenu(e));
-
-        // Barra flutuante - botão adicionar (+)
-        const floatAddBtn = document.getElementById('floatAddBtn');
-        if (floatAddBtn) floatAddBtn.addEventListener('click', () => {
-            openModal('newTransactionModal');
-        });
 
         const fabBtn = document.getElementById('fabBtn');
         if (fabBtn) fabBtn.addEventListener('click', () => toggleFab());
@@ -1028,11 +974,8 @@ class SmartFinance {
     updateMonthDisplay() {
         const months = this.getMonths();
         const el = document.getElementById('currentMonth');
-        const floatEl = document.getElementById('floatCurrentMonth');
-        if (months) {
-            const monthText = months[this.currentMonth.getMonth()] + ' ' + this.currentMonth.getFullYear();
-            if (el) el.textContent = monthText;
-            if (floatEl) floatEl.textContent = months[this.currentMonth.getMonth()].substring(0, 3) + ' ' + this.currentMonth.getFullYear();
+        if (el && months) {
+            el.textContent = months[this.currentMonth.getMonth()] + ' ' + this.currentMonth.getFullYear();
         }
     }
 
@@ -2334,7 +2277,6 @@ class SmartFinance {
         const totalAlerts = bills.length + closingAlertsCount;
         const badge = document.getElementById('alertBadge');
         const btn = document.getElementById('alertBtn');
-        const floatBadge = document.getElementById('floatAlertBadge');
         if (badge && btn) {
             if (totalAlerts > 0) {
                 badge.textContent = totalAlerts;
@@ -2343,15 +2285,6 @@ class SmartFinance {
             } else {
                 badge.classList.remove('visible');
                 btn.classList.remove('has-alerts');
-            }
-        }
-        // Atualiza badge da barra flutuante
-        if (floatBadge) {
-            floatBadge.textContent = totalAlerts;
-            if (totalAlerts > 0) {
-                floatBadge.style.display = 'flex';
-            } else {
-                floatBadge.style.display = 'none';
             }
         }
         if (this.settings.notifyBills && bills.length > 0 && Notification.permission === 'granted') {
@@ -2364,6 +2297,342 @@ class SmartFinance {
                 localStorage.setItem(notifKey, 'true');
             }
         }
+    }
+
+    checkNegativeBalance() {
+        if (!this.settings.alertNegativeBalance) {
+            const alert = document.getElementById('negativeBalanceAlert');
+            if (alert) alert.style.display = 'none';
+            return;
+        }
+        const negativeAccounts = this.accounts.filter(a =>
+            a.type === 'checking' && (parseFloat(a.balance) || 0) < 0
+        );
+        const alert = document.getElementById('negativeBalanceAlert');
+        const message = document.getElementById('negativeBalanceMessage');
+        if (negativeAccounts.length > 0 && alert && message) {
+            const names = negativeAccounts.map(a => a.name).join(', ');
+            message.textContent = this.t('negativeBalanceAlert', { count: negativeAccounts.length }) + ' (' + names + ')';
+            alert.style.display = 'block';
+        } else if (alert) {
+            alert.style.display = 'none';
+        }
+    }
+
+    checkAutoBackup() {
+        if (!this.settings.autoBackupEnabled) return;
+        const lastBackup = localStorage.getItem('smartfinance_last_backup');
+        const now = Date.now();
+        const weekMs = 7 * 24 * 60 * 60 * 1000;
+        if (!lastBackup || (now - parseInt(lastBackup)) > weekMs) {
+            if (this.transactions.length > 10) {
+                setTimeout(() => {
+                    this.showToast(this.t('autoBackupSuggested'));
+                }, 3000);
+            }
+        }
+    }
+
+    async toggleDemoMode() {
+        if (this.demoMode) {
+            const confirmed = await showConfirm(
+                '️ Encerrar Demonstração?',
+                'Encerrar modo demonstração e limpar todos os dados?<br><br>Esta ação não pode ser desfeita.'
+            );
+            if (confirmed) {
+                this.clearAllData(true);
+                this.demoMode = false;
+                localStorage.setItem('smartfinance_demo', 'false');
+                this.applyDemoBadge();
+                this.showToast(this.t('demoCleared'));
+            }
+        } else {
+            const confirmed = await showConfirm(
+                'Carregar Demonstração?',
+                'Carregar dados de exemplo?<br><br>Seus dados atuais serão substituídos pelos dados de demonstração.<br><br>Recomendamos fazer backup antes de continuar.'
+            );
+            if (confirmed) {
+                this.loadDemoData();
+            }
+        }
+    }
+
+    loadDemoData() {
+        this.accounts = [
+            { id: 'acc1', name: 'Conta Corrente Principal', type: 'checking', balance: 3500, color: '#6366f1' },
+            { id: 'acc2', name: 'Poupança', type: 'checking', balance: 8200, color: '#10b981' },
+            { id: 'acc3', name: 'Investimentos', type: 'investment', balance: 39000, color: '#f59e0b' }
+        ];
+        this.cards = [
+            { id: 'card1', name: 'Nubank', brand: 'Mastercard', last4: '4532', closingDay: 15, dueDay: 22, limit: 5000, color: '#8b5cf6' },
+            { id: 'card2', name: 'Inter', brand: 'Visa', last4: '8821', closingDay: 20, dueDay: 27, limit: 3000, color: '#f97316' }
+        ];
+        this.transactions = [];
+        const today = new Date();
+        for (let m = 0; m < 6; m++) {
+            const month = new Date(today.getFullYear(), today.getMonth() - m, 1);
+            this.transactions.push({
+                id: this.generateUniqueId() + '_sal_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 5).toISOString().split('T')[0],
+                amount: 5000,
+                category: 'salario',
+                description: 'Salário Mensal',
+                statusOk: true,
+                paymentMethod: 'pix',
+                accountId: 'acc1'
+            });
+            this.transactions.push({
+                id: this.generateUniqueId() + '_alg_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 10).toISOString().split('T')[0],
+                amount: -1500,
+                category: 'casa',
+                description: 'Aluguel Apartamento',
+                statusOk: true,
+                paymentMethod: 'auto',
+                accountId: 'acc1'
+            });
+            for (let d = 0; d < 4; d++) {
+                this.transactions.push({
+                    id: this.generateUniqueId() + '_sup_' + m + '_' + d,
+                    date: new Date(month.getFullYear(), month.getMonth(), 3 + d * 7).toISOString().split('T')[0],
+                    amount: -(200 + Math.floor(Math.random() * 300)),
+                    category: 'despensa',
+                    description: 'Supermercado - Compra ' + (d + 1),
+                    statusOk: true,
+                    paymentMethod: 'card:card1',
+                    accountId: 'acc1'
+                });
+            }
+            this.transactions.push({
+                id: this.generateUniqueId() + '_trans_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 15).toISOString().split('T')[0],
+                amount: -350,
+                category: 'transporte',
+                description: 'Combustível + Uber',
+                statusOk: true,
+                paymentMethod: 'debit',
+                accountId: 'acc1'
+            });
+            this.transactions.push({
+                id: this.generateUniqueId() + '_laz_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 20).toISOString().split('T')[0],
+                amount: -400,
+                category: 'lazer',
+                description: 'Cinema + Restaurante',
+                statusOk: true,
+                paymentMethod: 'card:card2',
+                accountId: 'acc1'
+            });
+            this.transactions.push({
+                id: this.generateUniqueId() + '_inv_' + m,
+                date: new Date(month.getFullYear(), month.getMonth(), 25).toISOString().split('T')[0],
+                amount: -1000,
+                category: 'reserva_aplicacao',
+                description: 'Aporte mensal investimentos',
+                statusOk: true,
+                paymentMethod: 'transfer',
+                accountId: 'acc1'
+            });
+        }
+        this.investments = [
+            { id: 'inv1', name: 'CDB Banco XYZ', type: 'cdb', initial: 10000, current: 11200, date: '2025-01-15', rate: 12, accountId: 'acc3' },
+            { id: 'inv2', name: 'Tesouro IPCA+ 2029', type: 'tesouro', initial: 5000, current: 5800, date: '2025-03-10', rate: 6.5, accountId: 'acc3' }
+        ];
+        this.demoMode = true;
+        localStorage.setItem('smartfinance_demo', 'true');
+        this.clearCache();
+        this.saveTransactions();
+        this.saveAccounts();
+        this.saveCards();
+        this.saveInvestments();
+        this.applyDemoBadge();
+        this.populateCategorySelects();
+        this.populatePaymentMethodSelects();
+        this.populateAccountSelects();
+        this.populateCardFilter();
+        this.render();
+        this.updateCharts();
+        this.updateAlertBadge();
+        this.checkNegativeBalance();
+        this.showToast(this.t('demoLoaded'));
+    }
+
+    requestNotifications() {
+        if (!('Notification' in window)) {
+            this.showToast(this.t('notificationsNotSupported'));
+            return;
+        }
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                this.settings.notifyBills = true;
+                this.saveSettings();
+                this.updateSettingsUI();
+                this.showToast(this.t('notificationsEnabled'));
+                new Notification('Smart Finance', {
+                    body: 'Notificações ativadas com sucesso!',
+                    icon: 'favicon.svg'
+                });
+            } else {
+                this.showToast(this.t('notificationsDenied'));
+            }
+        });
+    }
+
+    saveSettingsFromModal() {
+        this.settings.alertNegativeBalance = document.getElementById('alertNegativeBalance').checked;
+        this.settings.blockNegativeBalance = document.getElementById('blockNegativeBalance').checked;
+        this.settings.autoBackupEnabled = document.getElementById('autoBackupEnabled').checked;
+        this.settings.notifyBills = document.getElementById('notifyBills').checked;
+        this.settings.pageSize = parseInt(document.getElementById('settingsPageSize').value);
+        this.pageSize = this.settings.pageSize;
+        this.currentPage = 1;
+        this.saveSettings();
+        this.checkNegativeBalance();
+        this.render();
+        closeModal('settingsModal');
+        this.showToast(this.t('settingsSaved'));
+    }
+
+    updateSettingsUI() {
+        const alertNeg = document.getElementById('alertNegativeBalance');
+        const blockNeg = document.getElementById('blockNegativeBalance');
+        const autoBackup = document.getElementById('autoBackupEnabled');
+        const notifyBills = document.getElementById('notifyBills');
+        const pageSize = document.getElementById('settingsPageSize');
+        const lastBackupDate = document.getElementById('lastBackupDate');
+        const notificationsStatus = document.getElementById('notificationsStatus');
+        if (alertNeg) alertNeg.checked = this.settings.alertNegativeBalance;
+        if (blockNeg) blockNeg.checked = this.settings.blockNegativeBalance;
+        if (autoBackup) autoBackup.checked = this.settings.autoBackupEnabled;
+        if (notifyBills) {
+            notifyBills.checked = this.settings.notifyBills;
+            notifyBills.disabled = !('Notification' in window) || Notification.permission !== 'granted';
+        }
+        if (pageSize) pageSize.value = this.settings.pageSize.toString();
+        if (lastBackupDate) {
+            const lastBackup = localStorage.getItem('smartfinance_last_backup');
+            if (lastBackup) {
+                const date = new Date(parseInt(lastBackup));
+                lastBackupDate.textContent = this.t('lastBackup', { date: date.toLocaleString(this.getLanguage()) });
+            } else {
+                lastBackupDate.textContent = this.t('neverBackedUp');
+            }
+        }
+        if (notificationsStatus) {
+            if (!('Notification' in window)) {
+                notificationsStatus.textContent = '❌ Não suportado';
+            } else if (Notification.permission === 'granted') {
+                notificationsStatus.textContent = '✅ Ativado';
+            } else if (Notification.permission === 'denied') {
+                notificationsStatus.textContent = '❌ Bloqueado';
+            } else {
+                notificationsStatus.textContent = '⏳ Pendente';
+            }
+        }
+    }
+
+    renderWaterfallChart() {
+        const canvas = document.getElementById('waterfallChart');
+        if (!canvas) return;
+        const months = this.getMonths('short');
+        const labels = [];
+        const incomeData = [];
+        const expenseData = [];
+        const balanceData = [];
+        let runningBalance = 0;
+        for (let i = -5; i <= 0; i++) {
+            const d = new Date(this.currentMonth);
+            d.setMonth(d.getMonth() + i);
+            labels.push(months[d.getMonth()] + '/' + d.getFullYear());
+            const mt = this.getMonthTransactions(d);
+            let inc = 0, exp = 0;
+            mt.forEach(t => {
+                if (t.amount > 0) inc += t.amount;
+                else exp += Math.abs(t.amount);
+            });
+            incomeData.push(inc);
+            expenseData.push(exp);
+            runningBalance += (inc - exp);
+            balanceData.push(runningBalance);
+        }
+        const colors = this.getChartColors();
+        if (this.charts.waterfall) {
+            this.charts.waterfall.destroy();
+        }
+        this.charts.waterfall = new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: incomeData,
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: '#10b981',
+                        borderWidth: 1,
+                        stack: 'stack1'
+                    },
+                    {
+                        label: 'Despesas',
+                        data: expenseData.map(v => -v),
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: '#ef4444',
+                        borderWidth: 1,
+                        stack: 'stack1'
+                    },
+                    {
+                        label: 'Saldo Acumulado',
+                        data: balanceData,
+                        type: 'line',
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: colors.text }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                const value = Math.abs(context.parsed.y);
+                                label += smartfinance.formatCurrency(value);
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stacked: true,
+                        ticks: { color: colors.textSecondary },
+                        grid: { color: colors.grid }
+                    },
+                    y1: {
+                        position: 'right',
+                        ticks: { color: colors.textSecondary },
+                        grid: { display: false }
+                    },
+                    x: {
+                        stacked: true,
+                        ticks: { color: colors.textSecondary },
+                        grid: { color: colors.grid }
+                    }
+                }
+            }
+        });
     }
 
     // ===== FATURA DE CARTÃO =====
@@ -4111,33 +4380,14 @@ window.acceptDisclaimer = function() {
         }, 600);
     }
 };
-document.addEventListener('DOMContentLoaded', () => {
-const todayBtn = document.getElementById('todayMonthBtn');
-if (todayBtn) {
-todayBtn.addEventListener('click', () => {
-smartfinance.currentMonth = new Date();
-smartfinance.currentMonth.setDate(1);
-smartfinance.currentMonth.setHours(0, 0, 0, 0);
-smartfinance.updateMonthDisplay();
-smartfinance.clearCache();
-smartfinance.currentPage = 1;
-smartfinance.render();
-smartfinance.updateCharts();
-});
-}
-});
+
 window.startApp = function() {
-const quote = document.getElementById('quoteModal');
-const splash = document.getElementById('splashScreen');
-const main = document.getElementById('mainApp');
-const taskbar = document.getElementById('bottomTaskbar');
-if (quote) { quote.classList.remove('active'); quote.style.display = 'none'; }
-if (splash) {
-splash.classList.add('fade-out');
-setTimeout(() => { splash.style.display = 'none'; }, 800);
-}
-if (main) main.style.display = 'block';
-if (taskbar) taskbar.style.display = 'flex';
+    const quote = document.getElementById('quoteModal');
+    const main = document.getElementById('mainApp');
+    const fab = document.getElementById('fabBtn');
+    if (quote) { quote.classList.remove('active'); quote.style.display = 'none'; }
+    if (main) main.style.display = 'block';
+    if (fab) fab.style.display = 'flex';
 };
 
 window.closeWhatsNewModal = function() { closeModal('whatsNewModal'); };
@@ -4175,61 +4425,6 @@ window.addEventListener('load', () => {
 });
 
 // Click fora fecha MENUS (não modais!)
-document.addEventListener('click', (e) => {
-if (!e.target.closest('.taskbar-btn') && !e.target.closest('.fab-popup') && !e.target.closest('.taskbar-menu-wrapper')) {
-if (fabPopup) fabPopup.classList.remove('active');
-if (mainMenu) mainMenu.classList.remove('active');
-if (fabBtnTaskbar) fabBtnTaskbar.classList.remove('menu-active');
-if (menuBtnTaskbar) menuBtnTaskbar.classList.remove('menu-active');
-}
-});
-const _origUpdateAlertBadge = SmartFinance.prototype.updateAlertBadge;
-SmartFinance.prototype.updateAlertBadge = function() {
-_origUpdateAlertBadge.call(this);
-const today = new Date(); today.setHours(0, 0, 0, 0);
-const in3Days = new Date(today); in3Days.setDate(in3Days.getDate() + 3);
-const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-const bills = this.transactions.filter(t => {
-if (t.statusOk || t.amount >= 0) return false;
-const tDate = this.parseDate(t.date);
-return tDate <= in3Days;
-});
-let closingAlertsCount = 0;
-this.cards.forEach(card => {
-const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-const closingDay = Math.min(card.closingDay, lastDayOfMonth);
-const closingDate = new Date(today.getFullYear(), today.getMonth(), closingDay);
-closingDate.setHours(0, 0, 0, 0);
-if (closingDate.getTime() === tomorrow.getTime()) closingAlertsCount++;
-});
-const totalAlerts = bills.length + closingAlertsCount;
-const badge = document.getElementById('alertBadgeTaskbar');
-if (badge) {
-if (totalAlerts > 0) {
-badge.textContent = totalAlerts > 99 ? '99+' : totalAlerts;
-badge.classList.add('visible');
-} else {
-badge.classList.remove('visible');
-}
-}
-};
-const _origOpenModal = window.openModal;
-window.openModal = function(id) {
-_origOpenModal(id);
-const fabPopup = document.getElementById('fabPopup');
-const mainMenu = document.getElementById('mainMenu');
-if (taskbar) taskbar.style.display = 'none';
-if (fabPopup) fabPopup.classList.remove('active');
-if (mainMenu) mainMenu.classList.remove('active');
-};
-const _origCloseModal = window.closeModal;
-window.closeModal = function(id) {
-_origCloseModal(id);
-const stillOpen = document.querySelector('.modal.active, .modal-front.active');
-if (!stillOpen && taskbar) taskbar.style.display = 'flex';
-};
-console.log('🎉 Smart Finance v1.0.2 carregado com sucesso!');
-
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('mainMenu');
     const info = document.getElementById('infoMenu');
@@ -4288,7 +4483,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== SOLUÇÃO 3: ATALHOS DE TECLADO PARA NAVEGAÇÃO DE MÊS =====
-function setupKeyboardShortcuts() {
+(function setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
         // Ignora se estiver em input/select/textarea ou modal aberto
         const tag = document.activeElement?.tagName;
@@ -4318,10 +4513,10 @@ function setupKeyboardShortcuts() {
             smartfinance.updateCharts();
         }
     });
-}
+})();
 
 // ===== SOLUÇÃO 3: SWIPE HORIZONTAL NA TABELA DE TRANSAÇÕES (MOBILE) =====
-function setupSwipeMonthNavigation() {
+(function setupSwipeMonthNavigation() {
     const transactionsSection = document.getElementById('transactionsSection');
     if (!transactionsSection) return;
 
@@ -4357,202 +4552,6 @@ function setupSwipeMonthNavigation() {
             }
         }
     }, { passive: true });
-}
+})();
 
-// ===== FLOATING ACTION BAR SETUP =====
-function setupFloatingActionBar() {
-    const floatingBar = document.getElementById('floatingBar');
-    const floatMonthDisplay = document.getElementById('floatMonthDisplay');
-    const floatPrevMonth = document.getElementById('floatPrevMonth');
-    const floatNextMonth = document.getElementById('floatNextMonth');
-    const floatAddBtn = document.getElementById('floatAddBtn');
-    const floatPrivacyBtn = document.getElementById('floatPrivacyBtn');
-    const floatThemeBtn = document.getElementById('floatThemeBtn');
-    const floatAlertBtn = document.getElementById('floatAlertBtn');
-    const floatMenuBtn = document.getElementById('floatMenuBtn');
-    const floatAlertBadge = document.getElementById('floatAlertBadge');
-    const floatMenuDropdown = document.getElementById('floatMenuDropdown');
-    const themeIconLight = document.querySelector('.theme-icon-light');
-    const themeIconDark = document.querySelector('.theme-icon-dark');
-    
-    // Show floating bar when app starts
-    if (floatingBar) {
-        floatingBar.style.display = 'flex';
-    }
-    
-    // Update month display in floating bar
-    function updateFloatMonthDisplay() {
-        if (floatMonthDisplay && smartfinance.currentMonth) {
-            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            const m = smartfinance.currentMonth.getMonth();
-            const y = smartfinance.currentMonth.getFullYear();
-            floatMonthDisplay.textContent = `${monthNames[m]} ${y}`;
-        }
-    }
-    
-    // Sync with main month display
-    if (smartfinance.updateMonthDisplay) {
-        const origUpdate = smartfinance.updateMonthDisplay;
-        smartfinance.updateMonthDisplay = function() {
-            origUpdate.call(this);
-            updateFloatMonthDisplay();
-        };
-    }
-    
-    // Navigation buttons
-    if (floatPrevMonth) {
-        floatPrevMonth.addEventListener('click', () => {
-            if (smartfinance.changeMonth) smartfinance.changeMonth(-1);
-        });
-    }
-    
-    if (floatNextMonth) {
-        floatNextMonth.addEventListener('click', () => {
-            if (smartfinance.changeMonth) smartfinance.changeMonth(1);
-        });
-    }
-    
-    // Add button - open FAB popup or modal
-    if (floatAddBtn) {
-        floatAddBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (typeof openNewTransactionModal === 'function') {
-                openNewTransactionModal();
-            }
-        });
-    }
-    
-    // Privacy button
-    if (floatPrivacyBtn) {
-        floatPrivacyBtn.addEventListener('click', () => {
-            if (typeof togglePrivacy === 'function') togglePrivacy();
-        });
-    }
-    
-    // Theme button
-    if (floatThemeBtn) {
-        floatThemeBtn.addEventListener('click', () => {
-            if (typeof toggleTheme === 'function') toggleTheme();
-            // Update icons
-            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-            if (themeIconLight && themeIconDark) {
-                if (isDark) {
-                    themeIconLight.style.display = 'none';
-                    themeIconDark.style.display = 'block';
-                } else {
-                    themeIconLight.style.display = 'block';
-                    themeIconDark.style.display = 'none';
-                }
-            }
-        });
-    }
-    
-    // Alert button
-    if (floatAlertBtn) {
-        floatAlertBtn.addEventListener('click', () => {
-            if (typeof openBillsModal === 'function') openBillsModal();
-        });
-    }
-    
-    // Menu button
-    if (floatMenuBtn) {
-        floatMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (floatMenuDropdown) {
-                const isActive = floatMenuDropdown.classList.contains('show');
-                // Close header menu if open
-                const mainMenu = document.getElementById('mainMenu');
-                if (mainMenu) mainMenu.classList.remove('active');
-                // Toggle float menu
-                floatMenuDropdown.classList.toggle('show', !isActive);
-            }
-        });
-    }
-    
-    // Menu item actions
-    if (floatMenuDropdown) {
-        floatMenuDropdown.querySelectorAll('.menu-item').forEach(item => {
-            const action = item.dataset.action;
-            if (action) {
-                item.addEventListener('click', () => {
-                    // Close menu
-                    floatMenuDropdown.classList.remove('show');
-                    
-                    // Execute action
-                    switch(action) {
-                        case 'showDashboard':
-                            if (smartfinance.showSection) smartfinance.showSection('dashboard');
-                            break;
-                        case 'showTransactions':
-                            if (smartfinance.showSection) smartfinance.showSection('transactions');
-                            break;
-                        case 'showAccounts':
-                            if (smartfinance.showSection) smartfinance.showSection('accounts');
-                            break;
-                        case 'showCreditCards':
-                            if (smartfinance.showSection) smartfinance.showSection('creditCards');
-                            break;
-                        case 'showInvestments':
-                            if (smartfinance.showSection) smartfinance.showSection('investments');
-                            break;
-                        case 'showGoals':
-                            if (smartfinance.showSection) smartfinance.showSection('goals');
-                            break;
-                        case 'showBudget':
-                            if (smartfinance.showSection) smartfinance.showSection('budget');
-                            break;
-                        case 'showRecurring':
-                            if (smartfinance.showSection) smartfinance.showSection('recurring');
-                            break;
-                        case 'toggleDemoMode':
-                            if (typeof toggleDemoMode === 'function') toggleDemoMode();
-                            break;
-                        case 'exportData':
-                            if (typeof exportData === 'function') exportData();
-                            break;
-                        case 'importData':
-                            if (typeof importData === 'function') importData();
-                            break;
-                        case 'backupRestore':
-                            if (typeof backupRestore === 'function') backupRestore();
-                            break;
-                        case 'clearData':
-                            if (typeof clearData === 'function') clearData();
-                            break;
-                    }
-                });
-            }
-        });
-    }
-    
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (floatMenuDropdown && !e.target.closest('#floatMenuDropdown') && !e.target.closest('#floatMenuBtn')) {
-            floatMenuDropdown.classList.remove('show');
-        }
-    });
-    
-    // Initialize month display
-    updateFloatMonthDisplay();
-    
-    // Update alert badge
-    function updateFloatAlertBadge(count) {
-        if (floatAlertBadge) {
-            floatAlertBadge.textContent = count || 0;
-            floatAlertBadge.classList.toggle('visible', count > 0);
-        }
-    }
-    
-    // Hook into alert badge update
-    if (smartfinance.updateAlertBadge) {
-        const origAlertUpdate = smartfinance.updateAlertBadge;
-        smartfinance.updateAlertBadge = function() {
-            const result = origAlertUpdate.call(this);
-            const count = this.alerts.length || 0;
-            updateFloatAlertBadge(count);
-            return result;
-        };
-    }
-    }
 })();
