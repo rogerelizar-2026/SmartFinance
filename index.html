@@ -631,7 +631,17 @@ if ('serviceWorker' in navigator) {
     <!-- Modal Manual -->
     <div class="modal" id="manualModal" role="dialog" aria-modal="true" tabindex="-1">
         <div class="modal-content wide" tabindex="0">
-            <div class="modal-header"><h2>📘 Manual do Usuário</h2><div class="flex-gap-8"><button class="btn btn-secondary btn-small" id="printManualBtn">🖨️ Imprimir</button><button class="modal-close" data-close-modal="manualModal"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+            <div class="modal-header"><h2>📘 Manual do Usuário</h2>
+                <div class="flex-gap-8">
+                    <button class="btn btn-secondary btn-small" id="printManualBtn">🖨️ Imprimir</button>
+                    <button class="modal-close" data-close-modal="manualModal">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
             <div class="manual-content" id="manualContent"></div>
         </div>
     </div>
