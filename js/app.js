@@ -4167,19 +4167,19 @@ window.toggleFab = function() {
     const bbAddBtn = document.getElementById('bbAddBtn');
     
     if (fabActionsBottom) {
-        const isExpanded = fabActionsBottom.style.display === 'flex';
+        const isExpanded = fabActionsBottom.classList.contains('show');
         if (isExpanded) {
-            fabActionsBottom.style.display = 'none';
+            fabActionsBottom.classList.remove('show');
             bbAddBtn.classList.remove('active');
         } else {
-            fabActionsBottom.style.display = 'flex';
+            fabActionsBottom.classList.add('show');
             bbAddBtn.classList.add('active');
         }
     }
 };
 
 window.openExpenseModal = function() {
-    if (document.getElementById('fabActionsBottom').style.display === 'flex') toggleFab();
+    if (document.getElementById('fabActionsBottom').classList.contains('show')) toggleFab();
     smartfinance.setDefaultDate();
     smartfinance.currentTransactionType = 'expense';
     document.querySelectorAll('#transactionForm .type-btn').forEach(btn => {
@@ -4192,7 +4192,7 @@ window.openExpenseModal = function() {
 };
 
 window.openIncomeModal = function() {
-    if (document.getElementById('fabActionsBottom').style.display === 'flex') toggleFab();
+    if (document.getElementById('fabActionsBottom').classList.contains('show')) toggleFab();
     smartfinance.setDefaultDate();
     smartfinance.currentTransactionType = 'income';
     document.querySelectorAll('#transactionForm .type-btn').forEach(btn => {
@@ -4205,7 +4205,7 @@ window.openIncomeModal = function() {
 };
 
 window.openTransferModal = function() {
-    if (document.getElementById('fabActionsBottom').style.display === 'flex') toggleFab();
+    if (document.getElementById('fabActionsBottom').classList.contains('show')) toggleFab();
     smartfinance.populateAccountSelects();
     document.getElementById('transferForm').reset();
     document.getElementById('transferDate').value = new Date().toISOString().split('T')[0];
@@ -4498,7 +4498,7 @@ document.addEventListener('click', (e) => {
     }
     const fabActionsBottom = document.getElementById('fabActionsBottom');
     const bbAddBtn = document.getElementById('bbAddBtn');
-    if (fabActionsBottom && !fabActionsBottom.contains(e.target) && (!bbAddBtn || !bbAddBtn.contains(e.target)) && fabActionsBottom.style.display === 'flex') {
+    if (fabActionsBottom && !fabActionsBottom.contains(e.target) && (!bbAddBtn || !bbAddBtn.contains(e.target)) && fabActionsBottom.classList.contains('show')) {
         toggleFab();
     }
 });

@@ -366,17 +366,17 @@ body.modal-open { overflow: hidden; }
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 10px 16px;
-    margin-bottom: 16px;
+    border-radius: 12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
     box-shadow: var(--shadow);
     position: relative;
     overflow: visible;
     z-index: 10;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 8px;
 }
 
 .app-header::before {
@@ -1544,8 +1544,8 @@ body.privacy-on canvas { filter: blur(6px); }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 10px;
-    gap: 6px;
+    padding: 4px 8px;
+    gap: 4px;
     z-index: 1000;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
 }
@@ -1554,9 +1554,9 @@ body.privacy-on canvas { filter: blur(6px); }
     background: var(--input-bg);
     border: 1px solid var(--glass-border);
     color: var(--text-primary);
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1773,6 +1773,14 @@ body.privacy-on canvas { filter: blur(6px); }
     border-radius: 14px;
     box-shadow: var(--shadow-lg);
     z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.fab-actions-bottom.show {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .fab-actions-bottom .fab-action {
@@ -1791,7 +1799,18 @@ body.privacy-on canvas { filter: blur(6px); }
     transition: all 0.2s ease;
     font-family: inherit;
     white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
 }
+
+.fab-actions-bottom.show .fab-action {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.fab-actions-bottom.show .fab-action:nth-child(1) { transition-delay: 0.05s; }
+.fab-actions-bottom.show .fab-action:nth-child(2) { transition-delay: 0.1s; }
+.fab-actions-bottom.show .fab-action:nth-child(3) { transition-delay: 0.15s; }
 
 .fab-actions-bottom .fab-action:hover {
     background: rgba(99, 102, 241, 0.15);
