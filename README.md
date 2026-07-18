@@ -2,7 +2,7 @@
 
 > **Controle financeiro pessoal inteligente — 100% offline, seguro e gratuito.**
 
-![Versão](https://img.shields.io/badge/versão-2.0.0-6366f1?style=for-the-badge)
+![Versão](https://img.shields.io/badge/versão-2.0.1-6366f1?style=for-the-badge)
 ![PWA](https://img.shields.io/badge/PWA-Sim-10b981?style=for-the-badge)
 ![Offline](https://img.shields.io/badge/Offline-100%25-06b6d4?style=for-the-badge)
 ![Licença](https://img.shields.io/badge/licença-Gratuita-f59e0b?style=for-the-badge)
@@ -266,6 +266,25 @@ Se o Smart Finance tem sido útil para você, que tal um cafezinho?
   <em>Que Deus abençoe sua jornada financeira.</em>
 </p>
 ## 📄 Changelog
+
+### v2.0.1 - 2026
+**🎨 Melhorias de Interface e Experiência do Usuário**
+
+**Adicionado:**
+- ✅ **Sequência de Inicialização Otimizada:**
+  1. Splash Screen exibida por 3 segundos
+  2. Disclaimer aparece e desaparece ao clicar em "OK"
+  3. Citação motivacional exibida por 3 segundos
+  4. Dashboard é carregada
+
+**Alterado:**
+- ✅ **Barra Flutuante:** Adicionada linha azul clara fina no contorno superior para destaque
+
+**Corrigido:**
+- ✅ **Botão "OK":** Diminuído para tamanho mais compacto (80px max-width)
+- ✅ **Indicador Numérico do Sino:** Agora aparece apenas quando há contas a vencer; caso contrário, apenas o sino fica visível
+
+---
 
 ### v2.0.0 - 2026
 **🎨 Melhorias de Interface e Experiência do Usuário**

@@ -295,13 +295,13 @@ body.modal-open { overflow: hidden; }
     background: var(--gradient-primary);
     color: white;
     border: none;
-    padding: 14px 24px;
-    border-radius: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.85rem;
     cursor: pointer;
-    width: 100%;
-    max-width: 320px;
+    width: auto;
+    max-width: 80px;
     transition: all 0.3s ease;
     opacity: 0.5;
 }
@@ -1541,6 +1541,7 @@ body.privacy-on canvas { filter: blur(6px); }
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     border-top: 1px solid var(--glass-border);
+    border-top: 2px solid rgba(59, 130, 246, 0.5);
     display: flex;
     align-items: center;
     justify-content: space-between;

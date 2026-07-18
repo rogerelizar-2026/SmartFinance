@@ -7,6 +7,31 @@ e este projeto aderem ao [Versionamento Semântico](https://semver.org/lang/pt-B
 
 ---
 
+## [2.0.1] - 2026
+
+### 🎨 Melhorias de Interface e Experiência do Usuário
+
+#### Adicionado
+- **Sequência de Inicialização Otimizada:**
+  1. Splash Screen exibida por 3 segundos
+  2. Disclaimer aparece e desaparece ao clicar em "OK"
+  3. Citação motivacional exibida por 3 segundos
+  4. Dashboard é carregada
+
+#### Alterado
+- **Botão do Disclaimer:** Texto alterado de "Aceitar e continuar" para "OK"
+- **Layout do Disclaimer:** Botão movido para o final do texto, posicionado ao lado direito da checkbox
+- **Barra Flutuante:** Adicionada linha azul clara fina no contorno superior para destaque
+
+#### Corrigido
+- **Botão "OK":** Diminuído para tamanho mais compacto (80px max-width)
+- **Indicador Numérico do Sino:** Agora aparece apenas quando há contas a vencer; caso contrário, apenas o sino fica visível
+
+### 📊 Resumo
+- **Foco:** Melhoria na sequência de inicialização, ajustes de UI/UX e correções visuais
+
+---
+
 ## [2.0.0] - 2026
 
 ### 🎨 Melhorias de Interface e Experiência do Usuário
