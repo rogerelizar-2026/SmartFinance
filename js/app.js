@@ -80,7 +80,7 @@ const FINANCIAL_QUOTES = [
     { text: "Quem compra o que não precisa, rouba a si mesmo.", author: "Provérbio Popular" }
 ];
 
-const manualHTML = '<div class="manual-cover"><h1>📘 Manual do Usuário</h1><h2>Smart Finance Brasil</h2><p>Controle Financeiro Pessoal Inteligente</p><p class="version">Versão 2.0.0 - 2026</p><p class="author">Idealizado por RogerElizar™</p></div><div class="manual-quote"><p>"Toda boa dádiva e todo dom perfeito vêm do alto, descendo do Pai das luzes."</p><div class="quote-author">— Tiago 1:17</div></div><h2>🎯 Bem-vindo ao Smart Finance!</h2><p>Parabéns por dar o primeiro passo rumo à sua <strong>liberdade financeira</strong>!</p><h2>🆕 Novidades v2.0.0</h2><ul><li><strong>Melhorias de Interface:</strong> Botão do disclaimer atualizado para "OK" e reposicionado</li><li><strong>Performance:</strong> Assets minificados para produção (33% de redução)</li><li><strong>Correções de Bugs:</strong> Backup, datas, confirmações e investimentos corrigidos</li><li><strong>Modal de Confirmação:</strong> Substituído confirm() nativo por modal customizado</li><li><strong>Investimentos:</strong> Salvamento e carregamento corrigidos</li></ul><h2>📱 Instalação como WebApp</h2><ol><li>Acesse o site pelo navegador</li><li>Procure o ícone de instalação</li><li>Confirme a instalação</li></ol><div class="manual-blessing"><h3>🙏 É Isso! </h3><div class="manual-quote"><p>Que Deus abençoe sua jornada financeira.</p><div class="quote-author">Com amor e orações,<br>RogerElizar®</div></div></div>';
+const manualHTML = '<div class="manual-cover"><h1>📘 Manual do Usuário</h1><h2>Smart Finance Brasil</h2><p>Controle Financeiro Pessoal Inteligente</p><p class="version">Versão 2.0.1 - 2026</p><p class="author">Idealizado por RogerElizar™</p></div><div class="manual-quote"><p>"Toda boa dádiva e todo dom perfeito vêm do alto, descendo do Pai das luzes."</p><div class="quote-author">— Tiago 1:17</div></div><h2>🎯 Bem-vindo ao Smart Finance!</h2><p>Parabéns por dar o primeiro passo rumo à sua <strong>liberdade financeira</strong>!</p><h2>🆕 Novidades v2.0.1</h2><ul><li><strong>Melhorias de Interface:</strong> Botão do disclaimer atualizado para "OK" e reposicionado</li><li><strong>Performance:</strong> Assets minificados para produção (33% de redução)</li><li><strong>Correções de Bugs:</strong> Backup, datas, confirmações e investimentos corrigidos</li><li><strong>Modal de Confirmação:</strong> Substituído confirm() nativo por modal customizado</li><li><strong>Investimentos:</strong> Salvamento e carregamento corrigidos</li></ul><h2>📱 Instalação como WebApp</h2><ol><li>Acesse o site pelo navegador</li><li>Procure o ícone de instalação</li><li>Confirme a instalação</li></ol><div class="manual-blessing"><h3>🙏 É Isso! </h3><div class="manual-quote"><p>Que Deus abençoe sua jornada financeira.</p><div class="quote-author">Com amor e orações,<br>RogerElizar®</div></div></div>';
 
 // ===== TRADUÇÕES v1.0.0 =====
 const TRANSLATIONS = {
@@ -2321,10 +2321,12 @@ class SmartFinance {
             if (totalAlerts > 0) {
                 bbBadge.textContent = totalAlerts;
                 bbBadge.classList.add('visible');
+                bbBadge.style.display = 'flex';
                 bbBtn.classList.add('has-alerts');
             } else {
                 bbBadge.textContent = '';
                 bbBadge.classList.remove('visible');
+                bbBadge.style.display = 'none';
                 bbBtn.classList.remove('has-alerts');
             }
         }
@@ -3813,7 +3815,7 @@ class SmartFinance {
 
     // ===== SISTEMA DE ATUALIZAÇÃO =====
     checkVersionUpdate() {
-        const CURRENT_VERSION = '2.0.0';
+        const CURRENT_VERSION = '2.0.1';
         const STORAGE_KEY = 'smartfinance_last_version';
         try {
             const lastVersion = localStorage.getItem(STORAGE_KEY);
@@ -3830,6 +3832,15 @@ class SmartFinance {
 
     showWhatsNewModal(version) {
         const WHATS_NEW_DATA = {
+            '2.0.1': {
+                title: 'Novidades da v2.0.1',
+                features: [
+                    '✨ Sequência de inicialização otimizada',
+                    '🎨 Linha azul destacando barra flutuante',
+                    '🔔 Indicador do sino só aparece com alertas',
+                    '📱 Botão "OK" do disclaimer mais compacto'
+                ]
+            },
             '2.0.0': {
                 version: '2.0.0',
                 features: [
@@ -4410,7 +4421,12 @@ function showQuoteModal() {
     const quoteAuthor = document.getElementById('quoteAuthor');
     if (quoteText) quoteText.textContent = '"' + quote.text + '"';
     if (quoteAuthor) quoteAuthor.textContent = '— ' + quote.author;
-    document.getElementById('quoteModal').classList.add('active');
+    const quoteModal = document.getElementById('quoteModal');
+    quoteModal.classList.add('active');
+    // 4. Citação fica por 3 segundos e depois entra a dashboard
+    setTimeout(() => {
+        startApp();
+    }, 3000);
 }
 
 window.acceptDisclaimer = function() {
@@ -4418,21 +4434,13 @@ window.acceptDisclaimer = function() {
     if (!btn || !btn.classList.contains('enabled')) return;
     localStorage.setItem('smartfinance_disclaimer_accepted', 'true');
     const disclaimer = document.getElementById('disclaimerModal');
-    const splash = document.getElementById('splashScreen');
     if (disclaimer) {
         disclaimer.classList.add('disintegrating');
         setTimeout(() => {
             disclaimer.classList.remove('active', 'disintegrating');
             disclaimer.style.display = 'none';
-            if (splash) {
-                splash.classList.add('fade-out');
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                    setTimeout(showQuoteModal, 300);
-                }, 800);
-            } else {
-                setTimeout(showQuoteModal, 300);
-            }
+            // 3. Após aceitar disclaimer, mostra citação por 3 segundos
+            showQuoteModal();
         }, 600);
     }
 };
@@ -4448,34 +4456,39 @@ window.closeWhatsNewModal = function() { closeModal('whatsNewModal'); };
 window.printManualFromWhatsNew = function() { closeWhatsNewModal(); setTimeout(() => { smartfinance.printManual(); }, 300); };
 window.openManualFromWhatsNew = function() { closeWhatsNewModal(); setTimeout(() => { openManualModal(); }, 300); };
 
-// ===== EVENT LISTENERS GLOBAIS =====
+    // ===== EVENT LISTENERS GLOBAIS =====
 window.addEventListener('load', () => {
     const dateEl = document.getElementById('printDate');
     if (dateEl) dateEl.textContent = 'Gerado em: ' + new Date().toLocaleString('pt-BR');
     const accepted = localStorage.getItem('smartfinance_disclaimer_accepted') === 'true';
     const splash = document.getElementById('splashScreen');
     const disclaimer = document.getElementById('disclaimerModal');
+    
+    // 1. Splash Screen fica por 3 segundos
     if (splash) {
         splash.style.display = 'flex';
         splash.classList.remove('fade-out');
     }
+    
     setTimeout(() => {
+        // 2. Após 3s, mostra o Disclaimer (se não aceito) ou vai direto para citação
         if (!accepted && disclaimer) {
-            disclaimer.classList.add('active');
-            disclaimer.style.display = 'flex';
-            initDisclaimer();
-        } else {
+            splash.classList.add('fade-out');
             setTimeout(() => {
-                if (splash) {
-                    splash.classList.add('fade-out');
-                    setTimeout(() => {
-                        splash.style.display = 'none';
-                        showQuoteModal();
-                    }, 800);
-                }
-            }, 3000);
+                splash.style.display = 'none';
+                disclaimer.classList.add('active');
+                disclaimer.style.display = 'flex';
+                initDisclaimer();
+            }, 800);
+        } else {
+            // Já aceitou, vai direto para citação
+            splash.classList.add('fade-out');
+            setTimeout(() => {
+                splash.style.display = 'none';
+                showQuoteModal();
+            }, 800);
         }
-    }, 3500);
+    }, 3000);
 });
 
 // Click fora fecha MENUS (não modais!)
