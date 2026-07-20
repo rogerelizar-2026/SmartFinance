@@ -815,6 +815,7 @@ class SmartFinance {
                     else if (action === 'dashboard-income') dashboardAction('income');
                     else if (action === 'dashboard-expense') dashboardAction('expense');
                     else if (action === 'dashboard-cards') dashboardAction('cards');
+                    else if (action === 'openGoalModal') openGoalModal();
                 });
             }
         });
