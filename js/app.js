@@ -686,6 +686,7 @@ class SmartFinance {
                     else if (action === 'dashboard-income') dashboardAction('income');
                     else if (action === 'dashboard-expense') dashboardAction('expense');
                     else if (action === 'dashboard-cards') dashboardAction('cards');
+                    else if (action === 'openGoalModal') openGoalModal();
                 });
             }
         });
@@ -1663,6 +1664,7 @@ class SmartFinance {
         const expEl = document.getElementById('totalExpenses');
         if (expEl) expEl.textContent = this.formatCurrency(Math.abs(exp));
         this.updateProjection();
+        this.updateGoalDisplay();
     }
 
     // Projeção simples: média do saldo líquido (receitas - despesas) dos últimos 3 meses com dados,
