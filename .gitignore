@@ -1,7 +1,31 @@
 ```
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
 # Build artifacts
-*.min.html
-*.min.js
-*.min.css
-sw.min.js
+dist/
+build/
+*.js.map
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
 ```
