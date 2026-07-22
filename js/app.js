@@ -1768,7 +1768,15 @@ class SmartFinance {
         const tr = document.createElement('tr');
         tr.className = 'transaction-row';
         tr.dataset.id = t.id;
-        tr.onclick = function() { smartfinance.editTransaction(t.id); };
+        tr.onclick = function(e) { 
+            // Se clicar no status, apenas alterna o status
+            if (e.target.classList.contains('status-toggle')) {
+                e.stopPropagation();
+                smartfinance.toggleTransactionStatus(t.id);
+            } else {
+                smartfinance.editTransaction(t.id);
+            }
+        };
         let rowHtml = '';
         if (isMobile) {
             rowHtml += '<div class="swipe-actions"><div class="swipe-action complete">✓ Paga</div><div class="swipe-action delete">🗑️ Excluir</div></div>';
@@ -1778,7 +1786,7 @@ class SmartFinance {
             '<td data-label="Categoria"><span class="category-badge" style="background:' + cat.color + '">' + this.escapeHtml(cat.name) + '</span></td>' +
             '<td data-label="Conta">' + (acc ? '<span class="account-badge">' + this.escapeHtml(acc.name) + '</span>' : '-') + '</td>' +
             '<td data-label="Pagamento"><span class="payment-badge">' + paymentName + '</span></td>' +
-            '<td data-label="Status"><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
+            '<td data-label="Status"><span class="status-badge ' + statusClass + ' status-toggle" title="Clique para alterar o status">' + statusText + '</span></td>' +
             '<td data-label="Valor" class="amount ' + cls + ' privacy-value">' + this.formatCurrency(t.amount) + '</td>';
         tr.innerHTML = rowHtml;
         return tr;
@@ -2031,6 +2039,18 @@ class SmartFinance {
         });
         this.filterCategoriesByType('editCategory', this.currentEditType);
         openModal('editModal');
+    }
+
+    toggleTransactionStatus(id) {
+        const t = this.transactions.find(x => x.id === id);
+        if (!t) return;
+        t.statusOk = !t.statusOk;
+        this.clearCache();
+        this.saveTransactions();
+        this.render();
+        this.updateAlertBadge();
+        const statusText = t.statusOk ? this.t('completed') : this.t('pending');
+        this.showToast('✅ Status: ' + statusText);
     }
 
     updateTransaction() {
@@ -2550,6 +2570,7 @@ class SmartFinance {
         const autoBackup = document.getElementById('autoBackupEnabled');
         const notifyBills = document.getElementById('notifyBills');
         const pageSize = document.getElementById('settingsPageSize');
+        const demoMode = document.getElementById('settingsDemoMode');
         const lastBackupDate = document.getElementById('lastBackupDate');
         const notificationsStatus = document.getElementById('notificationsStatus');
         if (alertNeg) alertNeg.checked = this.settings.alertNegativeBalance;
@@ -2560,6 +2581,7 @@ class SmartFinance {
             notifyBills.disabled = !('Notification' in window) || Notification.permission !== 'granted';
         }
         if (pageSize) pageSize.value = this.settings.pageSize.toString();
+        if (demoMode) demoMode.checked = this.demoMode || false;
         if (lastBackupDate) {
             const lastBackup = localStorage.getItem('smartfinance_last_backup');
             if (lastBackup) {
@@ -4442,7 +4464,19 @@ window.handleCsvFileSelect = function(event) {
         // 1. Pega o conteúdo do arquivo e remove o caractere fantasma (BOM) do início
         let text = e.target.result.replace(/^\uFEFF/, '');
         
-        // 2. Normaliza as quebras de linha para \n
+        // 2. Tenta detectar e corrigir codificação - assume UTF-8
+        // Se houver caracteres estranhos, tenta interpretar como Latin-1 e converte para UTF-8
+        // Detecta caracteres de substituição () que indicam problema de encoding
+        if (/[\uFFFD]/.test(text)) {
+            // Converte de Latin-1 para UTF-8
+            const bytes = new Uint8Array(e.target.result.length);
+            for (let i = 0; i < e.target.result.length; i++) {
+                bytes[i] = e.target.result.charCodeAt(i);
+            }
+            text = new TextDecoder('iso-8859-1').decode(bytes);
+        }
+        
+        // 3. Normaliza as quebras de linha para \n
         text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         
         window._pendingCsvData = text;
