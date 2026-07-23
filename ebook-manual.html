@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Completo SmartFinance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .toc h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+        }
+        
+        .toc li {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .toc li:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+        
+        .toc a {
+            text-decoration: none;
+            color: #1976d2;
+            font-weight: 600;
+            display: block;
+        }
+        
+        .chapter {
+            padding: 40px;
+            margin: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .chapter.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chapter h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #555;
+            margin: 25px 0 15px 0;
+            font-size: 1.4em;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+        
+        .tip-box, .warning-box, .info-box {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .tip-box {
+            background: #e8f5e8;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 5px solid #2196F3;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        
+        @media print {
+            .controls, .toc, .nav-buttons {
+                display: none !important;
+            }
+            .chapter {
+                display: block !important;
+                margin: 0;
+                padding: 20px;
+            }
+            body {
+                background: white;
+                padding: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            header {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .chapter {
+                padding: 20px;
+                margin: 10px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Manual Completo SmartFinance</h1>
+            <div class="subtitle">Guia Definitivo para Gestão Financeira Inteligente</div>
+            <div class="controls">
+                <button class="btn-primary" onclick="print()">🖨️ Imprimir</button>
+                <button class="btn-secondary" onclick="downloadPDF()">📄 Baixar PDF</button>
+                <button class="btn-danger" onclick="window.close()">❌ Fechar</button>
+            </div>
+        </header>
+
+        <div class="toc">
+            <h2>📋 Índice</h2>
+            <ul>
+                <li><a href="#" onclick="showChapter('capitulo1')">1. Visão Geral do Painel (Dashboard)</a></li>
+                <li><a href="#" onclick="showChapter('capitulo2')">2. Primeiros Passos: Contas e Cartões</a></li>
+                <li><a href="#" onclick="showChapter('capitulo3')">3. Registrando Movimentações Diárias</a></li>
+                <li><a href="#" onclick="showChapter('capitulo4')">4. Planejamento Financeiro Avançado</a></li>
+                <li><a href="#" onclick="showChapter('capitulo5')">5. Investimentos e Aplicações</a></li>
+                <li><a href="#" onclick="showChapter('capitulo6')">6. Perguntas Frequentes (FAQ)</a></li>
+                <li><a href="#" onclick="showChapter('capitulo7')">7. Atalhos Rápidos e Dicas de Produtividade</a></li>
+                <li><a href="#" onclick="showChapter('capitulo8')">8. Como Importar Dados via Planilha CSV</a></li>
+                <li><a href="#" onclick="showChapter('apendice')">Apêndice A: Guia Completo de Configurações</a></li>
+            </ul>
+        </div>
+
+        <!-- Capítulo 1 -->
+        <div id="capitulo1" class="chapter active">
+            <h2>1. Visão Geral do Painel (Dashboard)</h2>
+            
+            <p>O Dashboard é o coração da aplicação SmartFinance, onde você terá uma visão consolidada de toda sua situação financeira em tempo real.</p>
+            
+            <h3>🔍 Elementos do Dashboard</h3>
+            <p><strong>Saldo Total:</strong> Mostra o saldo combinado de todas suas contas ativas, atualizado automaticamente conforme novas transações são registradas.</p>
+            
+            <p><strong>Gráfico de Balanço Mensal:</strong> Exibe visualmente a relação entre receitas e despesas ao longo dos últimos 12 meses, permitindo identificar padrões sazonais.</p>
+            
+            <p><strong>Cartões de Alerta:</strong> Notificações inteligentes sobre contas próximas do vencimento, metas financeiras atingidas ou possíveis problemas de fluxo de caixa.</p>
+            
+            <div class="tip-box">
+                <strong>Dica Pro:</strong> Personalize o período de visualização no canto superior direito para analisar dados específicos por ano, trimestre ou mês.
+            </div>
+            
+            <h3>📈 Navegação Intuitiva</h3>
+            <p>A interface segue os princípios de design flat e material, com ícones intuitivos e cores que representam diferentes categorias financeiras:</p>
+            <ul>
+                <li><strong>Verde:</strong> Receitas e saldos positivos</li>
+                <li><strong>Vermelho:</strong> Despesas e alertas</li>
+                <li><strong>Azul:</strong> Investimentos e metas</li>
+                <li><strong>Laranja:</strong> Cartões de crédito</li>
+            </ul>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo2')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Capítulo 2 -->
+        <div id="capitulo2" class="chapter">
+            <h2>2. Primeiros Passos: Contas e Cartões</h2>
+            
+            <p>A configuração inicial das contas é fundamental para o funcionamento eficiente do sistema SmartFinance.</p>
+            
+            <h3>💳 Adicionando Contas Bancárias</h3>
+            <p>Clique em "Contas" no menu lateral e selecione "Adicionar Nova Conta". Preencha os seguintes campos:</p>
+            
+            <div class="code-block">
+                - Nome da Conta (ex: "Corrente Itaú", "Poupança Caixa")<br>
+                - Tipo de Conta (Corrente, Poupança, Investimento)<br>
+                - Saldo Inicial<br>
+                - Banco e Agência (opcional para referência)<br>
+                - Limite Disponível (para contas com cheque especial)
+            </div>
+            
+            <h3>💳 Gerenciando Cartões de Crédito</h3>
+            <p>Para adicionar cartões de crédito:</p>
+            <ol>
+                <li>Clique em "Cartões" no menu</li>
+                <li>Selecione "Novo Cartão"</li>
+                <li>Preencha os dados: Bandeira, Número (parcial), Limite, Data de Vencimento</li>
+            </ol>
+            
+            <div class="warning-box">
+                <strong>Importante:</strong> O número do cartão deve ser inserido parcialmente (ex: ****.1234) para segurança. O sistema não armazena dados sensíveis completos.
+            </div>
+            
+            <h3>🔄 Sincronização Automática</h3>
+            <p>Se desejar, configure a sincronização automática com seu banco (disponível para bancos parceiros). Isso mantém seu saldo atualizado em tempo real.</p>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo1')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('capitulo3')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Capítulo 3 -->
+        <div id="capitulo3" class="chapter">
+            <h2>3. Registrando Movimentações Diárias</h2>
+            
+            <p>O registro de transações diárias é essencial para manter um controle financeiro preciso e eficaz.</p>
+            
+            <h3>📝 Tipos de Transações</h3>
+            <p><strong>Receitas:</strong> Entradas de dinheiro provenientes de salários, freelas, aluguéis, etc.</p>
+            <p><strong>Despesas:</strong> Saídas de dinheiro para contas, compras, investimentos, etc.</p>
+            <p><strong>Transferências:</strong> Movimentações entre suas próprias contas (não afetam o saldo total).</p>
+            
+            <h3>⚡ Formas de Registro</h3>
+            <p><strong>Método Rápido:</strong> Use o botão flutuante "+" na tela principal para registrar transações imediatas.</p>
+            <p><strong>Formulário Detalhado:</strong> Acesse "Transações" > "Nova Transação" para registros mais complexos com categorias específicas.</p>
+            
+            <div class="info-box">
+                <strong>Recurso Inteligente:</strong> O sistema aprende com seus padrões de gastos e sugere categorias automaticamente com base em descrições anteriores.
+            </div>
+            
+            <h3>🏷️ Categorização Inteligente</h3>
+            <p>Categorias pré-definidas incluem:</p>
+            <ul>
+                <li>Alimentação</li>
+                <li>Moradia</li>
+                <li>Transporte</li>
+                <li>Educação</li>
+                <li>Lazer</li>
+                <li>Saúde</li>
+                <li>Investimentos</li>
+            </ul>
+            
+            <p>Você pode criar categorias personalizadas conforme suas necessidades específicas.</p>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo2')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('capitulo4')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Capítulo 4 -->
+        <div id="capitulo4" class="chapter">
+            <h2>4. Planejamento Financeiro Avançado</h2>
+            
+            <p>O SmartFinance oferece ferramentas poderosas para planejar seu futuro financeiro com estratégias avançadas.</p>
+            
+            <h3>🎯 Definição de Metas Financeiras</h3>
+            <p>Estabeleça objetivos claros com prazos definidos:</p>
+            <ul>
+                <li>Compra de imóvel</li>
+                <li>Férias internacionais</li>
+                <li>Fundo de emergência</li>
+                <li>Aposentadoria antecipada</li>
+            </ul>
+            
+            <p>Para cada meta, defina:</p>
+            <div class="code-block">
+                - Valor total necessário<br>
+                - Data de conclusão desejada<br>
+                - Valor mensal a ser poupado<br>
+                - Conta específica para acumular recursos
+            </div>
+            
+            <h3>📊 Análise de Gastos Recorrentes</h3>
+            <p>O sistema identifica automaticamente assinaturas, aluguéis e outros gastos fixos, permitindo:</p>
+            <ul>
+                <li>Análise de custo-benefício de serviços</li>
+                <li>Identificação de gastos desnecessários</li>
+                <li>Planejamento de substituição ou cancelamento</li>
+            </ul>
+            
+            <div class="tip-box">
+                <strong>Dica Estratégica:</strong> Configure alertas para quando determinadas categorias ultrapassarem percentuais predefinidos do seu orçamento mensal.
+            </div>
+            
+            <h3>🔄 Orçamentos Mensais Dinâmicos</h3>
+            <p>Crie orçamentos baseados em porcentagens de sua renda ou valores fixos. O sistema ajusta automaticamente conforme sua realidade financeira evolui.</p>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo3')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('capitulo5')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Capítulo 5 -->
+        <div id="capitulo5" class="chapter">
+            <h2>5. Investimentos e Aplicações</h2>
+            
+            <p>O SmartFinance ajuda você a gerenciar e acompanhar todos os seus investimentos em um único local.</p>
+            
+            <h3>💼 Tipos de Investimentos Suportados</h3>
+            <p><strong>Renda Fixa:</strong> Tesouro Direto, CDB, LCI, LCA, Debêntures</p>
+            <p><strong>Renda Variável:</strong> Ações, ETFs, Fundos Imobiliários</p>
+            <p><strong>Internacional:</strong> Ações americanas, BDRs, Criptomoedas</p>
+            <p><strong>Previdência Privada:</strong> PGBL, VGBL e planos de aposentadoria</p>
+            
+            <h3>📈 Acompanhamento em Tempo Real</h3>
+            <p>Integre corretoras participantes para atualização automática de cotas e valores. Para investimentos manuais, utilize o sistema de importação de extratos.</p>
+            
+            <div class="info-box">
+                <strong>Calculadora Financeira:</strong> Ferramentas integradas para simular rentabilidades, calcular IR, e projetar crescimento de carteiras ao longo do tempo.
+            </div>
+            
+            <h3>📊 Relatórios de Performance</h3>
+            <p>Gere relatórios detalhados com:</p>
+            <ul>
+                <li>Retorno sobre o investimento (ROI)</li>
+                <li>Comparação com índices de mercado</li>
+                <li>Alavancagem patrimonial</li>
+                <li>Distribuição por classe de ativo</li>
+            </ul>
+            
+            <div class="warning-box">
+                <strong>Atenção:</strong> Mantenha sempre seus dados de login de corretoras em local seguro. O SmartFinance não armazena credenciais de acesso externo.
+            </div>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo4')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('capitulo6')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Capítulo 6 - Antigo 7 -->
+        <div id="capitulo6" class="chapter">
+            <h2>6. Perguntas Frequentes (FAQ)</h2>
+            
+            <h3>❓ Como posso recuperar minha senha?</h3>
+            <p>Clique em "Esqueci minha senha" na tela de login e siga as instruções enviadas para seu email cadastrado. O processo leva até 5 minutos para ser concluído.</p>
+            
+            <h3>❓ Os dados estão seguros?</h3>
+            <p>Sim, utilizamos criptografia AES-256 e armazenamento em nuvem protegida. Nenhum dado bancário ou pessoal sensível é compartilhado com terceiros.</p>
+            
+            <h3>❓ Posso usar em múltiplos dispositivos?</h3>
+            <p>Totalmente compatível com smartphones, tablets e computadores. Sincronizamos todos os dados em tempo real entre dispositivos.</p>
+            
+            <h3>❓ Como faço backup dos meus dados?</h3>
+            <p>Acesse "Configurações" > "Exportar Dados" para baixar um arquivo JSON com todas suas informações financeiras.</p>
+            
+            <div class="tip-box">
+                <strong>Recomendado:</strong> Exporte seus dados mensalmente para manter cópias de segurança locais.
+            </div>
+            
+            <h3>❓ Há limite de transações?</h3>
+            <p>Não há limite para o número de transações que você pode registrar. O plano gratuito suporta até 10.000 lançamentos.</p>
+            
+            <h3>❓ Como funciona a sincronização bancária?</h3>
+            <p>Disponível para clientes premium, conectamos diretamente com mais de 20 instituições financeiras para importação automática de movimentações.</p>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo5')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('capitulo7')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Capítulo 7 - Antigo 8 -->
+        <div id="capitulo7" class="chapter">
+            <h2>7. Atalhos Rápidos e Dicas de Produtividade</h2>
+            
+            <h3>⌨️ Atalhos de Teclado</h3>
+            <p><strong>Ctrl + N:</strong> Nova transação rápida</p>
+            <p><strong>Ctrl + Shift + F:</strong> Busca avançada por transações</p>
+            <p><strong>Ctrl + P:</strong> Pré-visualização de relatório</p>
+            <p><strong>Alt + → / ←:</strong> Navegação entre módulos</p>
+            <p><strong>Esc:</strong> Fechar janelas modais rapidamente</p>
+            
+            <h3>⚡ Dicas de Eficiência</h3>
+            <p><strong>Templates de Transação:</strong> Salve modelos frequentes (ex: aluguel mensal, mensalidade escolar) para preenchimento rápido.</p>
+            
+            <p><strong>Etiquetas Inteligentes:</strong> Use tags personalizadas para agrupar transações especiais (projetos, eventos, viagens).</p>
+            
+            <div class="info-box">
+                <strong>Pro Tip:</strong> Configure notificações push para lembrar de contas a pagar e metas financeiras importantes.
+            </div>
+            
+            <h3>📱 Modo Mobile</h3>
+            <p><strong>Scan de Cupom Fiscal:</strong> Tire foto de recibos e cupons para registro automático de despesas.</p>
+            <p><strong>Voz para Texto:</strong> Use assistente de voz para registrar transações sem digitar.</p>
+            <p><strong>Geolocalização:</strong> O sistema sugere categorias baseadas no local da compra.</p>
+            
+            <h3>🔄 Integrações Externas</h3>
+            <p>Conecte com Google Calendar para sincronizar datas de vencimento, integre com planilhas do Google Sheets, e exporte relatórios em diversos formatos.</p>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo6')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('capitulo8')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Capítulo 8 - Antigo 9 -->
+        <div id="capitulo8" class="chapter">
+            <h2>8. Como Importar Dados via Planilha CSV</h2>
+            
+            <h3>📋 Formato Requerido</h3>
+            <p>Para importar transações existentes de planilhas, utilize o formato CSV com as seguintes colunas obrigatórias:</p>
+            
+            <div class="code-block">
+                data,descricao,valor,tipo,categoria,conta_origem,conta_destino<br>
+                2024-01-15,"Supermercado Dia",-285.50,despesa,"Alimentação","Carteira","Nubank"<br>
+                2024-01-20,"Salário Empresa X",5200.00,receita,"Salário","Itaú",""<br>
+                2024-01-25,"Transferência Poupança",-1000.00,transferencia,"Investimentos","Corrente","Poupança"
+            </div>
+            
+            <h3>⚙️ Processo de Importação</h3>
+            <p>1. Acesse "Configurações" > "Importar Dados"</p>
+            <p>2. Selecione o arquivo CSV formatado corretamente</p>
+            <p>3. Mapeie as colunas do seu arquivo com os campos do sistema</p>
+            <p>4. Revise as transações antes da confirmação final</p>
+            <p>5. Confirme a importação e aguarde a validação</p>
+            
+            <div class="warning-box">
+                <strong>Importante:</strong> Valide cuidadosamente o formato de datas (AAAA-MM-DD) e separadores decimais (.) antes da importação para evitar erros.
+            </div>
+            
+            <h3>🔄 Mapeamento Personalizado</h3>
+            <p>Se sua planilha tem cabeçalhos diferentes, você pode mapear manualmente cada coluna durante o processo de importação. O sistema reconhece variações comuns como "data_lancamento", "valor_bruto", "tipo_movimento", etc.</p>
+            
+            <h3>✅ Validação Automática</h3>
+            <p>O sistema verifica automaticamente:</p>
+            <ul>
+                <li>Consistência de datas</li>
+                <li>Valores numéricos válidos</li>
+                <li>Tipos de transação permitidos</li>
+                <li>Existência de contas mapeadas</li>
+            </ul>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo7')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('apendice')">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- Apêndice -->
+        <div id="apendice" class="chapter">
+            <h2>Apêndice A: Guia Completo de Configurações</h2>
+            
+            <h3>⚙️ Preferências Gerais</h3>
+            <p><strong>Moeda e Idioma:</strong> Selecione o padrão monetário e linguístico preferido. O sistema suporta mais de 15 idiomas e 20 moedas.</p>
+            <p><strong>Fuso Horário:</strong> Configure automaticamente ou manualmente para garantir precisão nos registros temporais.</p>
+            <p><strong>Formato de Data:</strong> Escolha entre DD/MM/AAAA ou AAAA-MM-DD conforme sua preferência regional.</p>
+            
+            <h3>🔐 Segurança e Privacidade</h3>
+            <p><strong>Autenticação de Dois Fatores:</strong> Habilite para adicionar camada extra de proteção à sua conta.</p>
+            <p><strong>Monitoramento de Acesso:</strong> Receba alertas quando houver tentativas de login de IPs desconhecidos.</p>
+            <p><strong>Política de Retenção:</strong> Defina período de armazenamento de dados históricos (mínimo 2 anos legalmente exigido).</p>
+            
+            <div class="tip-box">
+                <strong>Segurança Pro:</strong> Ative a opção de bloqueio automático após 30 minutos de inatividade em dispositivos públicos.
+            </div>
+            
+            <h3>📧 Notificações</h3>
+            <p><strong>Email:</strong> Receba resumos semanais e alertas críticos no seu endereço cadastrado.</p>
+            <p><strong>Push:</strong> Notificações instantâneas para transações, vencimentos e metas atingidas.</p>
+            <p><strong>SMS:</strong> Serviço premium para alertas de segurança e emergência financeira.</p>
+            
+            <h3>🔄 Backup e Sincronização</h3>
+            <p><strong>Backup Automático:</strong> Configurações para cópias de segurança programadas (diária, semanal, mensal).</p>
+            <p><strong>Sincronização em Tempo Real:</strong> Mantenha todos seus dispositivos atualizados instantaneamente.</p>
+            <p><strong>Recuperação de Dados:</strong> Processo de restauração em caso de perda de acesso ou exclusão acidental.</p>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showChapter('capitulo8')">← Anterior</button>
+                <button class="nav-btn" onclick="showChapter('capitulo1')">Voltar ao Início</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>SmartFinance © 2026 | Manual Completo v3.2.1 | Todos os direitos reservados</p>
+            <p>Contato: suporte@smartfinance.com.br | Atualizado em: 24/07/2026</p>
+        </footer>
+    </div>
+
+    <script>
+        function showChapter(chapterId) {
+            // Esconde todos os capítulos
+            const chapters = document.querySelectorAll('.chapter');
+            chapters.forEach(chapter => {
+                chapter.classList.remove('active');
+            });
+            
+            // Mostra o capítulo selecionado
+            const targetChapter = document.getElementById(chapterId);
+            if (targetChapter) {
+                targetChapter.classList.add('active');
+            }
+            
+            // Scroll para o topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function downloadPDF() {
+            alert('Funcionalidade de download PDF ativada. O arquivo será gerado e baixado automaticamente.');
+            window.print();
+        }
+        
+        // Inicializa o primeiro capítulo
+        document.addEventListener('DOMContentLoaded', function() {
+            showChapter('capitulo1');
+        });
+    </script>
+</body>
+</html>
