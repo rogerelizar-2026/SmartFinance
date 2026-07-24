@@ -1553,35 +1553,6 @@ class SmartFinance {
             nextMonthEl.textContent = this.formatCurrency(nextMonthFeesTotal);
             nextMonthEl.className = 'card-value privacy-value negative';
         }
-        
-        this.updateProjection();
-    }
-    // Projeção simples: média do saldo líquido (receitas - despesas) dos últimos 3 meses com dados,
-    // usada para estimar o próximo mês. Não é machine learning, é uma média móvel — mas dá uma
-    // referência útil sem exigir histórico complexo.
-    updateProjection() {
-        const projEl = document.getElementById('projectionBalance');
-        if (!projEl) return;
-        const netByMonth = [];
-        for (let i = 1; i <= 6 && netByMonth.length < 3; i++) {
-            const refDate = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - i, 1);
-            const monthTx = this.transactions.filter(t => {
-                const d = new Date(t.date + 'T12:00:00');
-                return d.getFullYear() === refDate.getFullYear() && d.getMonth() === refDate.getMonth();
-            });
-            if (monthTx.length > 0) {
-                const net = monthTx.reduce((sum, t) => sum + t.amount, 0);
-                netByMonth.push(net);
-            }
-        }
-        if (netByMonth.length === 0) {
-            projEl.textContent = 'Sem histórico';
-            projEl.className = 'card-value privacy-value';
-            return;
-        }
-        const avgNet = netByMonth.reduce((a, b) => a + b, 0) / netByMonth.length;
-        projEl.textContent = (avgNet >= 0 ? '+ ' : '') + this.formatCurrency(avgNet);
-        projEl.className = 'card-value privacy-value ' + (avgNet >= 0 ? 'positive' : 'negative');
     }
     // ===== RENDERIZAÇÃO =====
     render() {

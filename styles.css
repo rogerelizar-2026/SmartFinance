@@ -625,7 +625,7 @@ body.light .info-dropdown, body.light .dropdown-menu { background: rgba(255, 255
 /* ===== DASHBOARD ===== */
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);  /* MUDANÇA: de 4 para 5 colunas */
+  grid-template-columns: repeat(4, 1fr);  /* 4 colunas para os cards restantes */
   gap: 16px;
   margin-bottom: 24px;
 }
