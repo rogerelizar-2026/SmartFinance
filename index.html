@@ -535,7 +535,9 @@ if ('serviceWorker' in navigator) {
             </div>
             <div id="clearStep2" style="display:none;">
                 <p class="font-semibold mb-16">Digite <strong style="color:var(--danger-color);">LIMPAR</strong> para confirmar</p>
-                <input type="text" class="confirm-input" id="clearConfirmInput" placeholder="LIMPAR">
+                <input type="text" class="confirm-input" id="clearConfirmInput" placeholder="LIMPAR" oninput="checkClearConfirm()">
+                <p class="font-semibold mb-8" style="margin-top:16px;">🔒 Digite sua senha para autorizar</p>
+                <input type="password" class="confirm-input" id="clearPasswordInput" placeholder="Sua senha" oninput="checkClearConfirm()">
                 <div class="action-buttons" style="margin-top:16px;">
                     <button class="btn btn-danger" id="finalClearBtn" disabled style="opacity:0.5;">🗑️ Apagar Tudo</button>
                     <button class="btn btn-secondary" data-close-modal="clearDataModal">Cancelar</button>
