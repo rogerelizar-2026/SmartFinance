@@ -594,7 +594,18 @@ body.light .info-dropdown, body.light .dropdown-menu { background: rgba(255, 255
 
 .dropdown-item.danger { color: var(--danger-color); }
 .dropdown-item.danger:hover { background: rgba(239, 68, 68, 0.15); }
-.dropdown-divider { height: 1px; background: var(--border-color); margin: 6px 0; }
+.dropdown-divider { height: 1px; background: var(--border-color); margin: 8px 0; }
+
+/* Menu section titles */
+.menu-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 14px 4px;
+    margin-top: 4px;
+}
 
 /* v1.0.0: Botão Demo ativo no menu Info */
 .info-item.demo-active {
