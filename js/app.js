@@ -862,6 +862,9 @@ class SmartFinance {
         const clearConfirmInput = document.getElementById('clearConfirmInput');
         if (clearConfirmInput) clearConfirmInput.addEventListener('input', () => checkClearConfirm());
 
+        const clearPasswordInput = document.getElementById('clearPasswordInput');
+        if (clearPasswordInput) clearPasswordInput.addEventListener('input', () => checkClearConfirm());
+
         const finalClearBtn = document.getElementById('finalClearBtn');
         if (finalClearBtn) finalClearBtn.addEventListener('click', () => self.clearAllData());
 
@@ -4481,6 +4484,8 @@ window.openClearDataModal = function() {
     document.getElementById('clearStep2').style.display = 'none';
     document.getElementById('clearConfirmInput').value = '';
     document.getElementById('clearConfirmInput').classList.remove('match');
+    document.getElementById('clearPasswordInput').value = '';
+    document.getElementById('clearPasswordInput').classList.remove('match');
     document.getElementById('finalClearBtn').disabled = true;
     document.getElementById('finalClearBtn').style.opacity = '0.5';
     openModal('clearDataModal');
@@ -4797,13 +4802,23 @@ window.showClearStep2 = function() {
 
 window.checkClearConfirm = function() {
     const input = document.getElementById('clearConfirmInput');
+    const passwordInput = document.getElementById('clearPasswordInput');
     const btn = document.getElementById('finalClearBtn');
-    if (input.value.trim().toUpperCase() === 'LIMPAR') {
+    const storedPassword = localStorage.getItem(PASSWORD_STORAGE_KEY);
+    
+    // Verifica se a palavra LIMPAR foi digitada
+    const wordMatch = input.value.trim().toUpperCase() === 'LIMPAR';
+    // Verifica se a senha foi digitada e confere com a armazenada (se houver senha configurada)
+    const passwordMatch = !storedPassword || (passwordInput && passwordInput.value === storedPassword);
+    
+    if (wordMatch && passwordMatch) {
         input.classList.add('match');
+        if (passwordInput) passwordInput.classList.add('match');
         btn.disabled = false;
         btn.style.opacity = '1';
     } else {
-        input.classList.remove('match');
+        input.classList.toggle('match', wordMatch);
+        if (passwordInput) passwordInput.classList.toggle('match', passwordMatch && passwordInput.value.length > 0);
         btn.disabled = true;
         btn.style.opacity = '0.5';
     }
