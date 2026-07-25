@@ -1554,7 +1554,7 @@ body.privacy-on canvas { filter: blur(6px); }
     border-top: 2px solid rgba(59, 130, 246, 0.5);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 4px 8px;
     gap: 4px;
     z-index: 1000;
@@ -1595,27 +1595,6 @@ body.privacy-on canvas { filter: blur(6px); }
     stroke: currentColor; stroke-width: 2;
     stroke-linecap: round; stroke-linejoin: round;
     fill: none;
-}
-
-.bottom-bar-btn-add {
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
-    transition: all 0.3s ease;
-}
-
-.bottom-bar-btn-add:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
-}
-
-.bottom-bar-btn-add.active {
-    background: var(--danger-color);
-    transform: rotate(45deg);
 }
 
 .bottom-bar-month {
@@ -1773,8 +1752,9 @@ body.privacy-on canvas { filter: blur(6px); }
 .fab-actions-bottom {
     position: absolute;
     bottom: 56px;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 8px;
+    left: auto;
+    transform: none;
     display: flex;
     gap: 8px;
     padding: 8px;

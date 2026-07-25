@@ -4344,9 +4344,13 @@ function closeAllDropdowns() {
     const info = document.getElementById('infoMenu');
     const main = document.getElementById('mainMenu');
     const bbMain = document.getElementById('bbMainMenu');
+    const fabActionsBottom = document.getElementById('fabActionsBottom');
+    const bbAddBtn = document.getElementById('bbAddBtn');
     if (info) info.classList.remove('active');
     if (main) main.classList.remove('active');
     if (bbMain) bbMain.classList.remove('active');
+    if (fabActionsBottom) fabActionsBottom.classList.remove('show');
+    if (bbAddBtn) bbAddBtn.classList.remove('menu-active');
     document.querySelectorAll('.header-btn').forEach(b => b.classList.remove('menu-active'));
     document.querySelectorAll('.bottom-bar-btn').forEach(b => b.classList.remove('menu-active'));
 }
@@ -4579,10 +4583,10 @@ window.toggleFab = function() {
         const isExpanded = fabActionsBottom.classList.contains('show');
         if (isExpanded) {
             fabActionsBottom.classList.remove('show');
-            bbAddBtn.classList.remove('active');
+            bbAddBtn.classList.remove('menu-active');
         } else {
             fabActionsBottom.classList.add('show');
-            bbAddBtn.classList.add('active');
+            bbAddBtn.classList.add('menu-active');
         }
     }
 };
