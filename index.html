@@ -297,9 +297,16 @@ if ('serviceWorker' in navigator) {
         <button class="bottom-bar-btn" id="bbNextMonthBtn" aria-label="Próximo mês">
             <svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
         </button>
-        <button class="bottom-bar-btn" id="bbAddBtn" aria-label="Adicionar transação">
-            <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
+        <div class="dropdown-wrapper">
+            <button class="bottom-bar-btn" id="bbAddBtn" aria-label="Adicionar transação">
+                <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <div class="fab-actions-bottom" id="fabActionsBottom">
+                <button class="fab-action fab-action-expense" data-action="openExpenseModal"><span>💸</span><span class="fab-label">Despesa</span></button>
+                <button class="fab-action fab-action-income" data-action="openIncomeModal"><span>💰</span><span class="fab-label">Receita</span></button>
+                <button class="fab-action fab-action-transfer" data-action="openTransferModal"><span>🔄</span><span class="fab-label">Transferir</span></button>
+            </div>
+        </div>
         <button class="bottom-bar-btn" id="bbAlertBtn" aria-label="Contas a vencer">
             <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="alert-badge" id="bbAlertBadge"></span>
@@ -310,10 +317,10 @@ if ('serviceWorker' in navigator) {
         <button class="bottom-bar-btn" id="bbThemeBtn" aria-label="Alternar tema">
             <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
+        <button class="bottom-bar-btn menu-btn" id="bbMenuBtn" aria-label="Menu principal">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <div class="dropdown-wrapper">
-            <button class="bottom-bar-btn menu-btn" id="bbMenuBtn" aria-label="Menu principal">
-                <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
             <div class="dropdown-menu" id="bbMainMenu" role="menu" tabindex="-1">
                 <!-- Gestão Financeira -->
                 <div class="menu-section-title">💼 Gestão Financeira</div>
@@ -364,13 +371,6 @@ if ('serviceWorker' in navigator) {
                 <!-- Zona de Perigo -->
                 <button class="dropdown-item danger" data-action="openClearDataModal"><svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>🗑️ Limpar Dados</span></button>
             </div>
-        </div>
-        
-        <!-- FAB Actions (hidden by default, shown when bbAddBtn is clicked) -->
-        <div class="fab-actions-bottom" id="fabActionsBottom">
-            <button class="fab-action fab-action-transfer" data-action="openTransferModal"><span>🔄</span><span class="fab-label">Transferir</span></button>
-            <button class="fab-action fab-action-income" data-action="openIncomeModal"><span>💰</span><span class="fab-label">Receita</span></button>
-            <button class="fab-action fab-action-expense" data-action="openExpenseModal"><span>💸</span><span class="fab-label">Despesa</span></button>
         </div>
     </nav>
 
