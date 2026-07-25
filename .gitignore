@@ -37,7 +37,7 @@ Thumbs.db
 *.log
 *.tmp
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
