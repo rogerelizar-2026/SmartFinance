@@ -1556,7 +1556,7 @@ body.privacy-on canvas { filter: blur(6px); }
     align-items: center;
     justify-content: space-between;
     padding: 4px 8px;
-    gap: 8px;
+    gap: 4px;
     z-index: 1000;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
 }
@@ -1565,8 +1565,8 @@ body.privacy-on canvas { filter: blur(6px); }
     background: var(--input-bg);
     border: 1px solid var(--glass-border);
     color: var(--text-primary);
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
@@ -1601,11 +1601,13 @@ body.privacy-on canvas { filter: blur(6px); }
     font-size: 0.9rem;
     font-weight: 700;
     text-align: center;
-    padding: 0 8px;
+    padding: 0 12px;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 120px;
+    max-width: 160px;
 }
 
 .bottom-bar .alert-badge {
@@ -1644,14 +1646,17 @@ body.privacy-on canvas { filter: blur(6px); }
 }
 
 .bottom-bar .fab-actions-bottom {
-    bottom: auto;
-    top: 100%;
-    right: 0;
-    margin-top: 8px;
+    bottom: 100%;
+    top: auto;
+    right: 50%;
+    left: auto;
+    transform: translateX(50%) translateY(10px);
+    margin-top: 0;
+    margin-bottom: 8px;
 }
 
 .bottom-bar .fab-actions-bottom.show {
-    transform: translateY(0);
+    transform: translateX(50%) translateY(0);
 }
 
 /* Ajuste para o FAB não sobrepor a barra inferior */
@@ -1766,13 +1771,15 @@ body.privacy-on canvas { filter: blur(6px); }
 /* ===== FAB ACTIONS BOTTOM (within bottom bar) ===== */
 .fab-actions-bottom {
     position: absolute;
-    bottom: auto;
-    top: 100%;
-    right: 0;
+    bottom: 100%;
+    top: auto;
+    right: 50%;
     left: auto;
-    margin-top: 8px;
+    transform: translateX(50%) translateY(10px);
+    margin-top: 0;
+    margin-bottom: 8px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 6px;
     padding: 8px;
     background: var(--glass-bg);
@@ -1784,13 +1791,12 @@ body.privacy-on canvas { filter: blur(6px); }
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease;
-    transform: translateY(-10px);
 }
 
 .fab-actions-bottom.show {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0);
+    transform: translateX(50%) translateY(0);
 }
 
 .fab-actions-bottom .fab-action {

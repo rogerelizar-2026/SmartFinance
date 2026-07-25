@@ -1,4 +1,3 @@
-```gitignore
 # Compiled and binary files
 *.pyc
 *.class
@@ -19,25 +18,25 @@ dist/
 build/
 target/
 .gradle/
+.mypy_cache/
+.pytest_cache/
 
-# Editors/IDE
+# Editor/IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
 
-# System/Environment
+# System/Environment files
 .DS_Store
 Thumbs.db
 .env
 .env.local
 *.env.*
 
-# Logs and temp files
+# Logs and coverage
 *.log
-*.tmp
-
-# Coverage
 coverage/
 htmlcov/
 .coverage
@@ -65,4 +64,3 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-```
