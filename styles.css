@@ -1556,7 +1556,7 @@ body.privacy-on canvas { filter: blur(6px); }
     align-items: center;
     justify-content: space-between;
     padding: 4px 8px;
-    gap: 4px;
+    gap: 8px;
     z-index: 1000;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
 }
@@ -1606,8 +1606,8 @@ body.privacy-on canvas { filter: blur(6px); }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 120px;
-    max-width: 160px;
+    width: 140px;
+    flex-shrink: 0;
 }
 
 .bottom-bar .alert-badge {
@@ -1648,15 +1648,15 @@ body.privacy-on canvas { filter: blur(6px); }
 .bottom-bar .fab-actions-bottom {
     bottom: 100%;
     top: auto;
-    right: 50%;
-    left: auto;
-    transform: translateX(50%) translateY(10px);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(10px);
     margin-top: 0;
     margin-bottom: 8px;
 }
 
 .bottom-bar .fab-actions-bottom.show {
-    transform: translateX(50%) translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 /* Ajuste para o FAB não sobrepor a barra inferior */
@@ -1773,9 +1773,9 @@ body.privacy-on canvas { filter: blur(6px); }
     position: absolute;
     bottom: 100%;
     top: auto;
-    right: 50%;
-    left: auto;
-    transform: translateX(50%) translateY(10px);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(10px);
     margin-top: 0;
     margin-bottom: 8px;
     display: flex;
@@ -1796,7 +1796,7 @@ body.privacy-on canvas { filter: blur(6px); }
 .fab-actions-bottom.show {
     opacity: 1;
     pointer-events: auto;
-    transform: translateX(50%) translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 .fab-actions-bottom .fab-action {
