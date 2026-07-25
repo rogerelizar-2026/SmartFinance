@@ -1,13 +1,12 @@
 # Compiled and build artifacts
 *.pyc
-__pycache__/
-*.o
-*.obj
 *.class
+*.o
 *.exe
 *.dll
 *.so
 *.a
+*.obj
 *.out
 dist/
 build/
@@ -33,9 +32,12 @@ venv/
 *.swp
 *.swo
 
-# System files
+# System/Environment files
 .DS_Store
 Thumbs.db
+.env
+.env.local
+*.env.*
 
 # Coverage and testing
 coverage/
