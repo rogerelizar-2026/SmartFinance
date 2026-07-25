@@ -1554,9 +1554,9 @@ body.privacy-on canvas { filter: blur(6px); }
     border-top: 2px solid rgba(59, 130, 246, 0.5);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 4px 8px;
-    gap: 4px;
+    gap: 8px;
     z-index: 1000;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
 }
@@ -1791,6 +1791,7 @@ body.privacy-on canvas { filter: blur(6px); }
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease;
+    transform: translateY(-10px);
 }
 
 .fab-actions-bottom.show {
