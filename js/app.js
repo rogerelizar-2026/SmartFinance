@@ -5410,6 +5410,18 @@ window.startApp = function() {
     if (quote) { quote.classList.remove('active'); quote.style.display = 'none'; }
     if (splash) { splash.classList.add('fade-out'); setTimeout(() => { splash.style.display = 'none'; }, 800); }
     if (main) main.style.display = 'block';
+    
+    // Mostra a tela de boas-vindas do tour (se ainda não foi completado)
+    const tourCompleted = localStorage.getItem('sf_tour_completed') === 'true';
+    if (!tourCompleted) {
+      const welcomeScreen = document.getElementById('sf-welcome-screen');
+      if (welcomeScreen && typeof SmartFinanceTour !== 'undefined') {
+        welcomeScreen.style.display = 'flex';
+        welcomeScreen.classList.remove('sf-hidden');
+        // Re-inicializa os eventos da tela de boas-vindas
+        SmartFinanceTour.init();
+      }
+    }
 };
 
 // Modifica showQuoteModal para abrir login primeiro
