@@ -406,7 +406,7 @@ class SmartFinance {
         this.currentTransactionType = 'expense';
         this.currentEditType = 'expense';
         this.currentEditId = null;
-        this.darkMode = true;
+        this.darkMode = false;
         this.privacyOn = false;
         this.charts = {};
         this.searchTimeout = null;
