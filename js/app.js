@@ -874,13 +874,8 @@ class SmartFinance {
         const startAppBtn = document.getElementById('startAppBtn');
         if (startAppBtn) {
           startAppBtn.addEventListener('click', () => {
-            // Inicia o tour após clicar em "Gerenciar Minhas Finanças"
+            // Apenas chama startApp() - a tela de boas-vindas será mostrada pelo startApp() se o tour não foi completado
             startApp();
-            setTimeout(() => {
-              if (typeof SmartFinanceTour !== 'undefined') {
-                SmartFinanceTour.start();
-              }
-            }, 500);
           });
         }
 
@@ -5411,15 +5406,17 @@ window.startApp = function() {
     if (splash) { splash.classList.add('fade-out'); setTimeout(() => { splash.style.display = 'none'; }, 800); }
     if (main) main.style.display = 'block';
     
-    // Mostra a tela de boas-vindas do tour (se ainda não foi completado)
+    // Mostra a tela de boas-vindas do tour (se ainda não foi completado e se o login já foi aceito)
     const tourCompleted = localStorage.getItem('sf_tour_completed') === 'true';
-    if (!tourCompleted) {
+    const disclaimerAccepted = localStorage.getItem('smartfinance_disclaimer_accepted') === 'true';
+    const hasPassword = localStorage.getItem('sf_has_password') === 'true';
+    
+    // Só mostra a tela de boas-vindas se o usuário já passou pelo login/disclaimer
+    if (!tourCompleted && disclaimerAccepted && hasPassword) {
       const welcomeScreen = document.getElementById('sf-welcome-screen');
       if (welcomeScreen && typeof SmartFinanceTour !== 'undefined') {
         welcomeScreen.style.display = 'flex';
         welcomeScreen.classList.remove('sf-hidden');
-        // Re-inicializa os eventos da tela de boas-vindas
-        SmartFinanceTour.init();
       }
     }
 };
@@ -5587,6 +5584,7 @@ const SmartFinanceTour = {
     this.initialized = true;
     
     try {
+      // Cria o overlay e tooltip, mas não os mostra ainda
       this.createOverlay(); 
       this.createTooltip();
     } catch (e) {
@@ -5594,12 +5592,8 @@ const SmartFinanceTour = {
       return;
     }
     
-    // Mostra a tela de boas-vindas quando o tour for iniciado
-    const welcomeScreen = document.getElementById('sf-welcome-screen');
-    if (welcomeScreen) {
-      welcomeScreen.style.display = 'flex';
-      welcomeScreen.classList.remove('sf-hidden');
-    }
+    // NÃO mostra a tela de boas-vindas aqui - ela será mostrada apenas após clicar em "Gerenciar Minhas Finanças"
+    // A tela de boas-vindas é controlada pelo startApp()
 
     // Evento do botão de iniciar tour da tela de boas-vindas
     const startTourBtn = document.getElementById('sf-start-tour-btn');
@@ -5692,15 +5686,28 @@ const SmartFinanceTour = {
         </div>
       </div>`;
     
-    // Adiciona eventos aos botões
+    // Adiciona eventos aos botões - REMOVENDO eventos anteriores primeiro para evitar duplicação
     setTimeout(() => {
       const closeBtn = document.getElementById('sf-tour-close-btn');
       const prevBtn = document.getElementById('sf-tour-prev-btn');
       const nextBtn = document.getElementById('sf-tour-next-btn');
       
-      if (closeBtn) closeBtn.addEventListener('click', () => this.end());
-      if (prevBtn) prevBtn.addEventListener('click', () => this.prev());
-      if (nextBtn) nextBtn.addEventListener('click', () => this.next());
+      // Remove listeners anteriores clonando os elementos
+      if (closeBtn) {
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        newCloseBtn.addEventListener('click', () => this.end());
+      }
+      if (prevBtn) {
+        const newPrevBtn = prevBtn.cloneNode(true);
+        prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+        newPrevBtn.addEventListener('click', () => this.prev());
+      }
+      if (nextBtn) {
+        const newNextBtn = nextBtn.cloneNode(true);
+        nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+        newNextBtn.addEventListener('click', () => this.next());
+      }
     }, 100);
   },
   
