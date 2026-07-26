@@ -5446,13 +5446,23 @@ const SmartFinanceTour = {
         welcomeScreen.classList.add('sf-hidden');
     }
 
-    // 2. Verifica se é o primeiro uso (tour ainda não completado)
-    const tourCompleted = localStorage.getItem('sf_tour_completed') === 'true';
-    
-    // 3. Inicia o tour automaticamente no primeiro uso
-    if (!tourCompleted) {
-        setTimeout(() => this.start(), 1000);
+    // 2. Adiciona evento ao botão de iniciar tour da tela de boas-vindas
+    const startTourBtn = document.getElementById('sf-start-tour-btn');
+    if (startTourBtn) {
+        startTourBtn.addEventListener('click', () => {
+            this.start();
+        });
     }
+    
+    // 3. NÃO inicia automaticamente - aguarda clique do usuário
+    // O tour só será iniciado quando o usuário clicar no botão "Iniciar Tour Interativo"
+  },
+  
+  // Função pública para iniciar o tour manualmente via botão do menu
+  startTour() {
+    // Marca como não completado para permitir reexecução
+    localStorage.removeItem('sf_tour_completed');
+    setTimeout(() => this.start(), 500);
   },
   
   // Função pública para iniciar o tour manualmente via botão do menu
@@ -5557,6 +5567,9 @@ window.startSmartFinanceTour = function() {
         SmartFinanceTour.startTour();
     }
 };
+
+// Expõe as funções do tour globalmente para os botões onclick
+window.SmartFinanceTour = SmartFinanceTour;
 
 // Inicia a configuração do tour quando a página carrega
 document.addEventListener('DOMContentLoaded', () => { SmartFinanceTour.init(); });
