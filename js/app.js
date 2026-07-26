@@ -5411,21 +5411,34 @@ window.showQuoteModal = function() {
     }
 };
     
-// INÍCIO: Lógica do Tour Interativo Smart Finance (Versão Botão)
+// INÍCIO: Lógica do Tour Interativo Smart Finance (Versão Corrigida)
 const SmartFinanceTour = {
   steps: [
     { target: 'body', title: '📘 Bem-vindo ao Smart Finance!', content: 'Este tour rápido vai te mostrar como dominar as funcionalidades essenciais. O app é 100% offline: seus dados nunca saem do seu dispositivo!', position: 'center' },
     { target: '.dashboard, #dashboard, main, section', title: '🎯 1. Visão Geral do Painel', content: 'Aqui você acompanha seu <b>Saldo Unificado</b>, <b>Receitas</b>, <b>Despesas</b> e a <b>Projeção do Próximo Mês</b>.', position: 'bottom' },
-    { target: 'button, .btn, a', title: '🏦 2. Primeiros Passos: Contas e Cartões', content: 'Antes de registrar gastos, cadastre onde seu dinheiro está. Use os menus para adicionar uma <b>Conta Corrente</b> ou <b>Cartão de Crédito</b>.', position: 'top' },
-    { target: 'button, .btn, a', title: '💰 3. Registrar Receita', content: 'Use para Salários, Pix ou Vendas. Selecione a conta de destino e o sistema atualizará seu saldo automaticamente.', position: 'bottom' },
-    { target: 'button, .btn, a', title: '💸 3. Registrar Despesa', content: 'Registre gastos à vista, débito ou crédito. <b>Dica:</b> Para compras parceladas, digite o valor total, selecione o cartão e marque "Recorrente/Parcelada".', position: 'bottom' },
+    { target: '#menuInfo, .info-menu, nav', title: '🏦 2. Menu Principal', content: 'Acesse todas as funcionalidades pelo menu inferior. Use para navegar entre <b>Contas</b>, <b>Cartões</b>, <b>Orçamento</b> e mais.', position: 'top' },
+    { target: '#btnReceita, button[type="submit"], .btn-success', title: '💰 3. Registrar Receita', content: 'Clique no botão verde para adicionar entradas como Salários, Pix ou Vendas. Selecione a conta de destino e o sistema atualizará seu saldo.', position: 'bottom' },
+    { target: '#btnDespesa, button[type="submit"], .btn-danger', title: '💸 4. Registrar Despesa', content: 'Clique no botão vermelho para registrar gastos. <b>Dica:</b> Para compras parceladas, digite o valor total, selecione o cartão e marque "Recorrente/Parcelada".', position: 'bottom' },
     { target: 'body', title: '🎉 Tour Concluído!', content: 'Você está pronto para dominar suas finanças! Lembre-se de ir em <b>Configurações > Backup</b> regularmente para salvar seus dados.', position: 'center' }
   ],
-  currentStep: 0, overlay: null, tooltip: null,
+  currentStep: 0, 
+  overlay: null, 
+  tooltip: null,
+  initialized: false,
 
   init() {
-    this.createOverlay(); 
-    this.createTooltip();
+    // Previne inicialização múltipla
+    if (this.initialized) return;
+    this.initialized = true;
+    
+    // Cria elementos com verificação de segurança
+    try {
+        this.createOverlay(); 
+        this.createTooltip();
+    } catch (e) {
+        console.warn('SmartFinanceTour: Erro ao criar elementos:', e);
+        return;
+    }
     
     // 1. Esconde a tela de boas-vindas personalizada (se existir)
     const welcomeScreen = document.getElementById('sf-welcome-screen');
@@ -5433,32 +5446,20 @@ const SmartFinanceTour = {
         welcomeScreen.classList.add('sf-hidden');
     }
 
-    // 2. Procura o botão "Gerenciar minhas finanças" (ignora maiúsculas/minúsculas)
-    const allButtons = document.querySelectorAll('button, a, .btn, [role="button"]');
-    const targetBtn = Array.from(allButtons).find(el => 
-        el.textContent.toLowerCase().includes('gerenciar minhas finanças')
-    );
-
-    if (targetBtn) {
-        // Quando o usuário clicar no botão, preparamos o tour
-        targetBtn.addEventListener('click', () => {
-            // Salva um "lembrete" de que o tour deve começar
-            localStorage.setItem('sf_start_tour', 'true');
-            
-            // Se a página não recarregar (SPA), inicia o tour após meio segundo
-            setTimeout(() => {
-                if (localStorage.getItem('sf_start_tour') === 'true') {
-                    this.start();
-                }
-            }, 600);
-        });
+    // 2. Verifica se é o primeiro uso (tour ainda não completado)
+    const tourCompleted = localStorage.getItem('sf_tour_completed') === 'true';
+    
+    // 3. Inicia o tour automaticamente no primeiro uso
+    if (!tourCompleted) {
+        setTimeout(() => this.start(), 1000);
     }
-
-    // 3. Se a página recarregou após o clique, este comando inicia o tour
-    if (localStorage.getItem('sf_start_tour') === 'true') {
-        localStorage.removeItem('sf_start_tour'); // Limpa o lembrete para não repetir
-        setTimeout(() => this.start(), 800); // Espera a página carregar totalmente
-    }
+  },
+  
+  // Função pública para iniciar o tour manualmente via botão do menu
+  startTour() {
+    // Marca como não completado para permitir reexecução
+    localStorage.removeItem('sf_tour_completed');
+    setTimeout(() => this.start(), 500);
   },
 
   createOverlay() { 
@@ -5548,6 +5549,13 @@ const SmartFinanceTour = {
     document.querySelectorAll('.sf-tour-highlight').forEach(el => el.classList.remove('sf-tour-highlight')); 
     localStorage.setItem('sf_tour_completed', 'true'); 
   }
+};
+
+// Função global para iniciar o tour via botão do menu
+window.startSmartFinanceTour = function() {
+    if (typeof SmartFinanceTour !== 'undefined' && SmartFinanceTour.startTour) {
+        SmartFinanceTour.startTour();
+    }
 };
 
 // Inicia a configuração do tour quando a página carrega
