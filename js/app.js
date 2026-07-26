@@ -872,7 +872,17 @@ class SmartFinance {
         if (acceptDisclaimerBtn) acceptDisclaimerBtn.addEventListener('click', () => acceptDisclaimer());
 
         const startAppBtn = document.getElementById('startAppBtn');
-        if (startAppBtn) startAppBtn.addEventListener('click', () => startApp());
+        if (startAppBtn) {
+          startAppBtn.addEventListener('click', () => {
+            // Inicia o tour após clicar em "Gerenciar Minhas Finanças"
+            startApp();
+            setTimeout(() => {
+              if (typeof SmartFinanceTour !== 'undefined') {
+                SmartFinanceTour.start();
+              }
+            }, 500);
+          });
+        }
 
         const csvFileInput = document.getElementById('csvFileInput');
         if (csvFileInput) csvFileInput.addEventListener('change', (e) => handleCsvFileSelect(e));
@@ -5411,118 +5421,315 @@ window.showQuoteModal = function() {
     }
 };
     
-// INÍCIO: Lógica do Tour Interativo Smart Finance (Versão Corrigida)
+// INÍCIO: Lógica do Tour Interativo Smart Finance (Versão Completa e Corrigida)
 const SmartFinanceTour = {
-  steps: [
-    { target: 'body', title: '📘 Bem-vindo ao Smart Finance!', content: 'Este tour rápido vai te mostrar como dominar as funcionalidades essenciais. O app é 100% offline: seus dados nunca saem do seu dispositivo!', position: 'center' },
-    { target: '.dashboard, #dashboard, main, section', title: '🎯 1. Visão Geral do Painel', content: 'Aqui você acompanha seu <b>Saldo Unificado</b>, <b>Receitas</b>, <b>Despesas</b> e a <b>Projeção do Próximo Mês</b>.', position: 'bottom' },
-    { target: '#menuInfo, .info-menu, nav', title: '🏦 2. Menu Principal', content: 'Acesse todas as funcionalidades pelo menu inferior. Use para navegar entre <b>Contas</b>, <b>Cartões</b>, <b>Orçamento</b> e mais.', position: 'top' },
-    { target: '#btnReceita, button[type="submit"], .btn-success', title: '💰 3. Registrar Receita', content: 'Clique no botão verde para adicionar entradas como Salários, Pix ou Vendas. Selecione a conta de destino e o sistema atualizará seu saldo.', position: 'bottom' },
-    { target: '#btnDespesa, button[type="submit"], .btn-danger', title: '💸 4. Registrar Despesa', content: 'Clique no botão vermelho para registrar gastos. <b>Dica:</b> Para compras parceladas, digite o valor total, selecione o cartão e marque "Recorrente/Parcelada".', position: 'bottom' },
-    { target: 'body', title: '🎉 Tour Concluído!', content: 'Você está pronto para dominar suas finanças! Lembre-se de ir em <b>Configurações > Backup</b> regularmente para salvar seus dados.', position: 'center' }
-  ],
+  steps: [],
   currentStep: 0, 
   overlay: null, 
   tooltip: null,
   initialized: false,
+  isDemoModeActive: false,
+
+  // Gera os passos dinamicamente com base no estado atual
+  generateSteps() {
+    const hasAccounts = this.hasData('sf_accounts');
+    const hasCards = this.hasData('sf_cards');
+    
+    return [
+      // 1. Apresentação do Dashboard
+      { 
+        target: 'body', 
+        title: '🎉 Bem-vindo ao Smart Finance!', 
+        content: 'Olá! Que bom ter você aqui. Este tour vai te mostrar como dominar suas finanças de forma simples e elegante. Vamos começar?', 
+        position: 'center' 
+      },
+      { 
+        target: '.dashboard, #mainApp header + .dashboard', 
+        title: '📊 Seu Dashboard Financeiro', 
+        content: 'Aqui está o coração do app! Você vê seu <strong>Saldo Unificado</strong>, <strong>Receitas</strong>, <strong>Despesas</strong> e a <strong>Projeção</strong> do próximo mês. Tudo claro e direto!', 
+        position: 'bottom' 
+      },
+      
+      // 2. Botões da barra flutuante
+      { 
+        target: '.floating-actions, .action-buttons, #btnReceita, #btnDespesa, #btnTransferencia', 
+        title: '⚡ Seus Botões Rápidos', 
+        content: 'Estes são seus melhores amigos! Aqui você registra <strong>Receitas 💰</strong>, <strong>Despesas 💸</strong> e <strong>Transferências 🔄</strong> com um toque.', 
+        position: 'top' 
+      },
+      
+      // 3. Modo Demonstração
+      { 
+        target: 'body', 
+        title: '🎮 Vamos Explorar o Modo Demonstração?', 
+        content: 'Antes de registrarmos dados reais, que tal experimentar o app? Clique no menu inferior em <strong>Configurações ⚙️</strong> e procure por <strong>Modo Demonstração</strong>. Explore à vontade e depois volte aqui!', 
+        position: 'center',
+        action: 'wait_for_demo'
+      },
+      
+      // 4. Primeiro registro - Criar Conta
+      { 
+        target: '.info-menu, nav[aria-label="Menu principal"], .bottom-nav', 
+        title: '🏦 Passo 1: Criar sua Primeira Conta', 
+        content: 'Agora vamos configurar! Clique em <strong>Minhas Contas</strong> no menu abaixo. Lá você vai cadastrar onde seu dinheiro fica guardado (banco, carteira, etc).', 
+        position: 'top',
+        action: 'navigate_to_accounts'
+      },
+      { 
+        target: '#accountsSection, .accounts-section, .section-accounts', 
+        title: '➕ Nova Conta', 
+        content: 'Clique em <strong>➕ Nova Conta</strong>. Preencha com um nome (ex: "Banco Principal"), escolha o tipo e coloque um saldo inicial. Isso mostra onde você fará lançamentos!', 
+        position: 'bottom' 
+      },
+      
+      // 5. Criar Cartão de Crédito
+      { 
+        target: '.info-menu, nav[aria-label="Menu principal"], .bottom-nav', 
+        title: '💳 Passo 2: Cadastrar Cartão de Crédito', 
+        content: 'Agora clique em <strong>Meus Cartões</strong> no menu. Vamos adicionar seu cartão para controlar as faturas!', 
+        position: 'top',
+        action: 'navigate_to_cards'
+      },
+      { 
+        target: '#cardsSection, .cards-section, .section-cards', 
+        title: '➕ Novo Cartão', 
+        content: 'Toque em <strong>➕ Novo Cartão</strong>. Preencha nome, bandeira, dia de fechamento e vencimento. Complete todos os campos e conclua!', 
+        position: 'bottom' 
+      },
+      
+      // 6. Lançar Receita
+      { 
+        target: '#btnReceita, button[onclick*="receita"], .btn-receita', 
+        title: '💰 Passo 3: Registrar uma Receita', 
+        content: 'Hora do primeiro lançamento! Clique no botão verde <strong>+ Receita</strong>. Vamos simular um salário ou entrada.', 
+        position: 'bottom',
+        action: 'open_income_modal'
+      },
+      { 
+        target: '#newTransactionModal, .modal#newTransactionModal', 
+        title: '📝 Preenchendo a Receita', 
+        content: 'Selecione <strong>💰 Receita</strong>, digite um valor, descrição (ex: "Salário"), categoria "Salário", e escolha a conta que criou. Depois clique em <strong>Concluir</strong>!', 
+        position: 'center' 
+      },
+      
+      // 7. Lançar Despesa
+      { 
+        target: '#btnDespesa, button[onclick*="despesa"], .btn-despesa', 
+        title: '💸 Passo 4: Registrar uma Despesa', 
+        content: 'Agora vamos registrar um gasto! Clique no botão vermelho <strong>+ Despesa</strong>.', 
+        position: 'bottom',
+        action: 'open_expense_modal'
+      },
+      { 
+        target: '#newTransactionModal, .modal#newTransactionModal', 
+        title: '📝 Preenchendo a Despesa', 
+        content: 'Selecione <strong>💸 Despesa</strong>, valor, descrição (ex: "Supermercado"), categoria e conta. Se foi no cartão, selecione-o. Conclua para ver a mágica!', 
+        position: 'center' 
+      },
+      
+      // 8. Ver Resultados
+      { 
+        target: '.dashboard, #mainApp header + .dashboard', 
+        title: '🎯 Veja os Resultados!', 
+        content: 'Observe como seu dashboard atualizou! Os valores de receita e despesa já aparecem. Que tal ver o extrato completo?', 
+        position: 'bottom' 
+      },
+      { 
+        target: '.info-menu, nav[aria-label="Menu principal"], .bottom-nav', 
+        title: '📄 Extrato do Mês', 
+        content: 'Clique em <strong>Extrato do Mês</strong> no menu. Lá você vê todos os lançamentos detalhados e pode imprimir ou gerar PDF!', 
+        position: 'top',
+        action: 'navigate_to_extract'
+      },
+      
+      // 9. Manual do Usuário
+      { 
+        target: '.info-menu, nav[aria-label="Menu principal"], .bottom-nav', 
+        title: '📘 Manual do Usuário', 
+        content: 'Quer se aprofundar? No menu, encontre <strong>Manual do Usuário</strong>. Lá tem tudo explicadinho, com dicas valiosas!', 
+        position: 'top',
+        action: 'navigate_to_manual'
+      },
+      
+      // 10. Encerramento - Limpar dados demonstração
+      { 
+        target: 'body', 
+        title: '🎊 Parabéns! Tour Concluído!', 
+        content: 'Você aprendeu o essencial! Agora é com você. <br><br><strong>Dica importante:</strong> Se usou o modo demonstração ou quer começar do zero com seus dados reais, vá em <strong>Configurações ⚙️</strong> e use <strong>Limpar Dados</strong>. Digite "LIMPAR" para confirmar e comece sua jornada rumo ao sucesso financeiro!', 
+        position: 'center' 
+      }
+    ];
+  },
+  
+  hasData(key) {
+    try {
+      const data = localStorage.getItem(key);
+      return data && JSON.parse(data).length > 0;
+    } catch {
+      return false;
+    }
+  },
 
   init() {
-    // Previne inicialização múltipla
     if (this.initialized) return;
     this.initialized = true;
     
-    // Cria elementos com verificação de segurança
     try {
-        this.createOverlay(); 
-        this.createTooltip();
+      this.createOverlay(); 
+      this.createTooltip();
     } catch (e) {
-        console.warn('SmartFinanceTour: Erro ao criar elementos:', e);
-        return;
+      console.warn('SmartFinanceTour: Erro ao criar elementos:', e);
+      return;
     }
     
-    // 1. Esconde a tela de boas-vindas personalizada (se existir)
+    // Mostra a tela de boas-vindas quando o tour for iniciado
     const welcomeScreen = document.getElementById('sf-welcome-screen');
     if (welcomeScreen) {
-        welcomeScreen.classList.add('sf-hidden');
+      welcomeScreen.style.display = 'flex';
+      welcomeScreen.classList.remove('sf-hidden');
     }
 
-    // 2. Adiciona evento ao botão de iniciar tour da tela de boas-vindas
+    // Evento do botão de iniciar tour da tela de boas-vindas
     const startTourBtn = document.getElementById('sf-start-tour-btn');
     if (startTourBtn) {
-        startTourBtn.addEventListener('click', () => {
-            this.start();
-        });
+      startTourBtn.addEventListener('click', () => {
+        this.start();
+      });
     }
     
-    // 3. NÃO inicia automaticamente - aguarda clique do usuário
-    // O tour só será iniciado quando o usuário clicar no botão "Iniciar Tour Interativo"
+    // Evento do botão de pular tour
+    const skipTourBtn = document.getElementById('sf-skip-tour-btn');
+    if (skipTourBtn) {
+      skipTourBtn.addEventListener('click', () => {
+        const welcomeScreen = document.getElementById('sf-welcome-screen');
+        if (welcomeScreen) {
+          welcomeScreen.style.display = 'none';
+        }
+        localStorage.setItem('sf_tour_completed', 'true');
+      });
+    }
   },
   
-  // Função pública para iniciar o tour manualmente via botão do menu
   startTour() {
-    // Marca como não completado para permitir reexecução
-    localStorage.removeItem('sf_tour_completed');
-    setTimeout(() => this.start(), 500);
-  },
-  
-  // Função pública para iniciar o tour manualmente via botão do menu
-  startTour() {
-    // Marca como não completado para permitir reexecução
     localStorage.removeItem('sf_tour_completed');
     setTimeout(() => this.start(), 500);
   },
 
   createOverlay() { 
-    this.overlay = document.createElement('div'); 
-    this.overlay.className = 'sf-tour-overlay'; 
-    document.body.appendChild(this.overlay); 
+    if (!this.overlay) {
+      this.overlay = document.createElement('div'); 
+      this.overlay.className = 'sf-tour-overlay'; 
+      document.body.appendChild(this.overlay); 
+    }
   },
   
   createTooltip() { 
-    this.tooltip = document.createElement('div'); 
-    this.tooltip.className = 'sf-tour-tooltip'; 
-    document.body.appendChild(this.tooltip); 
+    if (!this.tooltip) {
+      this.tooltip = document.createElement('div'); 
+      this.tooltip.className = 'sf-tour-tooltip'; 
+      document.body.appendChild(this.tooltip); 
+    }
   },
   
   start() {
+    // Regenera os passos baseado no estado atual
+    this.steps = this.generateSteps();
     this.currentStep = 0; 
+    
+    // Esconde tela de boas-vindas e inicia o tour
+    const welcomeScreen = document.getElementById('sf-welcome-screen');
+    if (welcomeScreen) {
+      welcomeScreen.style.display = 'none';
+    }
+    
     this.overlay.classList.add('active'); 
     this.showStep();
   },
   
   showStep() {
     const step = this.steps[this.currentStep];
+    if (!step) return;
+    
     const targetEl = document.querySelector(step.target) || document.body;
     
     // Remove destaque anterior
     document.querySelectorAll('.sf-tour-highlight').forEach(el => el.classList.remove('sf-tour-highlight'));
     
-    // Aplica novo destaque e rola a tela até o elemento
-    if (targetEl !== document.body) { 
-        targetEl.classList.add('sf-tour-highlight'); 
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+    // Aplica novo destaque e rola a tela
+    if (targetEl !== document.body && step.target !== 'body') { 
+      targetEl.classList.add('sf-tour-highlight'); 
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
     }
     
     this.positionTooltip(targetEl, step.position);
     
+    // Executa ação específica do passo se existir
+    if (step.action) {
+      this.executeAction(step.action);
+    }
+    
     this.tooltip.innerHTML = `
-      <button class="sf-tour-btn sf-tour-btn-close" onclick="SmartFinanceTour.end()">✕</button>
+      <button class="sf-tour-btn sf-tour-btn-close" id="sf-tour-close-btn">✕</button>
       <h3>${step.title}</h3>
       <p>${step.content}</p>
       <div class="sf-tour-actions">
         <span style="font-size: 0.85rem; color: #888;">Passo ${this.currentStep + 1} de ${this.steps.length}</span>
         <div>
-          ${this.currentStep > 0 ? `<button class="sf-tour-btn sf-tour-btn-prev" onclick="SmartFinanceTour.prev()">Voltar</button>` : ''}
-          <button class="sf-tour-btn sf-tour-btn-next" onclick="SmartFinanceTour.next()">${this.currentStep === this.steps.length - 1 ? 'Concluir' : 'Próximo'}</button>
+          ${this.currentStep > 0 ? `<button class="sf-tour-btn sf-tour-btn-prev" id="sf-tour-prev-btn">Voltar</button>` : ''}
+          <button class="sf-tour-btn sf-tour-btn-next" id="sf-tour-next-btn">${this.currentStep === this.steps.length - 1 ? 'Concluir' : 'Próximo'}</button>
         </div>
       </div>`;
+    
+    // Adiciona eventos aos botões
+    setTimeout(() => {
+      const closeBtn = document.getElementById('sf-tour-close-btn');
+      const prevBtn = document.getElementById('sf-tour-prev-btn');
+      const nextBtn = document.getElementById('sf-tour-next-btn');
+      
+      if (closeBtn) closeBtn.addEventListener('click', () => this.end());
+      if (prevBtn) prevBtn.addEventListener('click', () => this.prev());
+      if (nextBtn) nextBtn.addEventListener('click', () => this.next());
+    }, 100);
+  },
+  
+  executeAction(action) {
+    switch(action) {
+      case 'wait_for_demo':
+        // Aguarda usuário explorar modo demonstração
+        break;
+      case 'navigate_to_accounts':
+        // Pode disparar evento para navegação
+        const accountsBtn = document.querySelector('[data-section="accounts"], .menu-accounts, a[href="#accounts"]');
+        if (accountsBtn) accountsBtn.click();
+        break;
+      case 'navigate_to_cards':
+        const cardsBtn = document.querySelector('[data-section="cards"], .menu-cards, a[href="#cards"]');
+        if (cardsBtn) cardsBtn.click();
+        break;
+      case 'open_income_modal':
+        const incomeBtn = document.getElementById('btnReceita');
+        if (incomeBtn) incomeBtn.click();
+        break;
+      case 'open_expense_modal':
+        const expenseBtn = document.getElementById('btnDespesa');
+        if (expenseBtn) expenseBtn.click();
+        break;
+      case 'navigate_to_extract':
+        const extractBtn = document.querySelector('[data-section="extract"], .menu-extract, a[href="#extract"]');
+        if (extractBtn) extractBtn.click();
+        break;
+      case 'navigate_to_manual':
+        const manualBtn = document.querySelector('[data-action="showManual"], .menu-manual');
+        if (manualBtn) manualBtn.click();
+        break;
+    }
   },
   
   positionTooltip(targetEl, position) {
     const rect = targetEl === document.body 
-        ? { top: window.innerHeight / 2 - 100, left: window.innerWidth / 2 - 160, width: 320, height: 200 } 
-        : targetEl.getBoundingClientRect();
-        
+      ? { top: window.innerHeight / 2 - 100, left: window.innerWidth / 2 - 160, width: 320, height: 200 } 
+      : targetEl.getBoundingClientRect();
+      
     let top = rect.top + window.scrollY;
     let left = rect.left + window.scrollX;
     
@@ -5530,7 +5737,7 @@ const SmartFinanceTour = {
     else if (position === 'top') { top -= 220; left += (rect.width / 2) - 160; }
     else if (position === 'center') { top = window.scrollY + (window.innerHeight / 2) - 100; left = window.scrollX + (window.innerWidth / 2) - 160; }
     
-    // Garante que a caixa do tour não saia da tela
+    // Garante que não saia da tela
     left = Math.max(10, Math.min(left, window.innerWidth - 330)); 
     top = Math.max(10, top);
     
@@ -5540,22 +5747,22 @@ const SmartFinanceTour = {
   
   next() { 
     if (this.currentStep < this.steps.length - 1) { 
-        this.currentStep++; 
-        this.showStep(); 
+      this.currentStep++; 
+      this.showStep(); 
     } else { 
-        this.end(); 
+      this.end(); 
     } 
   },
   
   prev() { 
     if (this.currentStep > 0) { 
-        this.currentStep--; 
-        this.showStep(); 
+      this.currentStep--; 
+      this.showStep(); 
     } 
   },
   
   end() { 
-    this.overlay.classList.remove('active'); 
+    if (this.overlay) this.overlay.classList.remove('active'); 
     document.querySelectorAll('.sf-tour-highlight').forEach(el => el.classList.remove('sf-tour-highlight')); 
     localStorage.setItem('sf_tour_completed', 'true'); 
   }
@@ -5563,12 +5770,12 @@ const SmartFinanceTour = {
 
 // Função global para iniciar o tour via botão do menu
 window.startSmartFinanceTour = function() {
-    if (typeof SmartFinanceTour !== 'undefined' && SmartFinanceTour.startTour) {
-        SmartFinanceTour.startTour();
-    }
+  if (typeof SmartFinanceTour !== 'undefined' && SmartFinanceTour.startTour) {
+    SmartFinanceTour.startTour();
+  }
 };
 
-// Expõe as funções do tour globalmente para os botões onclick
+// Expõe as funções do tour globalmente
 window.SmartFinanceTour = SmartFinanceTour;
 
 // Inicia a configuração do tour quando a página carrega
