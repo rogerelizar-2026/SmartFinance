@@ -5201,7 +5201,7 @@ function openLoginModal() {
     
     if (firstAccess) {
         // Primeiro acesso - mostra aviso e formulário de cadastro com nome de usuário e senha dupla verificação
-        if (loginModalTitle) loginModalTitle.textContent = '👤 Criar Conta de Acesso';
+        if (loginModalTitle) loginModalTitle.textContent = '👤 Registrar senha de Acesso';
         if (firstAccessWarning) firstAccessWarning.style.display = 'block';
         if (loginForm) loginForm.style.display = 'none';
         if (changePasswordForm) changePasswordForm.style.display = 'block';
@@ -5318,7 +5318,7 @@ function processPasswordChange() {
     
     closeLoginModal();
     showQuoteModal();
-    smartfinance.showToast(`✅ Conta criada para "${username}"! Lembre-se de memorizar sua senha.`);
+    smartfinance.showToast(`✅ Senha registrada para "${username}"! Lembre-se de memorizar sua senha.`);
 }
 
 // Inicializa sistema de login
