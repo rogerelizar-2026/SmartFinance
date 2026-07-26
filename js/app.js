@@ -5410,5 +5410,187 @@ window.showQuoteModal = function() {
         openLoginModal();
     }
 };
+/**
+ * Smart Finance - Tour Interativo do Usuário
+ * Baseado no Manual do Usuário: Seções 1 a 3
+ */
+const SmartFinanceTour = {
+  steps: [
+    {
+      target: 'body',
+      title: '📘 Bem-vindo ao Smart Finance!',
+      content: 'Este tour rápido vai te mostrar como dominar as funcionalidades essenciais. O app é 100% offline: seus dados nunca saem do seu dispositivo!',
+      position: 'center'
+    },
+    {
+      target: '#dashboard-resumo', // Ajuste para o ID real do seu painel
+      title: '🎯 1. Visão Geral do Painel',
+      content: 'Aqui você acompanha seu <b>Saldo Unificado</b>, <b>Receitas</b>, <b>Despesas</b> e a <b>Projeção do Próximo Mês</b>. É o resumo da sua saúde financeira!',
+      position: 'bottom'
+    },
+    {
+      target: '#btn-minhas-contas', // Ajuste para o ID real do botão/menu
+      title: '🏦 2. Primeiros Passos: Contas',
+      content: 'Antes de registrar gastos, cadastre onde seu dinheiro está. Clique aqui para adicionar uma <b>Conta Corrente</b> ou <b>Investimento</b> com seu saldo inicial.',
+      position: 'top'
+    },
+    {
+      target: '#btn-meus-cartoes', // Ajuste para o ID real do botão/menu
+      title: '💳 2. Primeiros Passos: Cartões',
+      content: 'Cadastre seus cartões com as datas de <b>Fechamento</b> e <b>Vencimento</b>. O sistema calculará automaticamente as faturas parciais do mês.',
+      position: 'top'
+    },
+    {
+      target: '#btn-nova-receita', // Ajuste para o ID real do botão
+      title: '💰 3. Registrar Receita',
+      content: 'Use para Salários, Pix ou Vendas. Selecione a conta de destino (ex: Banco Itaú) e o sistema atualizará seu saldo unificado automaticamente.',
+      position: 'bottom'
+    },
+    {
+      target: '#btn-nova-despesa', // Ajuste para o ID real do botão
+      title: '💸 3. Registrar Despesa',
+      content: 'Registre gastos à vista, débito ou crédito. <b>Dica:</b> Para compras parceladas, digite o valor total, selecione o cartão e marque "Recorrente/Parcelada". O sistema divide as parcelas sozinho!',
+      position: 'bottom'
+    },
+    {
+      target: '#btn-nova-transferencia', // Ajuste para o ID real do botão
+      title: '🔄 3. Registrar Transferência',
+      content: 'Movimente dinheiro entre suas próprias contas (ex: da Conta Corrente para a Poupança). Isso <b>não altera</b> seu saldo total, apenas a distribuição.',
+      position: 'bottom'
+    },
+    {
+      target: 'body',
+      title: '🎉 Tour Concluído!',
+      content: 'Você está pronto para dominar suas finanças! Lembre-se: vá em <b>Configurações > Backup</b> regularmente para exportar seu arquivo `.json` e manter seus dados seguros.',
+      position: 'center'
+    }
+  ],
+  currentStep: 0,
+  overlay: null,
+  tooltip: null,
 
+  init() {
+    this.createOverlay();
+    this.createTooltip();
+    
+    // Verifica se é a primeira vez (usando localStorage)
+    if (!localStorage.getItem('sf_tour_completed')) {
+      document.getElementById('sf-start-tour-btn').addEventListener('click', () => {
+        this.hideWelcome();
+        setTimeout(() => this.start(), 500);
+      });
+    } else {
+      this.hideWelcome();
+    }
+  },
+
+  createOverlay() {
+    this.overlay = document.createElement('div');
+    this.overlay.className = 'sf-tour-overlay';
+    document.body.appendChild(this.overlay);
+  },
+
+  createTooltip() {
+    this.tooltip = document.createElement('div');
+    this.tooltip.className = 'sf-tour-tooltip';
+    document.body.appendChild(this.tooltip);
+  },
+
+  hideWelcome() {
+    const welcome = document.getElementById('sf-welcome-screen');
+    if (welcome) welcome.classList.add('sf-hidden');
+  },
+
+  start() {
+    this.currentStep = 0;
+    this.overlay.classList.add('active');
+    this.showStep();
+  },
+
+  showStep() {
+    const step = this.steps[this.currentStep];
+    const targetEl = step.target === 'body' ? document.body : document.querySelector(step.target);
+
+    // Remove destaque anterior
+    document.querySelectorAll('.sf-tour-highlight').forEach(el => el.classList.remove('sf-tour-highlight'));
+
+    if (targetEl && step.target !== 'body') {
+      targetEl.classList.add('sf-tour-highlight');
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Posicionamento do tooltip
+    this.positionTooltip(targetEl, step.position);
+
+    // Conteúdo do tooltip
+    this.tooltip.innerHTML = `
+      <button class="sf-tour-btn sf-tour-btn-close" onclick="SmartFinanceTour.end()">✕</button>
+      <h3>${step.title}</h3>
+      <p>${step.content}</p>
+      <div class="sf-tour-actions">
+        <span style="font-size: 0.85rem; color: #888;">Passo ${this.currentStep + 1} de ${this.steps.length}</span>
+        <div>
+          ${this.currentStep > 0 ? `<button class="sf-tour-btn sf-tour-btn-prev" onclick="SmartFinanceTour.prev()">Voltar</button>` : ''}
+          <button class="sf-tour-btn sf-tour-btn-next" onclick="SmartFinanceTour.next()">
+            ${this.currentStep === this.steps.length - 1 ? 'Concluir' : 'Próximo'}
+          </button>
+        </div>
+      </div>
+    `;
+  },
+
+  positionTooltip(targetEl, position) {
+    const rect = targetEl === document.body 
+      ? { top: window.innerHeight / 2 - 100, left: window.innerWidth / 2 - 160, width: 320, height: 200 }
+      : targetEl.getBoundingClientRect();
+
+    let top = rect.top + window.scrollY;
+    let left = rect.left + window.scrollX;
+
+    if (position === 'bottom') {
+      top += rect.height + 15;
+      left += (rect.width / 2) - 160;
+    } else if (position === 'top') {
+      top -= 220; // altura estimada do tooltip
+      left += (rect.width / 2) - 160;
+    } else if (position === 'center') {
+      top = window.scrollY + (window.innerHeight / 2) - 100;
+      left = window.scrollX + (window.innerWidth / 2) - 160;
+    }
+
+    // Limites da tela
+    left = Math.max(10, Math.min(left, window.innerWidth - 330));
+    top = Math.max(10, top);
+
+    this.tooltip.style.top = `${top}px`;
+    this.tooltip.style.left = `${left}px`;
+  },
+
+  next() {
+    if (this.currentStep < this.steps.length - 1) {
+      this.currentStep++;
+      this.showStep();
+    } else {
+      this.end();
+    }
+  },
+
+  prev() {
+    if (this.currentStep > 0) {
+      this.currentStep--;
+      this.showStep();
+    }
+  },
+
+  end() {
+    this.overlay.classList.remove('active');
+    document.querySelectorAll('.sf-tour-highlight').forEach(el => el.classList.remove('sf-tour-highlight'));
+    localStorage.setItem('sf_tour_completed', 'true');
+  }
+};
+
+// Inicializa o tour quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+  SmartFinanceTour.init();
+});
 })();
