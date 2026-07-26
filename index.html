@@ -379,8 +379,8 @@ if ('serviceWorker' in navigator) {
         </div>
     </nav>
     
-<!-- Animação de Boas-Vindas -->
-<div id="sf-welcome-screen" class="sf-welcome-container">
+<!-- Tela de Boas-Vindas (aparece após clicar em "Gerenciar Minhas Finanças") -->
+<div id="sf-welcome-screen" class="sf-welcome-container" style="display: none;">
   <div class="sf-welcome-content">
     <div class="sf-logo-animation">
       <svg viewBox="0 0 100 100" width="120" height="120">
@@ -390,7 +390,9 @@ if ('serviceWorker' in navigator) {
     </div>
     <h1 class="sf-welcome-title">Bem-vindo ao Smart Finance!</h1>
     <p class="sf-welcome-subtitle">Seu assistente pessoal de finanças.<br>Simples, seguro e <strong>100% offline</strong>.</p>
+    <p class="sf-welcome-message" style="margin: 20px 0; color: #666; font-size: 0.95rem;">Vamos fazer um tour rápido para você conhecer todas as funcionalidades?</p>
     <button id="sf-start-tour-btn" class="sf-primary-btn">Iniciar Tour Interativo 📘</button>
+    <button id="sf-skip-tour-btn" class="sf-secondary-btn" style="margin-top: 10px; background: transparent; border: 1px solid #ccc; color: #666;">Pular Tour e Ir Direto</button>
   </div>
 </div>
 
