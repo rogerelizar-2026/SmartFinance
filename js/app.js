@@ -5464,6 +5464,13 @@ const SmartFinanceTour = {
     localStorage.removeItem('sf_tour_completed');
     setTimeout(() => this.start(), 500);
   },
+  
+  // Função pública para iniciar o tour manualmente via botão do menu
+  startTour() {
+    // Marca como não completado para permitir reexecução
+    localStorage.removeItem('sf_tour_completed');
+    setTimeout(() => this.start(), 500);
+  },
 
   createOverlay() { 
     this.overlay = document.createElement('div'); 
